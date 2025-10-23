@@ -1,18 +1,41 @@
+using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos;
+using PrestamoDispositivos.DataContext.Sections;
+using PrestamoDispositivos.Services.Abstractions;
+using PrestamoDispositivos.Services.Implementations;
+using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+var builder = WebApplication.CreateBuilder(args);
+
+// Agregar configuración personalizada
 builder.AddCustomConfiguration();
 
-WebApplication app = builder.Build();
+// Agregar controladores con vistas
+builder.Services.AddControllersWithViews();
 
-// Configure the HTTP request pipeline.
+// Agregar Notyf 
+builder.Services.AddNotyf(config =>
+{
+    config.DurationInSeconds = 5;
+    config.IsDismissable = true;
+    config.Position = NotyfPosition.TopRight;
+});
+
+//  Registrar DbContext
+builder.Services.AddDbContext<DatacontextPres>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//  Registrar servicios
+builder.Services.AddScoped<ILoanService, LoanService>();
+
+var app = builder.Build();
+
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -22,6 +45,9 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+//  Habilitar Notyf
+app.UseNotyf();
 
 app.MapControllerRoute(
     name: "default",
