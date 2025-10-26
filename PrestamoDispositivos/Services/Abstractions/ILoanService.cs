@@ -5,11 +5,11 @@ namespace PrestamoDispositivos.Services.Abstractions
 {
     public interface ILoanService
     {
-        public Task<Response<LoanDTO>> CreateStudentAsync(LoanDTO student);
-        public Task<Response<LoanDTO>> UpdateStudentAsync(int id, LoanDTO student);
-
-        public Task<Response<bool>> DeleteStudentAsync(int id);
-        public Task<Response<LoanDTO>> GetStudentByIdAsync(int id);
-        public Task<Response<List<LoanDTO>>> GetAllStudentsAsync();
+        Task<Response<LoanDTO>> CreateLoanAsync(LoanDTO loan);
+        Task<Response<LoanDTO>> UpdateLoanAsync(Guid id, LoanDTO loan);
+        Task<Response<bool>> DeleteLoanAsync(Guid id);
+        Task<Response<LoanDTO>> GetLoanByIdAsync(Guid id);
+        Task<Response<List<LoanDTO>>> GetAllLoansAsync();
+        Task<Response<object>> ToggleLoanStatusAsync(ToggleLoanStatusDTO dto);
     }
 }
