@@ -1,9 +1,14 @@
-﻿namespace PrestamoDispositivos.DTO
+﻿using PrestamoDispositivos.Models;
+
+namespace PrestamoDispositivos.DTO
 {
     public class studentStatusDTO
     {
         public Guid IdStatus { get; set; }
 
-        public string EstadoCuenta { get; set; }
+        public string EstEstu { get; set; }
+
+        // Relación con Student
+        public ICollection<Student> Prestamos { get; set; }
     }
 }

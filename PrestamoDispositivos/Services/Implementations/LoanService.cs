@@ -24,10 +24,10 @@ namespace PrestamoDispositivos.Services.Implementations
                 var loan = new Loan
                 {
                     IdPrestamos = Guid.NewGuid(),
-                    IdEst = dto.IdEst,
-                    IdDispositivo = dto.IdDispositivo,
-                    IdAdminDis = dto.IdAdminDis,
-                    EstadoPrestamos = dto.EstadoPrestamos
+                    IdEstudiante = dto.IdEstudiante,
+                    IdDispo = dto.IdDispo,
+                    IdAdminDev = dto.IdAdminDev,
+                    IdEvento = dto.IdEvento
                 };
 
                 _context.Prestamos.Add(loan);
@@ -52,10 +52,10 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (loan == null)
                     return new Response<LoanDTO>(" Préstamo no encontrado");
 
-                loan.IdEst = dto.IdEst;
-                loan.IdDispositivo = dto.IdDispositivo;
-                loan.IdAdminDis = dto.IdAdminDis;
-                loan.EstadoPrestamos = dto.EstadoPrestamos;
+                loan.IdEstudiante = dto.IdEstudiante;
+                loan.IdDispo = dto.IdDispo;
+                loan.IdAdminDev = dto.IdAdminDev;
+                loan.IdEvento = dto.IdEvento;
 
                 _context.Prestamos.Update(loan);
                 await _context.SaveChangesAsync();
@@ -96,7 +96,7 @@ namespace PrestamoDispositivos.Services.Implementations
                 var loan = await _context.Prestamos
                     .Include(x => x.Estudiante)
                     .Include(x => x.Dispositivo)
-                    .Include(x => x.AdminDisp)
+                    .Include(x => x.DeviceManager)
                     .Include(x => x.EventoPrestamos)
                     .FirstOrDefaultAsync(x => x.IdPrestamos == id);
 
@@ -105,15 +105,17 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var dto = new LoanDTO
                 {
-                    IdPrestamos = loan.IdPrestamos,
-                    IdEst = loan.IdEst,
-                    IdDispositivo = loan.IdDispositivo,
-                    IdAdminDis = loan.IdAdminDis,
-                    EstadoPrestamos = loan.EstadoPrestamos,
-                    Estudiante = loan.Estudiante,
-                    Dispositivo = loan.Dispositivo,
-                    AdminDisp = loan.AdminDisp,
-                    EventoPrestamos = loan.EventoPrestamos
+
+                    //ES NECESARIO ASIGNAR TODOS LOS CAMPOS?? solo basta con ID?
+
+                    //IdPrestamos = loan.IdPrestamos,
+                    //IdEstudiante = loan.IdEstudiante,
+                    //IdDispo = loan.IdDispo,
+                    //IdAdminDev = loan.IdAdminDev,
+                    //Estudiante = loan.Estudiante,
+                    //Dispositivo = loan.Dispositivo,
+                    //AdminDisp = loan.AdminDisp,
+                    //EventoPrestamos = loan.EventoPrestamos
                 };
 
                 return new Response<LoanDTO>(dto, "Préstamo encontrado correctamente");
@@ -132,21 +134,23 @@ namespace PrestamoDispositivos.Services.Implementations
                 var loans = await _context.Prestamos
                     .Include(x => x.Estudiante)
                     .Include(x => x.Dispositivo)
-                    .Include(x => x.AdminDisp)
+                    .Include(x => x.DeviceManager)
                     .Include(x => x.EventoPrestamos)
                     .ToListAsync();
 
                 var dtoList = loans.Select(x => new LoanDTO
                 {
-                    IdPrestamos = x.IdPrestamos,
-                    IdEst = x.IdEst,
-                    IdDispositivo = x.IdDispositivo,
-                    IdAdminDis = x.IdAdminDis,
-                    EstadoPrestamos = x.EstadoPrestamos,
-                    Estudiante = x.Estudiante,
-                    Dispositivo = x.Dispositivo,
-                    AdminDisp = x.AdminDisp,
-                    EventoPrestamos = x.EventoPrestamos
+                    //ES NECESARIO ASIGNAR TODOS LOS CAMPOS?? solo basta con ID?
+
+                    //IdPrestamos = x.IdPrestamos,
+                    //IdEst = x.IdEst,
+                    //IdDispositivo = x.IdDispositivo,
+                    //IdAdminDis = x.IdAdminDis,
+                    //EstadoPrestamos = x.EstadoPrestamos,
+                    //Estudiante = x.Estudiante,
+                    //Dispositivo = x.Dispositivo,
+                    //AdminDisp = x.AdminDisp,
+                    //EventoPrestamos = x.EventoPrestamos
                 }).ToList();
 
                 return new Response<List<LoanDTO>>(dtoList, " Lista de préstamos obtenida correctamente");
@@ -166,7 +170,7 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (loan == null)
                     return new Response<object>(" Préstamo no encontrado");
 
-                loan.EstadoPrestamos = dto.NewStatus;
+                loan.IdEvento = dto.NewStatus;
                 await _context.SaveChangesAsync();
 
                 return new Response<object>(true, " Estado del préstamo actualizado correctamente");

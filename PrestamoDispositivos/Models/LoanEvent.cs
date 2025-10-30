@@ -1,15 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrestamoDispositivos.Models
 {
     public class LoanEvent
     {
-   
-        public Guid IdEvento { get; set; }
-        public string TipoPrestamos { get; set; }      
-        public DateTime FechaEvento { get; set; }
 
-        //  Relación con Prestamos
+        #region Atributos
+        [Key]
+        public Guid IdEvento { get; set; }
+        public string TipoPrestamos { get; set; }
+        #endregion
+
+        // apartado para Relaciones con otras clases (tablas)
+        #region Relaciones
+        //  Relación a muchos con Prestamos
+        [InverseProperty("EventoPrestamos")]
         public ICollection<Loan> EventosPrestamos { get; set; }
+        #endregion
     }
 }

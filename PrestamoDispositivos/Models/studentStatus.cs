@@ -5,12 +5,18 @@ namespace PrestamoDispositivos.Models
 {
     public class studentStatus
     {
-     
-        public Guid IdStatus { get; set; }
-       
-        public string EstadoCuenta { get; set; }
 
-        // Relación con Prestamos
-        public ICollection<Loan> Prestamos { get; set; }
+        #region Atributos
+        [Key]
+        public Guid IdStatus { get; set; }
+
+        public string EstEstu { get; set; }
+        #endregion
+
+        // apartado para Relaciones con otras clases (tablas)
+        #region Relaciones
+        // Relación a muchos con Estudiantes
+        public ICollection<Student> Prestamos { get; set; }
+        #endregion
     }
 }

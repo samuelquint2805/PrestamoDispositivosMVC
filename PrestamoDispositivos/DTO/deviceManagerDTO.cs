@@ -1,4 +1,6 @@
-﻿namespace PrestamoDispositivos.DTO
+﻿using PrestamoDispositivos.Models;
+
+namespace PrestamoDispositivos.DTO
 {
     public class deviceManagerDTO
     {
@@ -9,5 +11,8 @@
         public string Usuario { get; set; }
 
         public string Contraseña { get; set; }
+
+        //Relación con Prestamos
+        public ICollection<Loan> Loans { get; set; }
     }
 }

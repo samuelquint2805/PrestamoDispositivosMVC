@@ -15,5 +15,6 @@ namespace PrestamoDispositivos.DataContext.Sections
         public DbSet<Device> Dispositivos { get; set; }
         public DbSet<Loan> Prestamos { get; set; }
         public DbSet<LoanEvent> EventoPrestamos { get; set; }
+        public DbSet<studentStatus> EstadoEstudiantes { get; set; }
     }
 }

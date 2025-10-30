@@ -5,6 +5,8 @@ namespace PrestamoDispositivos.Models
 {
     public class Student
     {
+        #region Atributos
+        [Key]
         public Guid IdEst { get; set; }
         public string Nombre { get; set; }
         public string Usuario { get; set; }
@@ -14,9 +16,18 @@ namespace PrestamoDispositivos.Models
         public string Contraseña { get; set; }
         public string CorreoIns { get; set; }
         public int Carnet { get; set; }
-        public string EstadoCuenta { get; set; }
 
-        // Relación con Prestamos
-        public ICollection<Loan> Prestamos { get; set; }
+        #endregion
+
+        // apartado para Relaciones con otras clases (tablas)
+        #region Relaciones
+        //Relacion a uno con studenStatus
+        [ForeignKey("EstadoEstudiante")]
+        public ICollection<studentStatus> EstadoEst { get; set; }
+
+        // Relación a uno con Prestamos
+        [InverseProperty("Estudiante")]
+        public ICollection<Loan> Prestamos { get; set; } = new List<Loan>();
+        #endregion
     }
 }

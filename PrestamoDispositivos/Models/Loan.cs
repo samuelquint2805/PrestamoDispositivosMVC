@@ -1,24 +1,41 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrestamoDispositivos.Models
 {
     public class Loan
     {
-     
+
+        #region Atributos
+        [Key]
         public Guid IdPrestamos { get; set; }
 
-        // Llaves foráneas
+        public DateTime FechaEvento { get; set; }
+        public string EstadoPrestamo { get; set; }
+        #endregion
 
-        public Guid IdEst { get; set; }
+        // apartado para Relaciones con otras clases (tablas)
+        #region relaciones
+        //relacion a uno con Student
+        [ForeignKey("Estudiante")]
+        public Guid IdEstudiante { get; set; }
         public Student Estudiante { get; set; }
 
-        public Guid IdDispositivo { get; set; }
+        //relacion a uno con Device
+        [ForeignKey("Dispositivo")]
+        public Guid IdDispo { get; set; }
         public Device Dispositivo { get; set; }
 
-        public Guid IdAdminDis { get; set; }
-        public deviceManager AdminDisp { get; set; }
+        //relacion a muchos con deviceManager
+        [ForeignKey("DeviceManager")]
+        public Guid IdAdminDev { get; set; }
+        public deviceManager DeviceManager { get; set; }
+        
 
-        public Guid EstadoPrestamos { get; set; }
+        //relacion uno a uno con LoanEvent
+        [ForeignKey("EventoPrestamos")]
+        public Guid IdEvento { get; set; }
         public LoanEvent EventoPrestamos { get; set; }
+        #endregion
     }
 }

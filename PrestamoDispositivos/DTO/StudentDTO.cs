@@ -1,4 +1,7 @@
-﻿namespace PrestamoDispositivos.DTO
+﻿using PrestamoDispositivos.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PrestamoDispositivos.DTO
 {
     public class StudentDTO
     {
@@ -11,6 +14,12 @@
         public string Contraseña { get; set; }
         public string CorreoIns { get; set; }
         public int Carnet { get; set; }
-        public string EstadoCuenta { get; set; }
+
+
+        // Relación con studentStatus
+        public ICollection<studentStatusDTO> EstadoEst { get; set; }
+
+        // Relación con Prestamos
+        public Loan Prestamos { get; set; }
     }
 }
