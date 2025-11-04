@@ -5,11 +5,11 @@ namespace PrestamoDispositivos.Services.Abstractions
 {
     public interface IDeviceService
     {
-        public Task<Response<deviceDTO>> CreateStudentAsync(deviceDTO student);
-        public Task<Response<deviceDTO>> UpdateStudentAsync(int id, deviceDTO student);
+        public Task<Response<deviceDTO>> CreateDeviceAsync(deviceDTO student);
+        public Task<Response<deviceDTO>> UpdateDeviceAsync(Guid id, deviceDTO student);
 
-        public Task<Response<bool>> DeleteStudentAsync(int id);
-        public Task<Response<deviceDTO>> GetStudentByIdAsync(int id);
-        public Task<Response<List<deviceDTO>>> GetAllStudentsAsync();
+        public Task<Response<bool>> DeleteDeviceAsync(Guid id);
+        public Task<Response<deviceDTO>> GetDeviceByIdAsync(Guid id);
+        public Task<Response<List<deviceDTO>>> GetAllDeviceAsync();
     }
 }

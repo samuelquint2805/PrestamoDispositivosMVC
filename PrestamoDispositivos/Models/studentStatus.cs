@@ -9,7 +9,7 @@ namespace PrestamoDispositivos.Models
         #region Atributos
         [Key]
         public Guid IdStatus { get; set; }
-
+        [Required(ErrorMessage = "El estado del estudiante es requerido")]
         public string EstEstu { get; set; }
         #endregion
 

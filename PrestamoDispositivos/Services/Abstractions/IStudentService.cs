@@ -8,10 +8,10 @@ namespace PrestamoDispositivos.Services.Abstractions
     {
 
         public Task<Response<StudentDTO>> CreateStudentAsync(StudentDTO student);
-        public Task<Response<StudentDTO>> UpdateStudentAsync(int id, StudentDTO student);
+        public Task<Response<StudentDTO>> UpdateStudentAsync(Guid id, StudentDTO student);
 
-        public Task<Response<bool>> DeleteStudentAsync(int id);
-        public Task<Response<StudentDTO>> GetStudentByIdAsync(int id);
+        public Task<Response<bool>> DeleteStudentAsync(Guid id);
+        public Task<Response<StudentDTO>> GetStudentByIdAsync(Guid id);
         public Task<Response<List<StudentDTO>>> GetAllStudentsAsync();
     }
 }

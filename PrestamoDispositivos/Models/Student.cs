@@ -8,13 +8,21 @@ namespace PrestamoDispositivos.Models
         #region Atributos
         [Key]
         public Guid IdEst { get; set; }
+        [Required(ErrorMessage = "El campo de Nombre es requerido")]
         public string Nombre { get; set; }
+        [Required(ErrorMessage = "El campo de Usuario es requerido")]
         public string Usuario { get; set; }
+        [Required(ErrorMessage = "El campo de Teléfono es requerido")]
         public int Telefono { get; set; }
+        [Required(ErrorMessage = "El campo de Edad es requerido")]
         public int Edad { get; set; }
+        [Required(ErrorMessage = "El campo de Semestre Cursado es requerido")]
         public int semestreCursado { get; set; }
+        [Required(ErrorMessage = "El campo de Contraseña es requerido")]
         public string Contraseña { get; set; }
+        [Required(ErrorMessage = "El campo de Correo Institucional es requerido")]
         public string CorreoIns { get; set; }
+        [Required(ErrorMessage = "El campo de Carnet es requerido")]
         public int Carnet { get; set; }
 
         #endregion

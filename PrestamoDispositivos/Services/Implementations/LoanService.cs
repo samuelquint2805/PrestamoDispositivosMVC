@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.DTO;
@@ -10,32 +11,28 @@ namespace PrestamoDispositivos.Services.Implementations
     public class LoanService : ILoanService
     {
         private readonly DatacontextPres _context;
+        private readonly IMapper _mapper;
 
-        public LoanService(DatacontextPres context)
+        public LoanService(DatacontextPres context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
+
+
 
         // Crear préstamo
         public async Task<Response<LoanDTO>> CreateLoanAsync(LoanDTO dto)
         {
             try
             {
-                var loan = new Loan
-                {
-                    IdPrestamos = Guid.NewGuid(),
-                    IdEstudiante = dto.IdEstudiante,
-                    IdDispo = dto.IdDispo,
-                    IdAdminDev = dto.IdAdminDev,
-                    IdEvento = dto.IdEvento
-                };
-
-                _context.Prestamos.Add(loan);
+                Loan loan = _mapper.Map<Loan>(dto);
+                await _context.Prestamos.AddAsync(loan);
                 await _context.SaveChangesAsync();
 
-                dto.IdPrestamos = loan.IdPrestamos;
 
                 return new Response<LoanDTO>(dto, " Préstamo creado correctamente");
+              
             }
             catch (Exception ex)
             {
@@ -93,6 +90,11 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
+                //metodo con mapper pero sin incluir busqueda por ID
+                // List<Loan> loans = await _context.Prestamos.ToListAsync();
+                //List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
+
+                //metodo de busqueda por ID incluyendo las relaciones usando DTO
                 var loan = await _context.Prestamos
                     .Include(x => x.Estudiante)
                     .Include(x => x.Dispositivo)
@@ -103,22 +105,10 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (loan == null)
                     return new Response<LoanDTO>(" Préstamo no encontrado");
 
-                var dto = new LoanDTO
-                {
+              
+                    var loanDto = _mapper.Map<LoanDTO>(loan);
 
-                    //ES NECESARIO ASIGNAR TODOS LOS CAMPOS?? solo basta con ID?
-
-                    //IdPrestamos = loan.IdPrestamos,
-                    //IdEstudiante = loan.IdEstudiante,
-                    //IdDispo = loan.IdDispo,
-                    //IdAdminDev = loan.IdAdminDev,
-                    //Estudiante = loan.Estudiante,
-                    //Dispositivo = loan.Dispositivo,
-                    //AdminDisp = loan.AdminDisp,
-                    //EventoPrestamos = loan.EventoPrestamos
-                };
-
-                return new Response<LoanDTO>(dto, "Préstamo encontrado correctamente");
+                return new Response<LoanDTO>(loanDto, "Préstamo encontrado correctamente");
             }
             catch (Exception ex)
             {
@@ -131,27 +121,8 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
-                var loans = await _context.Prestamos
-                    .Include(x => x.Estudiante)
-                    .Include(x => x.Dispositivo)
-                    .Include(x => x.DeviceManager)
-                    .Include(x => x.EventoPrestamos)
-                    .ToListAsync();
-
-                var dtoList = loans.Select(x => new LoanDTO
-                {
-                    //ES NECESARIO ASIGNAR TODOS LOS CAMPOS?? solo basta con ID?
-
-                    //IdPrestamos = x.IdPrestamos,
-                    //IdEst = x.IdEst,
-                    //IdDispositivo = x.IdDispositivo,
-                    //IdAdminDis = x.IdAdminDis,
-                    //EstadoPrestamos = x.EstadoPrestamos,
-                    //Estudiante = x.Estudiante,
-                    //Dispositivo = x.Dispositivo,
-                    //AdminDisp = x.AdminDisp,
-                    //EventoPrestamos = x.EventoPrestamos
-                }).ToList();
+                List<Loan> loans =await _context.Prestamos.ToListAsync();
+                List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
 
                 return new Response<List<LoanDTO>>(dtoList, " Lista de préstamos obtenida correctamente");
             }

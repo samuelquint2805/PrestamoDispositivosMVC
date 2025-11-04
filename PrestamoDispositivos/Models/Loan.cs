@@ -9,8 +9,9 @@ namespace PrestamoDispositivos.Models
         #region Atributos
         [Key]
         public Guid IdPrestamos { get; set; }
-
+        [Required(ErrorMessage = "La fecha del evento es requerida")]
         public DateTime FechaEvento { get; set; }
+        [Required(ErrorMessage = "El estado del préstamo es requerido")]
         public string EstadoPrestamo { get; set; }
         #endregion
 

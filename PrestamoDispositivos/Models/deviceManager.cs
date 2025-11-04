@@ -11,9 +11,12 @@ namespace PrestamoDispositivos.Models
         [Key]
         public Guid IdAdmin { get; set; }
 
+        [Required(ErrorMessage = "El campo Nombre es requerido")]
         public string Nombre { get; set; }
 
+        [Required(ErrorMessage = "El campo de Usuario es requerido")]
         public string Usuario { get; set; }
+        [Required(ErrorMessage = "El campo de Contraseña es requerido")]
 
         public string Contraseña { get; set; }
         #endregion

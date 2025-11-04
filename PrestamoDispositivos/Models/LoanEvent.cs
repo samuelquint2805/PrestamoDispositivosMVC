@@ -9,6 +9,7 @@ namespace PrestamoDispositivos.Models
         #region Atributos
         [Key]
         public Guid IdEvento { get; set; }
+        [Required(ErrorMessage = "El campo de Tipo de Préstamos es requerido")]
         public string TipoPrestamos { get; set; }
         #endregion
 
