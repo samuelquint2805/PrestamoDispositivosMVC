@@ -1,0 +1,131 @@
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using PrestamoDispositivos.Core;
+using PrestamoDispositivos.DTO;
+using PrestamoDispositivos.Services.Abstractions;
+
+namespace PrestamoDispositivos.Controllers
+{
+    public class DeviceController : Controller
+    {
+        private readonly IDeviceService _deviceService;
+        private readonly INotyfService _notyfService;
+
+        public DeviceController(IDeviceService deviceService, INotyfService notyfService)
+        {
+            _deviceService = deviceService;
+            _notyfService = notyfService;
+        }
+
+        // GET: DeviceController
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            Response<List<deviceDTO>> response = await _deviceService.GetAllDeviceAsync();
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return RedirectToAction("Index", "Home");
+            }
+            
+            return View(response.Result);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+               return View();
+        }
+
+
+        // GET: DeviceController/Create
+        [HttpPost]
+        public async Task<IActionResult> Create( [FromForm] deviceDTO dto)
+        {
+            if(!ModelState.IsValid)
+            {
+            _notyfService.Error("Por favor, corrija los errores en el formulario.");
+            }
+
+            Response <deviceDTO> response = await _deviceService.CreateDeviceAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return View(dto);
+            }
+
+            _notyfService.Success("Dispositivo creado exitosamente.");
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+       
+
+        // GET: DeviceController/Edit/5
+        public async Task <IActionResult> Edit([FromRoute] Guid id)
+        {
+            Response<deviceDTO> response =  await _deviceService.GetDeviceByIdAsync(id);
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(response.Result);
+        }
+
+        // POST: DeviceController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit([FromForm] Guid id, deviceDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyfService.Error("Por favor, corrija los errores en el formulario.");
+                return View(dto);
+            }
+            Response<deviceDTO> response = await _deviceService.UpdateDeviceAsync(id, dto);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return View(dto);
+            }
+        _notyfService.Success("Dispositivo actualizado exitosamente.");
+            return RedirectToAction(nameof(Index));
+
+        }
+
+        
+
+        // POST: DeviceController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyfService.Error("Por favor, corrija los errores en el formulario.");
+                RedirectToAction(nameof(Index));
+            }
+            Response<bool> response = await _deviceService.DeleteDeviceAsync(id);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+
+            }
+            else
+            {
+                    _notyfService.Success("Dispositivo borrado exitosamente.");
+            }
+                
+            return RedirectToAction(nameof(Index));
+        }
+
+
+    }
+}

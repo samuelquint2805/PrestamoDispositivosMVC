@@ -159,22 +159,22 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
-                var StudentUP = await _context.Estudiante
+                var StudentDt = await _context.Estudiante
                    .Include(x => x.Prestamos)
                    .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
-                if (StudentUP == null)
+                if (StudentDt == null)
                     return new Response<bool>("Estudiante no encontrado");
 
                 // Validar si tiene préstamos asociados
-                if (StudentUP.Prestamos != null && StudentUP.Prestamos.Any())
+                if (StudentDt.Prestamos != null && StudentDt.Prestamos.Any())
                 {
                     return new Response<bool>(
                         "No se puede eliminar el Estudiante porque tiene préstamos asociados"
                     );
                 }
 
-                _context.Estudiante.Remove(StudentUP);
+                _context.Estudiante.Remove(StudentDt);
                 await _context.SaveChangesAsync();
 
                 return new Response<bool>(true, "Estudiante eliminado correctamente");

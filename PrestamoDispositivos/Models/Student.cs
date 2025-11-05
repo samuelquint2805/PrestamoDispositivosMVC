@@ -13,7 +13,8 @@ namespace PrestamoDispositivos.Models
         [Required(ErrorMessage = "El campo de Usuario es requerido")]
         public string Usuario { get; set; }
         [Required(ErrorMessage = "El campo de Teléfono es requerido")]
-        public int Telefono { get; set; }
+        [MaxLength(50)]
+        public string Telefono { get; set; }
         [Required(ErrorMessage = "El campo de Edad es requerido")]
         public int Edad { get; set; }
         [Required(ErrorMessage = "El campo de Semestre Cursado es requerido")]

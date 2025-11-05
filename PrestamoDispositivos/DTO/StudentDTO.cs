@@ -8,7 +8,7 @@ namespace PrestamoDispositivos.DTO
         public Guid IdEst { get; set; }
         public string Nombre { get; set; }
         public string Usuario { get; set; }
-        public int Telefono { get; set; }
+        public string Telefono { get; set; }
         public int Edad { get; set; }
         public int semestreCursado { get; set; }
         public string Contraseña { get; set; }

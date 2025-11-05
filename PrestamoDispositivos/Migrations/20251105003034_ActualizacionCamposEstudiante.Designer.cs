@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PrestamoDispositivos.DataContext.Sections;
 
@@ -11,9 +12,11 @@ using PrestamoDispositivos.DataContext.Sections;
 namespace PrestamoDispositivos.Migrations
 {
     [DbContext(typeof(DatacontextPres))]
-    partial class DatacontextPresModelSnapshot : ModelSnapshot
+    [Migration("20251105003034_ActualizacionCamposEstudiante")]
+    partial class ActualizacionCamposEstudiante
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
