@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Services.Abstractions;
+using PrestamoDispositivos.Services.Implementations;
 
 namespace PrestamoDispositivos.Controllers
 {
@@ -27,10 +28,10 @@ namespace PrestamoDispositivos.Controllers
             if (!response.IsSuccess)
             {
                 _notyfService.Error(response.Message);
-                return RedirectToAction("Index", "Home");
+                return View(new List<deviceDTO>());
             }
             
-            return View(response.Result);
+            return View(response.Result ?? new List<deviceDTO>());
         }
 
         [HttpGet]
@@ -63,8 +64,8 @@ namespace PrestamoDispositivos.Controllers
         }
 
 
-       
 
+        [HttpGet]
         // GET: DeviceController/Edit/5
         public async Task <IActionResult> Edit([FromRoute] Guid id)
         {
@@ -80,21 +81,23 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromForm] Guid id, deviceDTO dto)
+        public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] deviceDTO dto)
         {
             if (!ModelState.IsValid)
             {
-                _notyfService.Error("Por favor, corrija los errores en el formulario.");
+                _notyfService.Error("⚠️ Corrige los errores antes de guardar.");
                 return View(dto);
             }
-            Response<deviceDTO> response = await _deviceService.UpdateDeviceAsync(id, dto);
+
+            var response = await _deviceService.UpdateDeviceAsync(id, dto);
 
             if (!response.IsSuccess)
             {
-                _notyfService.Error(response.Message);
+                _notyfService.Error(response.Message ?? "❌ Error al actualizar el préstamo.");
                 return View(dto);
             }
-        _notyfService.Success("Dispositivo actualizado exitosamente.");
+
+            _notyfService.Success(response.Message ?? "✅ Préstamo actualizado correctamente.");
             return RedirectToAction(nameof(Index));
 
         }

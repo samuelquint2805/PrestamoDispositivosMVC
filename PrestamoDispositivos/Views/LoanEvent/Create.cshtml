@@ -1,0 +1,38 @@
+﻿@model PrestamoDispositivos.DTO.LoanEventDTO
+@{
+    ViewData["Title"] = "Crear Evento de Préstamo";
+}
+
+<section id="create-loan-event" class="contact py-5">
+    <div class="container">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold">Registrar Nuevo Evento de Préstamo</h2>
+            <p class="text-muted">Completa la información para crear un nuevo evento.</p>
+        </div>
+
+        <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 600px;">
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label asp-for="TipoPrestamos" class="form-label fw-semibold">Tipo de Préstamo</label>
+                        <input asp-for="TipoPrestamos" class="form-control" placeholder="Ej: Corto plazo, Largo plazo..." />
+                        <span asp-validation-for="TipoPrestamos" class="text-danger"></span>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-check-circle me-1"></i> Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary px-4 ms-2">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

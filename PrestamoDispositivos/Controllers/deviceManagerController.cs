@@ -79,7 +79,7 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromForm] Guid id, deviceManagerDTO dto)
+        public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] deviceManagerDTO dto)
         {
             if (!ModelState.IsValid)
             {

@@ -20,6 +20,6 @@ namespace PrestamoDispositivos.DTO
         public ICollection<studentStatusDTO> EstadoEst { get; set; }
 
         // Relación con Prestamos
-        public Loan Prestamos { get; set; }
+        public ICollection<LoanDTO> Prestamos { get; set; } = new List<LoanDTO>();
     }
 }

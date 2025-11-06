@@ -82,7 +82,7 @@ namespace PrestamoDispositivos.Controllers
 
         // EDITAR préstamo (guardar cambios)
         [HttpPost]
-        public async Task<IActionResult> Edit(Guid id, [FromForm] LoanDTO dto)
+        public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] LoanDTO dto)
         {
             if (!ModelState.IsValid)
             {

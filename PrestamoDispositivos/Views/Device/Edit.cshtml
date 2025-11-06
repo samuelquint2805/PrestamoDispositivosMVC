@@ -1,0 +1,379 @@
+﻿@using PrestamoDispositivos.DTO
+
+@model deviceDTO
+@{
+    ViewData["Title"] = "Editar Dispositivo";
+}
+
+<!-- Page Title Section -->
+<section class="page-title section" style="padding-top: 120px;">
+    <div class="container section-title" data-aos="fade-up">
+        <span class="subtitle">Dispositivos</span>
+        <h2>Editar Dispositivo</h2>
+        <p>Actualiza la información del dispositivo seleccionado</p>
+    </div>
+</section>
+
+<!-- Edit Form Section -->
+<section id="edit-device" class="section light-background">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+
+                        <!-- Form Header -->
+                        <div class="form-header mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-pencil-square me-3" style="font-size: 2rem; color: #3b7ddd;"></i>
+                                    <div>
+                                        <h4 class="mb-1">Editar Información</h4>
+                                        <p class="text-muted mb-0">ID: <code>@Model.IdDisp</code></p>
+                                    </div>
+                                </div>
+                                <!-- Current Status Badge -->
+                                <div>
+                                    @if (Model.EstadoDisp.ToLower() == "disponible")
+                                    {
+                                        <span class="badge bg-success fs-6">@Model.EstadoDisp</span>
+                                    }
+                                    else if (Model.EstadoDisp.ToLower().Contains("préstamo") || Model.EstadoDisp.ToLower().Contains("prestamo"))
+                                    {
+                                        <span class="badge bg-warning text-dark fs-6">@Model.EstadoDisp</span>
+                                    }
+                                    else if (Model.EstadoDisp.ToLower().Contains("mantenimiento"))
+                                    {
+                                        <span class="badge bg-info fs-6">@Model.EstadoDisp</span>
+                                    }
+                                    else if (Model.EstadoDisp.ToLower().Contains("dañado") || Model.EstadoDisp.ToLower().Contains("danado"))
+                                    {
+                                        <span class="badge bg-danger fs-6">@Model.EstadoDisp</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary fs-6">@Model.EstadoDisp</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <form asp-action="Edit" asp-route-id="@Model.IdDisp" method="post">
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(model => model.IdDisp)
+
+                            <div class="row">
+
+                                <!-- Tipo de Dispositivo -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Tipo" class="form-label">
+                                        <i class="bi bi-device-hdd text-primary me-1"></i>
+                                        Tipo de Dispositivo
+                                    </label>
+                                    <select asp-for="Tipo" class="form-select">
+                                        <option value="">Seleccione un tipo...</option>
+                                        <option value="Laptop">Laptop</option>
+                                        <option value="Desktop">Desktop / PC</option>
+                                        <option value="Tablet">Tablet</option>
+                                        <option value="All-in-One">All-in-One</option>
+                                        <option value="Workstation">Workstation</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <span asp-validation-for="Tipo" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Estado del Dispositivo -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="EstadoDisp" class="form-label">
+                                        <i class="bi bi-check-circle text-primary me-1"></i>
+                                        Estado
+                                    </label>
+                                    <select asp-for="EstadoDisp" class="form-select">
+                                        <option value="">Seleccione un estado...</option>
+                                        <option value="Disponible">Disponible</option>
+                                        <option value="En Préstamo">En Préstamo</option>
+                                        <option value="En Mantenimiento">En Mantenimiento</option>
+                                        <option value="Dañado">Dañado</option>
+                                        <option value="Fuera de Servicio">Fuera de Servicio</option>
+                                    </select>
+                                    <span asp-validation-for="EstadoDisp" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Procesador -->
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Procesador" class="form-label">
+                                        <i class="bi bi-cpu text-primary me-1"></i>
+                                        Procesador
+                                    </label>
+                                    <input asp-for="Procesador"
+                                           class="form-control"
+                                           placeholder="Ej: Intel Core i7-12700H, AMD Ryzen 7 5800X"
+                                           maxlength="100" />
+                                    <span asp-validation-for="Procesador" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Especifica el modelo completo del procesador
+                                    </div>
+                                </div>
+
+                                <!-- Almacenamiento -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Almacenamiento" class="form-label">
+                                        <i class="bi bi-hdd text-primary me-1"></i>
+                                        Almacenamiento (GB)
+                                    </label>
+                                    <div class="input-group">
+                                        <input asp-for="Almacenamiento"
+                                               type="number"
+                                               class="form-control"
+                                               placeholder="512"
+                                               min="1"
+                                               max="10000" />
+                                        <span class="input-group-text">GB</span>
+                                    </div>
+                                    <span asp-validation-for="Almacenamiento" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Capacidad total en Gigabytes
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta Gráfica -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TarjetaGrafica" class="form-label">
+                                        <i class="bi bi-gpu-card text-primary me-1"></i>
+                                        Tarjeta Gráfica
+                                    </label>
+                                    <input asp-for="TarjetaGrafica"
+                                           class="form-control"
+                                           placeholder="Ej: NVIDIA RTX 3060, Intel Iris Xe"
+                                           maxlength="100" />
+                                    <span asp-validation-for="TarjetaGrafica" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Modelo de la tarjeta gráfica o GPU integrada
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Divider -->
+                            <hr class="my-4">
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="Index" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <i class="bi bi-trash me-2"></i>Eliminar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+                <!-- Change History Info Card -->
+                <div class="card mt-4 border-0 bg-light" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-clock-history text-primary me-3" style="font-size: 1.5rem;"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">Historial de cambios</h6>
+                                <p class="mb-0 small text-muted">
+                                    Los cambios realizados se guardarán inmediatamente. Asegúrate de verificar toda la información antes de confirmar.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este dispositivo?</p>
+                <div class="alert alert-warning mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Información del dispositivo:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Tipo:</strong> @Model.Tipo</li>
+                        <li><strong>Procesador:</strong> @Model.Procesador</li>
+                        <li><strong>Estado:</strong> @Model.EstadoDisp</li>
+                    </ul>
+                </div>
+                <p class="text-danger mb-0">
+                    <small><i class="bi bi-exclamation-circle me-1"></i>Esta acción no se puede deshacer.</small>
+                </p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                </button>
+                <form asp-action="Delete" asp-route-id="@Model.IdDisp" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar Dispositivo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.625rem 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #3b7ddd;
+            box-shadow: 0 0 0 0.2rem rgba(59, 125, 221, 0.15);
+        }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #3b7ddd;
+        border-color: #3b7ddd;
+    }
+
+        .btn-primary:hover {
+            background-color: #2e6bc6;
+            border-color: #2e6bc6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 125, 221, 0.3);
+        }
+
+    .btn-outline-secondary:hover,
+    .btn-outline-danger:hover {
+        transform: translateY(-2px);
+    }
+
+    .input-group-text {
+        border-radius: 0 8px 8px 0;
+        background-color: #f8f9fa;
+    }
+
+    .text-danger {
+        display: block;
+        margin-top: 0.25rem;
+    }
+
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+    }
+
+    code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        color: #e83e8c;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffc107;
+        border-radius: 8px;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Inicializar animaciones AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+
+        // Validación adicional del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[method="post"]');
+
+            if (form && !form.action.includes('Delete')) {
+                form.addEventListener('submit', function(e) {
+                    // Validar campos requeridos
+                    const tipo = document.querySelector('[name="Tipo"]').value;
+                    const estado = document.querySelector('[name="EstadoDisp"]').value;
+
+                    if (!tipo || !estado) {
+                        e.preventDefault();
+                        alert('Por favor, selecciona el tipo y estado del dispositivo.');
+                    }
+                });
+            }
+
+            // Confirmación adicional antes de eliminar
+            const deleteForm = document.querySelector('#deleteModal form');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(e) {
+                    const confirmed = confirm('¿Realmente deseas eliminar este dispositivo? Esta acción es irreversible.');
+                    if (!confirmed) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -122,14 +122,6 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (StudentUP == null)
                     return new Response<StudentDTO>("Estudiante no encontrado");
 
-                //// Validar datos
-
-                // Verificar si el Dispositivo ya existe (excepto el actual)
-                var existingStu = await _context.Estudiante
-                    .FirstOrDefaultAsync(x => x.IdEst == StudentUP.IdEst);
-
-                if (existingStu != null)
-                    return new Response<StudentDTO>("El Estudiante ya existe");
 
                 // Actualizar propiedades
 
