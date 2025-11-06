@@ -8,6 +8,6 @@ namespace PrestamoDispositivos.DTO
         public string TipoPrestamos { get; set; }
 
         //Relación con Loan
-        public ICollection<LoanDTO> EventosPrestamos { get; set; }
+        public ICollection<Loan> EventosPrestamos { get; set; }
     }
 }

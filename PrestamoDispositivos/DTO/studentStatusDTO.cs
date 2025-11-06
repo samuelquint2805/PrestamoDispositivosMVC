@@ -9,6 +9,6 @@ namespace PrestamoDispositivos.DTO
         public string EstEstu { get; set; }
 
         // Relación con Student
-        public ICollection<StudentDTO> Prestamos { get; set; }
+        public ICollection<Student> Prestamos { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.Services.Abstractions;
 using PrestamoDispositivos.Services.Implementations;
-using Microsoft.AspNetCore.Builder;
 using AutoMapper;
 using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
@@ -22,7 +21,12 @@ namespace PrestamoDispositivos
             });
 
             // Auto mapper
+
+
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
+            //self services
+            AddServices(builder);
+            return builder;
 
             //toast notification
             builder.Services.AddNotyf(config =>
@@ -32,26 +36,23 @@ namespace PrestamoDispositivos
                 config.Position = NotyfPosition.TopRight;
             });
 
-            //self services
-            AddServices(builder);
-            return builder;
-
         }
+
+
+
 
         private static void AddServices(WebApplicationBuilder builder)
         {
             //Services injection
 
             builder.Services.AddScoped<IStudentService, StudentService>();
-            builder.Services.AddScoped<IDeviceService, DeviceService>();
-            builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
-            builder.Services.AddScoped<ILoanService, LoanService>();
-            builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
+            //builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
+            //builder.Services.AddScoped<ILoanService, LoanService>();
+            //builder.Services.AddScoped<ILoanEventService, LoanEventService>();
         }
 
         public static WebApplication WebAppCustomConfiguration(this WebApplication app)
         {
-            
             //  Habilitar Notyf
             app.UseNotyf();
            

@@ -121,7 +121,14 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (StudentUP == null)
                     return new Response<studentStatusDTO>("estado del estudiante no encontrado");
 
-               
+                //// Validar datos
+
+                // Verificar si el Dispositivo ya existe (excepto el actual)
+                var existingStu = await _context.EstadoEstudiantes
+                    .FirstOrDefaultAsync(x => x.IdStatus== StudentUP.IdStatus);
+
+                if (existingStu != null)
+                    return new Response<studentStatusDTO>("estado del estudiante no encontrado");
 
                 // Actualizar propiedades
 

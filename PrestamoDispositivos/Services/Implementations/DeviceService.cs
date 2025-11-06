@@ -27,13 +27,9 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 var devicesDV = await _context.Dispositivos
                     .ToListAsync();
-                Console.WriteLine($"Cantidad: {devicesDV.Count}");
-
-               
-
 
                 var deviceDTO = _mapper.Map<List<deviceDTO>>(devicesDV);
-                Console.WriteLine($"DTO convertido: {(deviceDTO == null ? "NULO" : deviceDTO.Count.ToString())}");
+
                 return new Response<List<deviceDTO>>(
                     deviceDTO,
                     "Dispositivos obtenidos correctamente"
@@ -120,13 +116,20 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var devic = await _context.Dispositivos
-                    
+                    .Include(x => x.Prestamos)
                     .FirstOrDefaultAsync(x => x.IdDisp == Guid.Parse(id.ToString()));
 
                 if (devic == null)
                     return new Response<deviceDTO>("Dispositivo no encontrado");
 
-                
+                //// Validar datos
+
+                // Verificar si el Dispositivo ya existe (excepto el actual)
+                var existingDev = await _context.Dispositivos
+                    .FirstOrDefaultAsync(x => x.IdDisp == devic.IdDisp);
+
+                if (existingDev != null)
+                    return new Response<deviceDTO>("El Dispositivo ya existe");
 
                 // Actualizar propiedades
 

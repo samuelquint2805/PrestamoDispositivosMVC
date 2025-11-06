@@ -123,7 +123,12 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (manager == null)
                     return new Response<deviceManagerDTO>("Administrador no encontrado");
 
-               
+                // Verificar si el usuario ya existe (excepto el actual)
+                var existingUser = await _context.AdminDisp
+                    .FirstOrDefaultAsync(x => x.Usuario == devicManDto.Usuario && x.IdAdmin != manager.IdAdmin);
+
+                if (existingUser != null)
+                    return new Response<deviceManagerDTO>("El usuario ya existe");
 
                 // Actualizar propiedades
                 manager.Nombre = devicManDto.Nombre;
