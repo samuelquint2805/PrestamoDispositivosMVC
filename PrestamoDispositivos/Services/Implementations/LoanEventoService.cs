@@ -123,14 +123,6 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (LoanEventUP == null)
                     return new Response<LoanEventDTO>("Evento del prestamo no encontrado");
 
-                
-
-                // Verificar si el Dispositivo ya existe (excepto el actual)
-                var existinLoanEv= await _context.EventoPrestamos
-                    .FirstOrDefaultAsync(x => x.IdEvento== LoanEventUP.IdEvento);
-
-                if (existinLoanEv != null)
-                    return new Response<LoanEventDTO>("El evento del prestamo ya existe");
 
                 // Actualizar propiedades
 

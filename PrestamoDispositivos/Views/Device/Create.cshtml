@@ -1,0 +1,272 @@
+﻿@model PrestamoDispositivos.DTO.deviceDTO
+@{
+    ViewData["Title"] = "Nuevo Dispositivo";
+}
+
+<!-- Page Title Section -->
+<section class="page-title section" style="padding-top: 120px;">
+    <div class="container section-title" data-aos="fade-up">
+        <span class="subtitle">Dispositivos</span>
+        <h2>Nuevo Dispositivo</h2>
+        <p>Registra un nuevo dispositivo en el sistema de préstamos</p>
+    </div>
+</section>
+
+<!-- Create Form Section -->
+<section id="create-device" class="section light-background">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+
+                        <!-- Form Header -->
+                        <div class="form-header mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-laptop me-3" style="font-size: 2rem; color: #3b7ddd;"></i>
+                                <div>
+                                    <h4 class="mb-1">Información del Dispositivo</h4>
+                                    <p class="text-muted mb-0">Completa todos los campos requeridos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form asp-action="Create" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+
+                                <!-- Tipo de Dispositivo -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Tipo" class="form-label">
+                                        <i class="bi bi-device-hdd text-primary me-1"></i>
+                                        Tipo de Dispositivo
+                                    </label>
+                                    <select asp-for="Tipo" class="form-select">
+                                        <option value="">Seleccione un tipo...</option>
+                                        <option value="Laptop">Laptop</option>
+                                        <option value="Desktop">Desktop / PC</option>
+                                        <option value="Tablet">Tablet</option>
+                                        <option value="All-in-One">All-in-One</option>
+                                        <option value="Workstation">Workstation</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                    <span asp-validation-for="Tipo" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Estado del Dispositivo -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="EstadoDisp" class="form-label">
+                                        <i class="bi bi-check-circle text-primary me-1"></i>
+                                        Estado
+                                    </label>
+                                    <select asp-for="EstadoDisp" class="form-select">
+                                        <option value="">Seleccione un estado...</option>
+                                        <option value="Disponible">Disponible</option>
+                                        <option value="En Préstamo">En Préstamo</option>
+                                        <option value="En Mantenimiento">En Mantenimiento</option>
+                                        <option value="Dañado">Dañado</option>
+                                        <option value="Fuera de Servicio">Fuera de Servicio</option>
+                                    </select>
+                                    <span asp-validation-for="EstadoDisp" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Procesador -->
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Procesador" class="form-label">
+                                        <i class="bi bi-cpu text-primary me-1"></i>
+                                        Procesador
+                                    </label>
+                                    <input asp-for="Procesador"
+                                           class="form-control"
+                                           placeholder="Ej: Intel Core i7-12700H, AMD Ryzen 7 5800X"
+                                           maxlength="100" />
+                                    <span asp-validation-for="Procesador" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Especifica el modelo completo del procesador
+                                    </div>
+                                </div>
+
+                                <!-- Almacenamiento -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Almacenamiento" class="form-label">
+                                        <i class="bi bi-hdd text-primary me-1"></i>
+                                        Almacenamiento (GB)
+                                    </label>
+                                    <div class="input-group">
+                                        <input asp-for="Almacenamiento"
+                                               type="number"
+                                               class="form-control"
+                                               placeholder="512"
+                                               min="1"
+                                               max="10000" />
+                                        <span class="input-group-text">GB</span>
+                                    </div>
+                                    <span asp-validation-for="Almacenamiento" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Capacidad total en Gigabytes
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta Gráfica -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TarjetaGrafica" class="form-label">
+                                        <i class="bi bi-gpu-card text-primary me-1"></i>
+                                        Tarjeta Gráfica
+                                    </label>
+                                    <input asp-for="TarjetaGrafica"
+                                           class="form-control"
+                                           placeholder="Ej: NVIDIA RTX 3060, Intel Iris Xe"
+                                           maxlength="100" />
+                                    <span asp-validation-for="TarjetaGrafica" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Modelo de la tarjeta gráfica o GPU integrada
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Divider -->
+                            <hr class="my-4">
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="Index" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-circle me-2"></i>Guardar Dispositivo
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card mt-4 border-0 bg-light" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-info-circle-fill text-primary me-3" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <h6 class="mb-2">Consejos para el registro</h6>
+                                <ul class="mb-0 small text-muted">
+                                    <li>Verifica que toda la información sea correcta antes de guardar</li>
+                                    <li>El procesador y la tarjeta gráfica deben incluir el modelo completo</li>
+                                    <li>El estado "Disponible" permite que el dispositivo pueda ser prestado</li>
+                                    <li>Puedes editar esta información posteriormente si es necesario</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Custom Styles -->
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.625rem 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #3b7ddd;
+            box-shadow: 0 0 0 0.2rem rgba(59, 125, 221, 0.15);
+        }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #3b7ddd;
+        border-color: #3b7ddd;
+    }
+
+        .btn-primary:hover {
+            background-color: #2e6bc6;
+            border-color: #2e6bc6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 125, 221, 0.3);
+        }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+    }
+
+    .input-group-text {
+        border-radius: 0 8px 8px 0;
+        background-color: #f8f9fa;
+    }
+
+    .text-danger {
+        display: block;
+        margin-top: 0.25rem;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Inicializar animaciones AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+
+        // Validación adicional del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+
+            form.addEventListener('submit', function(e) {
+                // Validar campos requeridos
+                const tipo = document.querySelector('[name="Tipo"]').value;
+                const estado = document.querySelector('[name="EstadoDisp"]').value;
+
+                if (!tipo || !estado) {
+                    e.preventDefault();
+                    alert('Por favor, selecciona el tipo y estado del dispositivo.');
+                }
+            });
+        });
+    </script>
+}

@@ -13,6 +13,6 @@ namespace PrestamoDispositivos.DTO
         public string Contraseña { get; set; }
 
         //Relación con Prestamos
-        public ICollection<Loan> Loans { get; set; }
+        public ICollection<LoanDTO> Loans { get; set; }
     }
 }
