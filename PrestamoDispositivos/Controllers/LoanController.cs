@@ -3,13 +3,9 @@ using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Services.Abstractions;
 using AspNetCoreHero.ToastNotification.Abstractions;
-using Microsoft.AspNetCore.Authorization;
 
 namespace PrestamoDispositivos.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;
@@ -21,8 +17,7 @@ namespace PrestamoDispositivos.Controllers
             _notyfService = notyfService;
         }
 
-        // LISTAR todos los préstamos
-        [HttpGet]
+        //  LISTAR todos los préstamos
         public async Task<IActionResult> Index()
         {
             var response = await _loanService.GetAllLoansAsync();
@@ -36,20 +31,19 @@ namespace PrestamoDispositivos.Controllers
             return View(response.Result);
         }
 
-        //  CREAR préstamo (formulario)
+        //  FORMULARIO DE CREACIÓN
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        //  CREAR préstamo (POST)
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm] LoanDTO dto)
+        public async Task<IActionResult> Create(LoanDTO dto)
         {
             if (!ModelState.IsValid)
             {
-                _notyfService.Error("⚠️ Corrige los errores del formulario.");
+                _notyfService.Error("Corrige los errores del formulario.");
                 return View(dto);
             }
 
@@ -57,15 +51,15 @@ namespace PrestamoDispositivos.Controllers
 
             if (!response.IsSuccess)
             {
-                _notyfService.Error(response.Message ?? "❌ Error al crear el préstamo.");
+                _notyfService.Error(response.Message ?? "Error al crear el préstamo.");
                 return View(dto);
             }
 
-            _notyfService.Success(response.Message ?? "✅ Préstamo creado correctamente.");
+            _notyfService.Success(response.Message ?? "Préstamo creado correctamente.");
             return RedirectToAction(nameof(Index));
         }
 
-        //  EDITAR préstamo (mostrar formulario)
+        //  EDITAR préstamo
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -73,20 +67,19 @@ namespace PrestamoDispositivos.Controllers
 
             if (!response.IsSuccess)
             {
-                _notyfService.Error(response.Message ?? "❌ Préstamo no encontrado.");
+                _notyfService.Error(response.Message ?? "Préstamo no encontrado.");
                 return RedirectToAction(nameof(Index));
             }
 
             return View(response.Result);
         }
 
-        // EDITAR préstamo (guardar cambios)
         [HttpPost]
-        public async Task<IActionResult> Edit(Guid id, [FromForm] LoanDTO dto)
+        public async Task<IActionResult> Edit(Guid id, LoanDTO dto)
         {
             if (!ModelState.IsValid)
             {
-                _notyfService.Error("⚠️ Corrige los errores antes de guardar.");
+                _notyfService.Error("Corrige los errores antes de guardar.");
                 return View(dto);
             }
 
@@ -94,11 +87,11 @@ namespace PrestamoDispositivos.Controllers
 
             if (!response.IsSuccess)
             {
-                _notyfService.Error(response.Message ?? "❌ Error al actualizar el préstamo.");
+                _notyfService.Error(response.Message ?? "Error al actualizar el préstamo.");
                 return View(dto);
             }
 
-            _notyfService.Success(response.Message ?? "✅ Préstamo actualizado correctamente.");
+            _notyfService.Success(response.Message ?? "Préstamo actualizado correctamente.");
             return RedirectToAction(nameof(Index));
         }
 
@@ -109,23 +102,23 @@ namespace PrestamoDispositivos.Controllers
             var response = await _loanService.DeleteLoanAsync(id);
 
             if (!response.IsSuccess)
-                _notyfService.Error(response.Message ?? "❌ Error al eliminar el préstamo.");
+                _notyfService.Error(response.Message ?? "Error al eliminar el préstamo.");
             else
-                _notyfService.Success(response.Message ?? "✅ Préstamo eliminado correctamente.");
+                _notyfService.Success(response.Message ?? "Préstamo eliminado correctamente.");
 
             return RedirectToAction(nameof(Index));
         }
 
-        // TOGGLE estado del préstamo (activar / desactivar)
+        //  TOGGLE estado del préstamo (activar/desactivar)
         [HttpPost]
-        public async Task<IActionResult> Toggle([FromForm] ToggleLoanStatusDTO dto)
+        public async Task<IActionResult> Toggle(ToggleLoanStatusDTO dto)
         {
             var response = await _loanService.ToggleLoanStatusAsync(dto);
 
             if (!response.IsSuccess)
-                _notyfService.Error(response.Message ?? "❌ Error al cambiar el estado del préstamo.");
+                _notyfService.Error(response.Message ?? "Error al cambiar el estado del préstamo.");
             else
-                _notyfService.Success(response.Message ?? "✅ Estado actualizado correctamente.");
+                _notyfService.Success(response.Message ?? "Estado actualizado correctamente.");
 
             return RedirectToAction(nameof(Index));
         }

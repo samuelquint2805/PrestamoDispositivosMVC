@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.Core;
+using PrestamoDispositivos.Data;
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Models;
 using PrestamoDispositivos.Services.Abstractions;
-
 
 namespace PrestamoDispositivos.Services.Implementations
 {
@@ -20,171 +20,127 @@ namespace PrestamoDispositivos.Services.Implementations
             _mapper = mapper;
         }
 
-        // Obtener todos los dispositivos
+        //  Obtener todos los estudiantes
         public async Task<Response<List<StudentDTO>>> GetAllStudentsAsync()
         {
             try
             {
-                var StudentDV = await _context.Estudiante
+                var students = await _context.Estudiante
+                    .Include(x => x.Prestamos)
                     .ToListAsync();
 
-                var StudentDTO = _mapper.Map<List<StudentDTO>>(StudentDV);
+                var studentDTOs = _mapper.Map<List<StudentDTO>>(students);
 
-                return new Response<List<StudentDTO>>(
-                    StudentDTO,
-                    "Estudiantes obtenidos correctamente"
-                );
+                return new Response<List<StudentDTO>>(studentDTOs, "Estudiantes obtenidos correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<List<StudentDTO>>(
-                    "Error al obtener lista de Estudiantes",
-                    new List<string> { ex.Message }
-                );
+                return new Response<List<StudentDTO>>("Error al obtener lista de estudiantes",
+                    new List<string> { ex.Message });
             }
         }
 
-        // Obtener Estudiante por ID
+        //  Obtener estudiante por ID
         public async Task<Response<StudentDTO>> GetStudentByIdAsync(Guid id)
         {
             try
             {
-                var StudentGT = await _context.Estudiante
+                var student = await _context.Estudiante
                     .Include(x => x.Prestamos)
-                    .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
+                    .FirstOrDefaultAsync(x => x.IdEst == id);
 
-                if (StudentGT == null)
+                if (student == null)
                     return new Response<StudentDTO>("Estudiante no encontrado");
 
-                var StudentDto = _mapper.Map<StudentDTO>(StudentGT);
+                var studentDto = _mapper.Map<StudentDTO>(student);
 
-                return new Response<StudentDTO>(
-                    StudentDto,
-                    "Estudiante encontrado correctamente"
-                );
+                return new Response<StudentDTO>(studentDto, "Estudiante encontrado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<StudentDTO>(
-                    "Error al obtener el Estudiante",
-                    new List<string> { ex.Message }
-                );
+                return new Response<StudentDTO>("Error al obtener el estudiante", new List<string> { ex.Message });
             }
         }
 
-        // Crear nuevo Estudiante
-        public async Task<Response<StudentDTO>> CreateStudentAsync(StudentDTO StudentDto)
+        //  Crear nuevo estudiante
+        public async Task<Response<StudentDTO>> CreateStudentAsync(StudentDTO studentDto)
         {
             try
             {
+                // Generar nuevo ID antes del mapeo
+                studentDto.IdEst = Guid.NewGuid();
 
-                // Verificar si el usuario ya existe
-                var existingUser = await _context.Estudiante
-                    .FirstOrDefaultAsync(x => x.IdEst ==StudentDto.IdEst);
-
-                if (existingUser != null)
-                    return new Response<StudentDTO>("El Estudiante ya existe");
-
-                // Mapear DTO a modelo
-                var students = _mapper.Map<Student>(StudentDto);
-                StudentDto.IdEst = Guid.NewGuid();
+                // Mapear DTO a entidad
+                var student = _mapper.Map<Student>(studentDto);
 
                 // Guardar en base de datos
-                _context.Estudiante.Add(students);
+                _context.Estudiante.Add(student);
                 await _context.SaveChangesAsync();
 
-                // Mapear resultado
-                var resultDto = _mapper.Map<StudentDTO>(students);
+                var resultDto = _mapper.Map<StudentDTO>(student);
 
-                return new Response<StudentDTO>(
-                    resultDto,
-                    "Estudiante creado correctamente"
-                );
+                return new Response<StudentDTO>(resultDto, "Estudiante creado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<StudentDTO>(
-                    "Error al crear el Estudiante",
-                    new List<string> { ex.Message }
-                );
+                return new Response<StudentDTO>("Error al crear el estudiante", new List<string> { ex.Message });
             }
         }
 
-        // Actualizar Estudiante
-        public async Task<Response<StudentDTO>> UpdateStudentAsync(Guid id, StudentDTO StudentDto)
+        //  Actualizar estudiante
+        public async Task<Response<StudentDTO>> UpdateStudentAsync(Guid id, StudentDTO studentDto)
         {
             try
             {
-                var StudentUP = await _context.Estudiante
+                var student = await _context.Estudiante
                     .Include(x => x.Prestamos)
-                    .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
+                    .FirstOrDefaultAsync(x => x.IdEst == id);
 
-                if (StudentUP == null)
+                if (student == null)
                     return new Response<StudentDTO>("Estudiante no encontrado");
 
-                //// Validar datos
-
-                // Verificar si el Dispositivo ya existe (excepto el actual)
-                var existingStu = await _context.Estudiante
-                    .FirstOrDefaultAsync(x => x.IdEst == StudentUP.IdEst);
-
-                if (existingStu != null)
-                    return new Response<StudentDTO>("El Estudiante ya existe");
-
                 // Actualizar propiedades
+                _mapper.Map(studentDto, student);
 
-                _mapper.Map(StudentDto, StudentUP);
-
-                _context.Estudiante.Update(StudentUP);
+                _context.Estudiante.Update(student);
                 await _context.SaveChangesAsync();
 
-                var resultDto = _mapper.Map<StudentDTO>(StudentUP);
+                var resultDto = _mapper.Map<StudentDTO>(student);
 
-                return new Response<StudentDTO>(
-                    resultDto,
-                    "Estudiante actualizado correctamente"
-                );
+                return new Response<StudentDTO>(resultDto, "Estudiante actualizado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<StudentDTO>(
-                    "Error al actualizar el Estudiante",
-                    new List<string> { ex.Message }
-                );
+                return new Response<StudentDTO>("Error al actualizar el estudiante", new List<string> { ex.Message });
             }
         }
 
-        // Eliminar Dispositivo
+        //  Eliminar estudiante
         public async Task<Response<bool>> DeleteStudentAsync(Guid id)
         {
             try
             {
-                var StudentDt = await _context.Estudiante
-                   .Include(x => x.Prestamos)
-                   .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
+                var student = await _context.Estudiante
+                    .Include(x => x.Prestamos)
+                    .FirstOrDefaultAsync(x => x.IdEst == id);
 
-                if (StudentDt == null)
+                if (student == null)
                     return new Response<bool>("Estudiante no encontrado");
 
                 // Validar si tiene préstamos asociados
-                if (StudentDt.Prestamos != null && StudentDt.Prestamos.Any())
+                if (student.Prestamos != null && student.Prestamos.Any())
                 {
-                    return new Response<bool>(
-                        "No se puede eliminar el Estudiante porque tiene préstamos asociados"
-                    );
+                    return new Response<bool>("No se puede eliminar el estudiante porque tiene préstamos asociados");
                 }
 
-                _context.Estudiante.Remove(StudentDt);
+                _context.Estudiante.Remove(student);
                 await _context.SaveChangesAsync();
 
                 return new Response<bool>(true, "Estudiante eliminado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
-                    "Error al eliminar el Estudiante",
-                    new List<string> { ex.Message }
-                );
+                return new Response<bool>("Error al eliminar el estudiante", new List<string> { ex.Message });
             }
         }
     }

@@ -1,0 +1,52 @@
+﻿@model List<PrestamoDispositivos.DTO.StudentDTO>
+
+@{
+    ViewData["Title"] = "Lista de Estudiantes";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold"> Lista de Estudiantes</h2>
+        <a asp-action="Create" class="btn btn-primary">➕ Nuevo Estudiante</a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">No hay estudiantes registrados.</div>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Código</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td>@student.Nombre</td>
+                        <td>@student.Carnet</td>
+                        <td>@student.CorreoIns</td>
+                        <td>@student.Telefono</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@student.IdEst" class="btn btn-sm btn-warning me-1">✏️ Editar</a>
+
+                            <form asp-action="Delete" asp-route-id="@student.IdEst" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('¿Seguro que deseas eliminar este estudiante?');">
+                                      Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

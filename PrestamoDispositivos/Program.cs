@@ -29,6 +29,7 @@ builder.Services.AddDbContext<DatacontextPres>(options =>
 
 //  Registrar servicios
 builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 var app = builder.Build();
 

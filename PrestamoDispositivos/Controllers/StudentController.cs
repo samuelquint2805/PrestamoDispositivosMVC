@@ -21,13 +21,14 @@ namespace PrestamoDispositivos.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            Response<List<StudentDTO>> response = await _StudentService.GetAllStudentsAsync(); 
+            Response<List<StudentDTO>> response = await _StudentService.GetAllStudentsAsync();
 
             if (!response.IsSuccess)
             {
                 _notyfService.Error(response.Message);
-                return RedirectToAction("Index", "Home");
+                return View(new List<StudentDTO>());
             }
+
 
             return View(response.Result);
         }

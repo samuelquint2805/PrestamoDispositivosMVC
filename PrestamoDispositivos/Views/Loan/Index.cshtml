@@ -1,0 +1,55 @@
+﻿@model IEnumerable<PrestamoDispositivos.DTO.LoanDTO>
+
+@{
+    ViewData["Title"] = "Lista de Prestamos";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Gestión de Préstamos</h2>
+
+    <div class="text-end mb-3">
+        <a asp-action="Create" class="btn btn-success"> Nuevo Prestamo</a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Estudiante</th>
+                    <th>Dispositivo</th>
+                    <th>Administrador</th>
+                    <th>Tipo de Préstamo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FechaEvento.ToString("yyyy-MM-dd")</td>
+                        <td>@item.EstadoPrestamo</td>
+                        <td>@item.Estudiante?.Nombre ?? "Sin asignar"</td>
+                        <td>@item.Dispositivo?.Tipo ?? "Sin asignar"</td>
+                        <td>@item.DeviceManager?.Nombre ?? "Sin asignar"</td>
+                        <td>@item.EventoPrestamos?.TipoPrestamos ?? "N/A"</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.IdPrestamos" class="btn btn-primary btn-sm">Editar</a>
+                            <form asp-action="Delete" asp-route-id="@item.IdPrestamos" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            No hay préstamos registrados aún.
+        </div>
+    }
+</div>

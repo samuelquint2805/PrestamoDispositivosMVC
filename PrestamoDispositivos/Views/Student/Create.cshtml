@@ -1,0 +1,43 @@
+﻿@model PrestamoDispositivos.DTO.StudentDTO
+
+@{
+    ViewData["Title"] = "Nuevo Estudiante";
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4">➕ Registrar Estudiante</h2>
+
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Carnet" class="form-label">Código</label>
+            <input asp-for="Carnet" class="form-control" />
+            <span asp-validation-for="Carnet" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CorreoIns" class="form-label">Correo</label>
+            <input asp-for="CorreoIns" type="email" class="form-control" />
+            <span asp-validation-for="CorreoIns" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Telefono" class="form-label">Teléfono</label>
+            <input asp-for="Telefono" class="form-control" />
+            <span asp-validation-for="Telefono" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
