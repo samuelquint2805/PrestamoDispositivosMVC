@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PrestamoDispositivos.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
+    //[Authorize]
+    //[ApiController]
+    //[Route("api/[controller]")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;
@@ -67,7 +67,7 @@ namespace PrestamoDispositivos.Controllers
 
         //  EDITAR préstamo (mostrar formulario)
         [HttpGet]
-        public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> Edit([FromRoute]Guid id)
         {
             var response = await _loanService.GetLoanByIdAsync(id);
 
@@ -86,7 +86,7 @@ namespace PrestamoDispositivos.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _notyfService.Error("⚠️ Corrige los errores antes de guardar.");
+                _notyfService.Error("Corrige los errores antes de guardar.");
                 return View(dto);
             }
 
@@ -94,24 +94,24 @@ namespace PrestamoDispositivos.Controllers
 
             if (!response.IsSuccess)
             {
-                _notyfService.Error(response.Message ?? "❌ Error al actualizar el préstamo.");
+                _notyfService.Error(response.Message ?? " Error al actualizar el préstamo.");
                 return View(dto);
             }
 
-            _notyfService.Success(response.Message ?? "✅ Préstamo actualizado correctamente.");
+            _notyfService.Success(response.Message ?? "Préstamo actualizado correctamente.");
             return RedirectToAction(nameof(Index));
         }
 
         //  ELIMINAR préstamo
         [HttpPost]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete([FromRoute]Guid id)
         {
             var response = await _loanService.DeleteLoanAsync(id);
 
             if (!response.IsSuccess)
-                _notyfService.Error(response.Message ?? "❌ Error al eliminar el préstamo.");
+                _notyfService.Error(response.Message ?? "Error al eliminar el préstamo.");
             else
-                _notyfService.Success(response.Message ?? "✅ Préstamo eliminado correctamente.");
+                _notyfService.Success(response.Message ?? "Préstamo eliminado correctamente.");
 
             return RedirectToAction(nameof(Index));
         }
@@ -123,9 +123,9 @@ namespace PrestamoDispositivos.Controllers
             var response = await _loanService.ToggleLoanStatusAsync(dto);
 
             if (!response.IsSuccess)
-                _notyfService.Error(response.Message ?? "❌ Error al cambiar el estado del préstamo.");
+                _notyfService.Error(response.Message ?? "Error al cambiar el estado del préstamo.");
             else
-                _notyfService.Success(response.Message ?? "✅ Estado actualizado correctamente.");
+                _notyfService.Success(response.Message ?? "Estado actualizado correctamente.");
 
             return RedirectToAction(nameof(Index));
         }

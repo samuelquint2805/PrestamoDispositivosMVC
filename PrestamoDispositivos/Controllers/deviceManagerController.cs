@@ -1,8 +1,11 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Services.Abstractions;
+using System.Security.Claims;
 
 namespace PrestamoDispositivos.Controllers
 {
@@ -16,7 +19,82 @@ namespace PrestamoDispositivos.Controllers
             _deviceManagerService = deviceManagerService;
             _notyfService = notyfService;
         }
+        [HttpGet]
+        public IActionResult Login() => View();
 
+        [HttpPost]
+        //public async Task<IActionResult> Login(string username, string password)
+        //{
+        //    // Verifica en la base o en tu servicio
+            
+        ////    if ()
+        ////    {
+        ////        _notyfService.Error("Usuario o contraseña incorrectos.");
+        ////        return View();
+        ////    }
+
+        ////    // Creamos las claims del usuario
+        ////    var claims = new List<Claim>
+        ////{
+        ////    new Claim(ClaimTypes.Name, user.NombreUsuario),
+        ////    new Claim(ClaimTypes.Role, user.Rol ?? "DeviceManAdmin")
+        ////};
+
+        //    //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        //    //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+        //    //_notyfService.Success("Sesión iniciada correctamente.");
+        //    //return RedirectToAction("Index", "Home");
+        //}
+
+        // =====================
+        // 🔹 LOGOUT
+        // =====================
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            _notyfService.Success("Sesión cerrada.");
+            return RedirectToAction("Login");
+        }
+
+        // =====================
+        // 🔹 REGISTRO
+        // =====================
+        [HttpGet]
+        public IActionResult Register() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> Register([FromForm] deviceManagerDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyfService.Error("Corrige los errores del formulario.");
+                return View(dto);
+            }
+
+            // Aquí llamas tu servicio que guarda el admin
+            //dto.Rol = "DeviceManAdmin"; // Rol por defecto
+            var response = await _deviceManagerService.CreateDeviceManagerAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return View(dto);
+            }
+
+            _notyfService.Success("Administrador registrado correctamente.");
+            return RedirectToAction("Login");
+        }
+
+        // =====================
+        // 🔹 ACCESS DENIED
+        // =====================
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
         // GET: DeviceController
         [HttpGet]
         public async Task<IActionResult> Index()

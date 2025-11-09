@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewData["Title"] = "Registro";
+}
+
+<div class="register-container">
+    <h1>Inscribirse</h1>
+
+    <form method="post">
+        <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" name="Nombre" class="form-control" placeholder="Su nombre" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Correo electrónico</label>
+            <input type="email" name="Correo" class="form-control" placeholder="Tu correo electrónico" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Contraseña</label>
+            <input type="password" name="Password" class="form-control" placeholder="Contraseña" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Repite tu contraseña</label>
+            <input type="password" name="ConfirmPassword" class="form-control" placeholder="Repite tu contraseña" required />
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="terms" required />
+            <label class="form-check-label" for="terms">
+                Acepto los <a href="#">Términos de servicio</a>.
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Registro</button>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #2b2b2b;
+        color: #fff;
+    }
+
+    .register-container {
+        max-width: 450px;
+        margin: 50px auto;
+        background: #3a3a3a;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    input, button {
+        border-radius: 5px;
+    }
+
+    a {
+        color: #4fa3ff;
+    }
+</style>

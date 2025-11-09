@@ -1,11 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.DataContext.Sections;
+using PrestamoDispositivos.Models;
 using PrestamoDispositivos.Services.Abstractions;
 using PrestamoDispositivos.Services.Implementations;
-using Microsoft.AspNetCore.Builder;
-using AutoMapper;
-using AspNetCoreHero.ToastNotification;
-using AspNetCoreHero.ToastNotification.Extensions;
+using System;
+
 
 namespace PrestamoDispositivos
 {
@@ -21,8 +26,31 @@ namespace PrestamoDispositivos
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            //manejo de priv8ilegios
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+     .AddCookie(options =>
+     {
+         options.LoginPath = "/deviceManager/Login";
+         options.LogoutPath = "/deviceManager/Logout";
+         options.AccessDeniedPath = "/deviceManager/AccessDenied";
+     });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                
+                options.AddPolicy("DeviceManagerAdmin", policy => policy.RequireRole("DeviceManAdmin"));
+                options.AddPolicy("StudentOnly", policy => policy.RequireRole("Estudiante"));
+            });
+
             // Auto mapper
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+            ////Cookie settings
+            //builder.Services.ConfigureApplicationCookie(options =>
+            //{
+            //    options.LoginPath = "/Account/Login";
+            //    options.AccessDeniedPath = "/Account/Denied";
+            //});
 
             //toast notification
             builder.Services.AddNotyf(config =>
@@ -43,15 +71,23 @@ namespace PrestamoDispositivos
             //Services injection
 
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<IStudentStatusService, StudentStatusService>();
             builder.Services.AddScoped<IDeviceService, DeviceService>();
             builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
             builder.Services.AddScoped<ILoanService, LoanService>();
             builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
         }
 
+
+
         public static WebApplication WebAppCustomConfiguration(this WebApplication app)
         {
+               
             
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             //  Habilitar Notyf
             app.UseNotyf();
            

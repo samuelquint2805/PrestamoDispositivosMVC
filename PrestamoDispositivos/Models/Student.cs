@@ -1,17 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrestamoDispositivos.Models
 {
-    public class Student
+    public class Student 
     {
         #region Atributos
         [Key]
         public Guid IdEst { get; set; }
         [Required(ErrorMessage = "El campo de Nombre es requerido")]
         public string Nombre { get; set; }
-        [Required(ErrorMessage = "El campo de Usuario es requerido")]
-        public string Usuario { get; set; }
+        
         [Required(ErrorMessage = "El campo de Teléfono es requerido")]
         [MaxLength(50)]
         public string Telefono { get; set; }
@@ -19,17 +19,20 @@ namespace PrestamoDispositivos.Models
         public int Edad { get; set; }
         [Required(ErrorMessage = "El campo de Semestre Cursado es requerido")]
         public int semestreCursado { get; set; }
-        [Required(ErrorMessage = "El campo de Contraseña es requerido")]
-        public string Contraseña { get; set; }
+        
         [Required(ErrorMessage = "El campo de Correo Institucional es requerido")]
-        public string CorreoIns { get; set; }
-        [Required(ErrorMessage = "El campo de Carnet es requerido")]
+        
         public int Carnet { get; set; }
 
         #endregion
 
+
         // apartado para Relaciones con otras clases (tablas)
         #region Relaciones
+
+        // Relación con ApplicationUser (Identity)
+       
+
         //Relacion a uno con studenStatus
         [ForeignKey("EstadoEstudiante")]
         public ICollection<studentStatus> EstadoEst { get; set; }

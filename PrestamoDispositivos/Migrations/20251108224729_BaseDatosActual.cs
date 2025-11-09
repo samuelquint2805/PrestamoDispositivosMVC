@@ -5,7 +5,7 @@
 namespace PrestamoDispositivos.Migrations
 {
     /// <inheritdoc />
-    public partial class ActualizacionCamposEstudiante : Migration
+    public partial class BaseDatosActual : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

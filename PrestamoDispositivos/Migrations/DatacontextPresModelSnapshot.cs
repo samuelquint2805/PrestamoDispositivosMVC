@@ -28,7 +28,8 @@ namespace PrestamoDispositivos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Almacenamiento")
+                    b.Property<int?>("Almacenamiento")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("EstadoDisp")

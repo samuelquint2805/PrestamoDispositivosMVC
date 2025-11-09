@@ -12,8 +12,8 @@ using PrestamoDispositivos.DataContext.Sections;
 namespace PrestamoDispositivos.Migrations
 {
     [DbContext(typeof(DatacontextPres))]
-    [Migration("20251105003034_ActualizacionCamposEstudiante")]
-    partial class ActualizacionCamposEstudiante
+    [Migration("20251108224729_BaseDatosActual")]
+    partial class BaseDatosActual
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,8 @@ namespace PrestamoDispositivos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Almacenamiento")
+                    b.Property<int?>("Almacenamiento")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("EstadoDisp")

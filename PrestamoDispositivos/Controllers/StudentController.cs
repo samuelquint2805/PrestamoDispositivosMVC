@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
@@ -6,6 +7,7 @@ using PrestamoDispositivos.Services.Abstractions;
 
 namespace PrestamoDispositivos.Controllers
 {
+   // [Authorize(Policy = "Estudiante")]
     public class StudentController : Controller
     {
         private readonly IStudentService _StudentService;
