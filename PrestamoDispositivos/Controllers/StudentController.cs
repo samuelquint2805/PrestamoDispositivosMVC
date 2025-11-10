@@ -83,11 +83,6 @@ namespace PrestamoDispositivos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] StudentDTO dto)
         {
-            if (!ModelState.IsValid)
-            {
-                _notyfService.Error("Por favor, corrija los errores en el formulario.");
-                return View(dto);
-            }
             Response<StudentDTO> response = await _StudentService.UpdateStudentAsync(id, dto);
 
             if (!response.IsSuccess)

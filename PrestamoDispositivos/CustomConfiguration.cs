@@ -30,14 +30,15 @@ namespace PrestamoDispositivos
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
      .AddCookie(options =>
      {
-         options.LoginPath = "/deviceManager/Login";
-         options.LogoutPath = "/deviceManager/Logout";
-         options.AccessDeniedPath = "/deviceManager/AccessDenied";
+         options.LoginPath = "/Account/Login";
+         options.LogoutPath = "/Account/Logout";
+         options.AccessDeniedPath = "/Account/AccessDenied";
+         options.ExpireTimeSpan = TimeSpan.FromHours(8);
+         options.SlidingExpiration = true;
      });
 
             builder.Services.AddAuthorization(options =>
             {
-                
                 options.AddPolicy("DeviceManagerAdmin", policy => policy.RequireRole("DeviceManAdmin"));
                 options.AddPolicy("StudentOnly", policy => policy.RequireRole("Estudiante"));
             });
@@ -76,6 +77,8 @@ namespace PrestamoDispositivos
             builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
             builder.Services.AddScoped<ILoanService, LoanService>();
             builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
+            builder.Services.AddScoped<TwoFactorService>();
+            builder.Services.AddScoped<SmtpEmailSender>(); // Si no está registrado
         }
 
 

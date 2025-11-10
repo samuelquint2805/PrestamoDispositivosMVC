@@ -32,7 +32,7 @@ namespace PrestamoDispositivos.Models
 
         // Relación con ApplicationUser (Identity)
         [ForeignKey("User")]
-        public string? ApplicationUserId { get; set; }
+        public Guid? ApplicationUserId { get; set; }
         public ApplicationUser? User { get; set; }
 
         //Relacion a uno con studenStatus

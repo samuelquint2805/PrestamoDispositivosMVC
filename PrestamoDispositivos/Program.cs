@@ -59,12 +59,12 @@ using (var scope = app.Services.CreateScope())
     {
         var db = services.GetRequiredService<DatacontextPres>();
         // Crear usuario admin si no existe (simple seeder)
-        if (!db.Users.Any(u => u.Email == "admin@yeff.local"))
+        if (!db.Users.Any(u => u.Email == "admin24@yeff.local"))
         {
             var admin = new PrestamoDispositivos.Models.ApplicationUser
             {
-                UserName = "admin",
-                Email = "admin@yeff.local",
+                UserName = "admin3",
+                Email = "admin24@yeff.local",
                 Role = "DeviceManager",
                 LockoutEnabled = true
             };

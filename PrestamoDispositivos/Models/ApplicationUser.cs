@@ -8,7 +8,7 @@ namespace PrestamoDispositivos.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("User")]
-        public string? ApplicationUserId { get; set; }
+        public Guid? ApplicationUserId { get; set; }
         public ApplicationUser? User { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

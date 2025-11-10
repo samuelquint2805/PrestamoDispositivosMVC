@@ -21,6 +21,9 @@ namespace PrestamoDispositivos.Controllers
         private readonly DatacontextPres _context;
         private readonly TwoFactorService _twoFactor;
         private readonly INotyfService _notyf;
+        private static readonly string[] ValidRoles = { "Estudiante", "DeviceManAdmin" };
+      
+
 
         // configuración
         private const int MaxFailedAccessAttempts = 5;
@@ -35,6 +38,75 @@ namespace PrestamoDispositivos.Controllers
 
         [HttpGet]
         public IActionResult Register() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // 1️⃣ Verificar si el usuario o email ya existen
+            var existingUser = await _context.Users
+                .AnyAsync(u => u.UserName == model.UserName || u.Email == model.Email);
+
+            if (existingUser)
+            {
+                ModelState.AddModelError("", "El nombre de usuario o correo electrónico ya están en uso.");
+                return View(model);
+            }
+
+            // 2️⃣ Determinar rol basado en el email o criterio específico
+            string userRole = DetermineUserRole(model.Email);
+
+            // 3️⃣ Crear nuevo usuario
+            var newUser = new ApplicationUser
+            {
+                UserName = model.UserName,
+                Email = model.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = userRole,
+                LockoutEnabled = true, // ⚠️ Importante para seguridad
+                AccessFailedCount = 0,
+                TwoFactorEnabled = false, // Puede activarlo después
+               
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            _notyf.Success($"Registro exitoso como {userRole}. Ahora puedes iniciar sesión.");
+
+            return RedirectToAction(nameof(Login));
+        }
+
+        // 4️⃣ Método para determinar el rol
+        private string DetermineUserRole(string email)
+        {
+            // Opción 1: Por dominio de email
+            if (email.EndsWith("@admin.gmail.com", StringComparison.OrdinalIgnoreCase))
+                return "DeviceManager";
+
+            // Opción 2: Lista de emails administradores
+            var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "admin@ejemplo.com",
+        "supervisor@ejemplo.com"
+    };
+
+            if (adminEmails.Contains(email))
+                return "DeviceManager";
+
+            // Opción 3: Por defecto, todos son estudiantes
+            return "Student";
+        }
+
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            var model = new LoginViewModel { ReturnUrl = returnUrl };
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)

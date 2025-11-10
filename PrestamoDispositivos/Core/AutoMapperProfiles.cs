@@ -18,7 +18,9 @@ namespace PrestamoDispositivos.Core
             CreateMap<LoanEvent, LoanEventDTO>().ReverseMap();
             CreateMap<Student, StudentDTO>().ReverseMap();
             CreateMap<studentStatus, studentStatusDTO>().ReverseMap();
-        
+            CreateMap<Student, studentStatusDTO>().ReverseMap();
+
+
         }
     }
 }

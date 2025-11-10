@@ -23,33 +23,7 @@ namespace PrestamoDispositivos.Controllers
         public IActionResult Login() => View();
 
         [HttpPost]
-        //public async Task<IActionResult> Login(string username, string password)
-        //{
-        //    // Verifica en la base o en tu servicio
-            
-        ////    if ()
-        ////    {
-        ////        _notyfService.Error("Usuario o contraseña incorrectos.");
-        ////        return View();
-        ////    }
-
-        ////    // Creamos las claims del usuario
-        ////    var claims = new List<Claim>
-        ////{
-        ////    new Claim(ClaimTypes.Name, user.NombreUsuario),
-        ////    new Claim(ClaimTypes.Role, user.Rol ?? "DeviceManAdmin")
-        ////};
-
-        //    //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        //    //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-        //    //_notyfService.Success("Sesión iniciada correctamente.");
-        //    //return RedirectToAction("Index", "Home");
-        //}
-
-        // =====================
-        // 🔹 LOGOUT
-        // =====================
+        
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -159,11 +133,7 @@ namespace PrestamoDispositivos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] deviceManagerDTO dto)
         {
-            if (!ModelState.IsValid)
-            {
-                _notyfService.Error("Por favor, corrija los errores en el formulario.");
-                return View(dto);
-            }
+           
             Response <deviceManagerDTO> response = await _deviceManagerService.UpdateDeviceManagerAsync(id, dto);
 
             if (!response.IsSuccess)

@@ -7,16 +7,17 @@ namespace PrestamoDispositivos.DTO
     {
         public Guid IdEst { get; set; }
         public string Nombre { get; set; }
-        public string Usuario { get; set; }
         public string Telefono { get; set; }
         public int Edad { get; set; }
         public int semestreCursado { get; set; }
-        public string Contraseña { get; set; }
-        public string CorreoIns { get; set; }
         public int Carnet { get; set; }
 
 
         // Relación con studentStatus
+
+        public Guid? ApplicationUserId { get; set; }
+        public ApplicationUserDTO? User { get; set; }
+
         public ICollection<studentStatusDTO> EstadoEst { get; set; }
 
         // Relación con Prestamos
