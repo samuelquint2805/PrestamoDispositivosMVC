@@ -49,7 +49,7 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var StudentStaGT = await _context.EstadoEstudiantes
-                    .Include(x => x.Prestamos)
+                    // .Include(x => x.Prestamos)
                     .FirstOrDefaultAsync(x => x.IdStatus == Guid.Parse(id.ToString()));
 
                 if (StudentStaGT == null)
@@ -115,13 +115,13 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var StudentUP = await _context.EstadoEstudiantes
-                    .Include(x => x.Prestamos)
-                    .FirstOrDefaultAsync(x => x.IdStatus== Guid.Parse(id.ToString()));
+                    // .Include(x => x.Prestamos)
+                    .FirstOrDefaultAsync(x => x.IdStatus == Guid.Parse(id.ToString()));
 
                 if (StudentUP == null)
                     return new Response<studentStatusDTO>("estado del estudiante no encontrado");
 
-               
+
 
                 // Actualizar propiedades
 
@@ -147,29 +147,32 @@ namespace PrestamoDispositivos.Services.Implementations
         }
 
         // Eliminar Dispositivo
-        public async Task<Response<bool>> DeleteStudentStaAsync(Guid id)
+        public async Task<Response<bool>> DeleteStudentStatusAsync(Guid id)
         {
             try
             {
+                // Buscar el estado del estudiante por ID, incluyendo su relación con Student
                 var StudentStaDt = await _context.EstadoEstudiantes
-                   .Include(x => x.Prestamos)
-                   .FirstOrDefaultAsync(x => x.IdStatus == Guid.Parse(id.ToString()));
+                    .Include(x => x.Student)
+                    .FirstOrDefaultAsync(x => x.IdStatus == id);
 
+                // Validar si existe
                 if (StudentStaDt == null)
                     return new Response<bool>("Estado del estudiante no encontrado");
 
-                // Validar si tiene préstamos asociados
-                if (StudentStaDt.Prestamos != null && StudentStaDt.Prestamos.Any())
+                // Validar si está asociado a un estudiante
+                if (StudentStaDt.Student != null)
                 {
                     return new Response<bool>(
-                        "No se puede eliminar el estado del estudiante porque tiene algun estudiante asociado"
+                        "No se puede eliminar el estado del estudiante porque está asociado a un estudiante."
                     );
                 }
 
+                // Eliminar el registro
                 _context.EstadoEstudiantes.Remove(StudentStaDt);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "Estado del Estudiante eliminado correctamente");
+                return new Response<bool>(true, "Estado del estudiante eliminado correctamente.");
             }
             catch (Exception ex)
             {

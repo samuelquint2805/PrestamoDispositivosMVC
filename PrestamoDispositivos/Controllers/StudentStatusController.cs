@@ -110,7 +110,7 @@ namespace PrestamoDispositivos.Controllers
                 _notyfService.Error("Por favor, corrija los errores en el formulario.");
                 RedirectToAction(nameof(Index));
             }
-            Response<bool> response = await _StudentStatusService.DeleteStudentStaAsync(id);
+            Response<bool> response = await _StudentStatusService.DeleteStudentStatusAsync(id);
 
             if (!response.IsSuccess)
             {

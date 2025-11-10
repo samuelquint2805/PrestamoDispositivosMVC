@@ -1,0 +1,18 @@
+﻿@model PrestamoDispositivos.Models.ViewModels.LoginWith2faViewModel
+
+<h2>Autenticación en dos pasos</h2>
+
+<form asp-action="LoginWith2fa" method="post">
+    <div class="form-group">
+        <label asp-for="TwoFactorCode"></label>
+        <input asp-for="TwoFactorCode" class="form-control" autocomplete="one-time-code" />
+        <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+    </div>
+
+    <div class="form-check">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label">Recordarme</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Verificar</button>
+</form>

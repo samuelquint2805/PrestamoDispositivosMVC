@@ -10,11 +10,11 @@ namespace PrestamoDispositivos.Models
         [Key]
         public Guid IdEst { get; set; }
         [Required(ErrorMessage = "El campo de Nombre es requerido")]
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = String.Empty;
         
         [Required(ErrorMessage = "El campo de Teléfono es requerido")]
         [MaxLength(50)]
-        public string Telefono { get; set; }
+        public string? Telefono { get; set; }
         [Required(ErrorMessage = "El campo de Edad es requerido")]
         public int Edad { get; set; }
         [Required(ErrorMessage = "El campo de Semestre Cursado es requerido")]
@@ -31,12 +31,15 @@ namespace PrestamoDispositivos.Models
         #region Relaciones
 
         // Relación con ApplicationUser (Identity)
-       
+        [ForeignKey("User")]
+        public string? ApplicationUserId { get; set; }
+        public ApplicationUser? User { get; set; }
 
         //Relacion a uno con studenStatus
         [ForeignKey("EstadoEstudiante")]
-        public ICollection<studentStatus> EstadoEst { get; set; }
+        public studentStatus? EstadoEst { get; set; }
 
+       
         // Relación a uno con Prestamos
         [InverseProperty("Estudiante")]
         public ICollection<Loan> Prestamos { get; set; } = new List<Loan>();
