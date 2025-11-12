@@ -53,26 +53,63 @@
                             <li><a href="#">Reportes</a></li>
                         </ul>
                     </li>
+                    <li class="dropdown">
+                        <a href="#"><span>Ingresar</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                        <ul>
+                            <li><a asp-controller="Account" asp-action="Login">soy Estudiante...</a>
+
+                                </li>
+                            <li><a asp-controller="Account" asp-action="Login">soy Administrador...</a></li>
+                            
+                        </ul>
+                    </li>
                     <li><a href="#contact">Contacto</a></li>
                     <!-- ✅ NUEVO: Ícono de usuario con menú desplegable -->
-                    <li class="nav-item dropdown-login">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-person-circle" style="font-size: 1.4rem;"></i>
+
+                    <li class="nav-item dropdown-login position-relative">
+                        <a href="#" class="nav-link d-flex align-items-center" id="loginToggle">
+                            <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                            <span class="ms-1">Iniciar sesión</span>
                         </a>
-                        <div class="login-dropdown">
-                            <form method="post" action="/Account/Login">
-                                <div class="mb-2">
-                                    <label for="UserName">Usuario</label>
-                                    <input type="text" id="UserName" name="UserName" class="form-control" placeholder="Tu usuario" required>
+
+                        <!-- Dropdown de login -->
+                        <div class="login-dropdown shadow rounded-4 p-3 border-0 bg-white" id="loginDropdown">
+                            <form id="loginForm">
+                                @Html.AntiForgeryToken()
+
+                                <!-- Mensaje de error -->
+                                <div id="loginError" class="alert alert-danger alert-sm py-2 mb-2 d-none" role="alert">
+                                    <small></small>
                                 </div>
+
                                 <div class="mb-2">
-                                    <label for="Password">Contraseña</label>
-                                    <input type="password" id="Password" name="Password" class="form-control" placeholder="Tu contraseña" required>
+                                    <label for="Email" class="form-label fw-semibold small">Usuario o Email</label>
+                                    <input type="text" id="Email" name="Email" class="form-control form-control-sm"
+                                           placeholder="Tu usuario o email" required />
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
-                                <div class="login-links">
-                                    <a href="/Account/ForgotPassword">¿Olvidaste tu contraseña?</a><br>
-                                    <a href="/Account/Register">Registrarse</a>
+
+                                <div class="mb-2">
+                                    <label for="Password" class="form-label fw-semibold small">Contraseña</label>
+                                    <input type="password" id="Password" name="Password" class="form-control form-control-sm"
+                                           placeholder="Tu contraseña" required />
+                                </div>
+
+                                <div class="mb-2 form-check">
+                                    <input type="checkbox" id="RememberMe" name="RememberMe" class="form-check-input" />
+                                    <label for="RememberMe" class="form-check-label small">Recordarme</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-1 fw-semibold" id="loginBtn">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                                </button>
+
+                                <div class="login-links text-center mt-2 small">
+                                    <a asp-controller="Account" asp-action="ForgotPassword" class="text-decoration-none d-block">
+                                        ¿Olvidaste tu contraseña?
+                                    </a>
+                                    <a asp-controller="Account" asp-action="Register" class="text-decoration-none d-block text-primary">
+                                        Crear cuenta nueva
+                                    </a>
                                 </div>
                             </form>
                         </div>
@@ -234,6 +271,10 @@
                     text-decoration: underline;
                 }
     </style>
+
+    <!-- scripts -->
+    
+    <script src="~/js/LoginDropdown.js"></script>
 
 </body>
 </html>

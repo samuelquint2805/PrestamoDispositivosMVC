@@ -153,7 +153,7 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 // Buscar el estado del estudiante por ID, incluyendo su relación con Student
                 var StudentStaDt = await _context.EstadoEstudiantes
-                    .Include(x => x.Student)
+                    .Include(x => x.studentsStu)
                     .FirstOrDefaultAsync(x => x.IdStatus == id);
 
                 // Validar si existe
@@ -161,7 +161,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     return new Response<bool>("Estado del estudiante no encontrado");
 
                 // Validar si está asociado a un estudiante
-                if (StudentStaDt.Student != null)
+                if (StudentStaDt.studentsStu != null)
                 {
                     return new Response<bool>(
                         "No se puede eliminar el estado del estudiante porque está asociado a un estudiante."

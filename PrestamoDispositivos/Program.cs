@@ -37,16 +37,6 @@ builder.Services.AddScoped<TwoFactorService>();
 builder.Services.AddTransient<SmtpEmailSender>();
 
 // Configurar autenticación por cookie (autenticación manual)
-builder.Services.AddAuthentication("MiCookieAuth")
-    .AddCookie("MiCookieAuth", options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-        options.SlidingExpiration = true;
-        options.Cookie.HttpOnly = true;
-    });
-
 // si quieres usar TempData que depende de cookie-TempDataProvider no requiere configuración adicional
 
 var app = builder.Build();
@@ -55,28 +45,109 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
     try
     {
         var db = services.GetRequiredService<DatacontextPres>();
-        // Crear usuario admin si no existe (simple seeder)
-        if (!db.Users.Any(u => u.Email == "admin24@yeff.local"))
+
+        // Asegurar que la BD existe
+        db.Database.EnsureCreated();
+
+        logger.LogInformation("?? Ejecutando seeder de usuarios...");
+
+        // 1?? Crear Admin Principal
+        if (!db.Users.Any(u => u.Email == "admin@sistema.com"))
         {
             var admin = new PrestamoDispositivos.Models.ApplicationUser
             {
-                UserName = "admin3",
-                Email = "admin24@yeff.local",
-                Role = "DeviceManager",
-                LockoutEnabled = true
+                UserName = "admin",
+                Email = "admin@sistema.com",
+                Role = "DeviceManAdmin",
+                LockoutEnabled = true,
+                AccessFailedCount = 0,
+                TwoFactorEnabled = false,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!")
             };
-            admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+
             db.Users.Add(admin);
-            db.SaveChanges();
+            logger.LogInformation("? Usuario admin creado: admin@sistema.com / Admin123!");
         }
+
+        // 2?? Crear Admin Secundario (ejemplo con @admin.gmail.com)
+        if (!db.Users.Any(u => u.Email == "supervisor@admin.gmail.com"))
+        {
+            var supervisor = new PrestamoDispositivos.Models.ApplicationUser
+            {
+                UserName = "supervisor",
+                Email = "supervisor@admin.gmail.com",
+                Role = "DeviceManAdmin",
+                LockoutEnabled = true,
+                AccessFailedCount = 0,
+                TwoFactorEnabled = false,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Super123!")
+            };
+
+            db.Users.Add(supervisor);
+            logger.LogInformation("? Usuario supervisor creado: supervisor@admin.gmail.com / Super123!");
+        }
+
+        // 3?? Crear Estudiantes de Ejemplo
+        var estudiantesEjemplo = new[]
+        {
+            new { UserName = "juan.perez", Email = "juan.perez@estudiante.com", Password = "Juan123!" },
+            new { UserName = "maria.lopez", Email = "maria.lopez@estudiante.com", Password = "Maria123!" },
+            new { UserName = "carlos.ruiz", Email = "carlos.ruiz@estudiante.com", Password = "Carlos123!" }
+        };
+
+        foreach (var est in estudiantesEjemplo)
+        {
+            if (!db.Users.Any(u => u.Email == est.Email))
+            {
+                var estudiante = new PrestamoDispositivos.Models.ApplicationUser
+                {
+                    UserName = est.UserName,
+                    Email = est.Email,
+                    Role = "Estudiante",
+                    LockoutEnabled = true,
+                    AccessFailedCount = 0,
+                    TwoFactorEnabled = false,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(est.Password)
+                };
+
+                db.Users.Add(estudiante);
+                logger.LogInformation($"? Estudiante creado: {est.Email} / {est.Password}");
+            }
+        }
+
+        // Guardar cambios
+        int cambios = db.SaveChanges();
+
+        if (cambios > 0)
+        {
+            logger.LogInformation($"? Seeder completado: {cambios} usuarios creados.");
+        }
+        else
+        {
+            logger.LogInformation("?? No se crearon usuarios (ya existen en BD).");
+        }
+
+        // Mostrar resumen en consola
+        logger.LogInformation("========================================");
+        logger.LogInformation("?? USUARIOS DISPONIBLES:");
+        logger.LogInformation("========================================");
+        logger.LogInformation("?? ADMINISTRADORES:");
+        logger.LogInformation("   - admin@sistema.com / Admin123!");
+        logger.LogInformation("   - supervisor@admin.gmail.com / Super123!");
+        logger.LogInformation("????? ESTUDIANTES:");
+        logger.LogInformation("   - juan.perez@estudiante.com / Juan123!");
+        logger.LogInformation("   - maria.lopez@estudiante.com / Maria123!");
+        logger.LogInformation("   - carlos.ruiz@estudiante.com / Carlos123!");
+        logger.LogInformation("========================================");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Error en el seeder inicial.");
+        logger.LogError(ex, "? Error en el seeder inicial: {Message}", ex.Message);
     }
 }
 

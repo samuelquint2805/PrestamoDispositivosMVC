@@ -1,8 +1,8 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.Models;
@@ -21,13 +21,10 @@ namespace PrestamoDispositivos.Controllers
         private readonly DatacontextPres _context;
         private readonly TwoFactorService _twoFactor;
         private readonly INotyfService _notyf;
-        private static readonly string[] ValidRoles = { "Estudiante", "DeviceManAdmin" };
-      
 
-
-        // configuración
+        // Configuración
         private const int MaxFailedAccessAttempts = 5;
-        private static readonly TimeSpan DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        private static readonly TimeSpan DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
 
         public AccountController(DatacontextPres context, TwoFactorService twoFactor, INotyfService notyf)
         {
@@ -46,7 +43,7 @@ namespace PrestamoDispositivos.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // 1️⃣ Verificar si el usuario o email ya existen
+            // Verificar si el usuario o email ya existen
             var existingUser = await _context.Users
                 .AnyAsync(u => u.UserName == model.UserName || u.Email == model.Email);
 
@@ -56,49 +53,55 @@ namespace PrestamoDispositivos.Controllers
                 return View(model);
             }
 
-            // 2️⃣ Determinar rol basado en el email o criterio específico
+            // Determinar rol basado en el email
             string userRole = DetermineUserRole(model.Email);
 
-            // 3️⃣ Crear nuevo usuario
-            var newUser = new ApplicationUser
+            // Crear nuevo usuario
+            ApplicationUser newUser = new ApplicationUser
             {
                 UserName = model.UserName,
                 Email = model.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 Role = userRole,
-                LockoutEnabled = true, // ⚠️ Importante para seguridad
+                LockoutEnabled = true,
                 AccessFailedCount = 0,
-                TwoFactorEnabled = false, // Puede activarlo después
-               
+                TwoFactorEnabled = false,
             };
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            _notyf.Success($"Registro exitoso como {userRole}. Ahora puedes iniciar sesión.");
+            // ✅ INICIAR SESIÓN AUTOMÁTICAMENTE después del registro
+            await SignInUser(newUser, isPersistent: false);
 
-            return RedirectToAction(nameof(Login));
+            _notyf.Success($"¡Bienvenido, {newUser.UserName}! Tu cuenta como {userRole} ha sido creada.");
+
+            // Redireccionar según el rol
+            if (userRole == "DeviceManAdmin")
+                return RedirectToAction("Index", "DeviceManagers");
+
+            return RedirectToAction("Index", "Home");
         }
 
-        // 4️⃣ Método para determinar el rol
+        // Método para determinar el rol
         private string DetermineUserRole(string email)
         {
-            // Opción 1: Por dominio de email
+            // Por dominio de email
             if (email.EndsWith("@admin.gmail.com", StringComparison.OrdinalIgnoreCase))
-                return "DeviceManager";
+                return "DeviceManAdmin";
 
-            // Opción 2: Lista de emails administradores
+            // Lista de emails administradores
             var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-        "admin@ejemplo.com",
-        "supervisor@ejemplo.com"
-    };
+            {
+                "admin@ejemplo.com",
+                "supervisor@ejemplo.com"
+            };
 
             if (adminEmails.Contains(email))
-                return "DeviceManager";
+                return "DeviceManAdmin";
 
-            // Opción 3: Por defecto, todos son estudiantes
-            return "Student";
+            // Por defecto, todos son estudiantes
+            return "Estudiante";
         }
 
         [HttpGet]
@@ -109,16 +112,27 @@ namespace PrestamoDispositivos.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Datos inválidos." });
+                }
                 return View(model);
+            }
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.Email || u.UserName == model.Email);
 
             if (user == null)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Credenciales inválidas." });
+                }
                 ModelState.AddModelError("", "Credenciales inválidas.");
                 return View(model);
             }
@@ -126,6 +140,10 @@ namespace PrestamoDispositivos.Controllers
             // Verificar bloqueo
             if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Cuenta bloqueada. Intenta más tarde." });
+                }
                 return View("Lockout");
             }
 
@@ -139,10 +157,20 @@ namespace PrestamoDispositivos.Controllers
                     user.AccessFailedCount = 0;
                     await _context.SaveChangesAsync();
                     _notyf.Error("Cuenta bloqueada por intentos fallidos.");
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = false, message = "Cuenta bloqueada por intentos fallidos." });
+                    }
                     return View("Lockout");
                 }
 
                 await _context.SaveChangesAsync();
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Credenciales inválidas." });
+                }
                 ModelState.AddModelError("", "Credenciales inválidas.");
                 return View(model);
             }
@@ -158,24 +186,35 @@ namespace PrestamoDispositivos.Controllers
                 TempData["TwoFactorUserId"] = user.Id.ToString();
                 TempData["ReturnUrl"] = model.ReturnUrl ?? string.Empty;
                 TempData["RememberMe"] = model.RememberMe.ToString();
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, requires2FA = true, redirectUrl = Url.Action(nameof(LoginWith2fa)) });
+                }
                 return RedirectToAction(nameof(LoginWith2fa));
             }
 
-            //  Iniciar sesión normal
+            // Iniciar sesión normal
             await SignInUser(user, model.RememberMe);
 
-            // Redirección por rol
-            if (user.Role == "DeviceManager")
-                return RedirectToAction("Index", "DeviceManagers");
+            _notyf.Success($"¡Bienvenido, {user.UserName}!");
 
-            if (user.Role == "Student")
-                return RedirectToAction("Index", "Home");
+            // Determinar URL de redirección
+            string redirectUrl = "/";
+            if (user.Role == "DeviceManAdmin")
+                redirectUrl = Url.Action("Index", "DeviceManagers") ?? "/";
+            else if (user.Role == "Estudiante")
+                redirectUrl = Url.Action("Index", "Home") ?? "/";
+            else if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                redirectUrl = model.ReturnUrl;
 
-            // Redirección por ReturnUrl si existe
-            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                return Redirect(model.ReturnUrl);
+            // Responder según el tipo de solicitud
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, redirectUrl = redirectUrl });
+            }
 
-            return RedirectToAction("Index", "Home");
+            return Redirect(redirectUrl);
         }
 
         [HttpGet]
@@ -229,11 +268,11 @@ namespace PrestamoDispositivos.Controllers
             if (TempData.TryGetValue("ReturnUrl", out var ru))
                 returnUrl = ru as string ?? string.Empty;
 
-            // 🔐 Redirección por rol después de 2FA
-            if (user.Role == "DeviceManager")
+            // Redirección por rol después de 2FA
+            if (user.Role == "DeviceManAdmin")
                 return RedirectToAction("Index", "DeviceManagers");
 
-            if (user.Role == "Student")
+            if (user.Role == "Estudiante")
                 return RedirectToAction("Index", "Home");
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -248,10 +287,17 @@ namespace PrestamoDispositivos.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("MiCookieAuth");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             _notyf.Information("Sesión cerrada.");
             return RedirectToAction("Index", "Home");
         }
@@ -259,21 +305,24 @@ namespace PrestamoDispositivos.Controllers
         private async Task SignInUser(ApplicationUser user, bool isPersistent)
         {
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.UserName),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role ?? "Student"),
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-    };
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role ?? "Estudiante"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
 
-            var claimsIdentity = new ClaimsIdentity(claims, "MiCookieAuth");
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = isPersistent,
-                ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
+                ExpiresUtc = DateTime.UtcNow.AddHours(8)
             };
 
-            await HttpContext.SignInAsync("MiCookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
         }
-}
     }
+}

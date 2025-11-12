@@ -3,7 +3,6 @@ using AspNetCoreHero.ToastNotification.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.Models;
@@ -26,32 +25,36 @@ namespace PrestamoDispositivos
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            //manejo de priv8ilegios
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-     .AddCookie(options =>
-     {
-         options.LoginPath = "/Account/Login";
-         options.LogoutPath = "/Account/Logout";
-         options.AccessDeniedPath = "/Account/AccessDenied";
-         options.ExpireTimeSpan = TimeSpan.FromHours(8);
-         options.SlidingExpiration = true;
-     });
+          .AddCookie(options =>
+          {
+              options.LoginPath = "/Account/Login";
+              options.LogoutPath = "/Account/Logout";
+              options.AccessDeniedPath = "/Account/AccessDenied";
+              options.ExpireTimeSpan = TimeSpan.FromHours(1);
+              options.SlidingExpiration = true;
+              options.Cookie.Name = "PrestamoDispositivosAuth";
+              options.Cookie.HttpOnly = true;
+              options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+          });
 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("DeviceManagerAdmin", policy => policy.RequireRole("DeviceManAdmin"));
-                options.AddPolicy("StudentOnly", policy => policy.RequireRole("Estudiante"));
+                options.AddPolicy("DeviceManagerAdmin", policy =>
+                    policy.RequireRole("DeviceManAdmin"));
+
+                options.AddPolicy("StudentOnly", policy =>
+                    policy.RequireRole("Estudiante"));
+
+                // Policy adicional: Cualquier usuario autenticado
+                options.AddPolicy("AuthenticatedUser", policy =>
+                    policy.RequireAuthenticatedUser());
             });
 
             // Auto mapper
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-            ////Cookie settings
-            //builder.Services.ConfigureApplicationCookie(options =>
-            //{
-            //    options.LoginPath = "/Account/Login";
-            //    options.AccessDeniedPath = "/Account/Denied";
-            //});
+         
 
             //toast notification
             builder.Services.AddNotyf(config =>

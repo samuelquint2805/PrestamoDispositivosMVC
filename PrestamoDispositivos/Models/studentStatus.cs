@@ -17,7 +17,7 @@ namespace PrestamoDispositivos.Models
 
         //  Relación 1:1 con Student
         [ForeignKey("StudentId")]
-        public Student? Student { get; set; } 
+        public ICollection<Student> studentsStu { get; set; } 
     }
 }
 

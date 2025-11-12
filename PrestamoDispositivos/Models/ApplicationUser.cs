@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrestamoDispositivos.Models
@@ -6,6 +7,7 @@ namespace PrestamoDispositivos.Models
     // Clase de usuario para autenticación manual (no Identity)
     public class ApplicationUser
     {
+        [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("User")]
         public Guid? ApplicationUserId { get; set; }
@@ -18,7 +20,7 @@ namespace PrestamoDispositivos.Models
 
         // Rol (por simplicidad lo vamos a mantenr como propiedad)
         public string Role { get; set; } = "Student";
-
+        
         // 2FA
         public bool TwoFactorEnabled { get; set; } = false;
         public string? TwoFactorCode { get; set; }

@@ -13,12 +13,7 @@ namespace PrestamoDispositivos.DataContext.Sections
         {
             base.OnModelCreating(modelBuilder);
 
-            // Student <-> studentStatus (1:1) - FK in studentStatus.StudentId
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.EstadoEst)
-                .WithOne(ss => ss.Student)
-                .HasForeignKey<studentStatus>(ss => ss.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
+           
 
             // Student <-> Loan (1:1) - FK in Loan.IdEstudiante
             modelBuilder.Entity<Loan>()
