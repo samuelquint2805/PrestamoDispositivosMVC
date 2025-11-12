@@ -9,10 +9,9 @@ using PrestamoDispositivos.Models;
 using PrestamoDispositivos.Models.ViewModels;
 using PrestamoDispositivos.Services.Implementations;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using System.Threading.Tasks;
+
 
 namespace PrestamoDispositivos.Controllers
 {
@@ -78,7 +77,7 @@ namespace PrestamoDispositivos.Controllers
 
             // Redireccionar según el rol
             if (userRole == "DeviceManAdmin")
-                return RedirectToAction("Index", "DeviceManagers");
+                return RedirectToAction("Index", "Home");
 
             return RedirectToAction("Index", "Home");
         }
@@ -202,7 +201,7 @@ namespace PrestamoDispositivos.Controllers
             // Determinar URL de redirección
             string redirectUrl = "/";
             if (user.Role == "DeviceManAdmin")
-                redirectUrl = Url.Action("Index", "DeviceManagers") ?? "/";
+                redirectUrl = Url.Action("Index", "DeviceManager") ?? "/";
             else if (user.Role == "Estudiante")
                 redirectUrl = Url.Action("Index", "Home") ?? "/";
             else if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -323,6 +322,165 @@ namespace PrestamoDispositivos.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
+        }
+        // Agregar estos métodos a tu AccountController.cs
+
+        [Authorize] // Requiere estar autenticado
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.Users.FindAsync(userGuid);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ProfileViewModel
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = user.Role ?? "Estudiante",
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                LockoutEnabled = user.LockoutEnabled,
+                AccessFailedCount = user.AccessFailedCount
+            };
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Settings()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.Users.FindAsync(userGuid);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new SettingsViewModel
+            {
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                CurrentEmail = user.Email
+            };
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Datos inválidos.");
+                return RedirectToAction(nameof(Settings));
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.Users.FindAsync(userGuid);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Verificar contraseña actual
+            if (!BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash))
+            {
+                _notyf.Error("La contraseña actual es incorrecta.");
+                return RedirectToAction(nameof(Settings));
+            }
+
+            // Actualizar contraseña
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            await _context.SaveChangesAsync();
+
+            _notyf.Success("Contraseña actualizada correctamente.");
+            return RedirectToAction(nameof(Settings));
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Toggle2FA()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.Users.FindAsync(userGuid);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.TwoFactorEnabled = !user.TwoFactorEnabled;
+            await _context.SaveChangesAsync();
+
+            _notyf.Success($"Autenticación de dos factores {(user.TwoFactorEnabled ? "activada" : "desactivada")}.");
+            return RedirectToAction(nameof(Settings));
+        }
+
+        // ViewModels necesarios (agregar en tu carpeta Models/ViewModels/)
+
+        public class ProfileViewModel
+        {
+            public string UserName { get; set; } = string.Empty;
+            public string Email { get; set; } = string.Empty;
+            public string Role { get; set; } = string.Empty;
+            public bool TwoFactorEnabled { get; set; }
+            public bool LockoutEnabled { get; set; }
+            public int AccessFailedCount { get; set; }
+        }
+
+        public class SettingsViewModel
+        {
+            public bool TwoFactorEnabled { get; set; }
+            public string CurrentEmail { get; set; } = string.Empty;
+        }
+
+        public class ChangePasswordViewModel
+        {
+            [Required(ErrorMessage = "La contraseña actual es requerida")]
+            [DataType(DataType.Password)]
+            public string CurrentPassword { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "La nueva contraseña es requerida")]
+            [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
+            [DataType(DataType.Password)]
+            public string NewPassword { get; set; } = string.Empty;
+
+            [DataType(DataType.Password)]
+            [Compare("NewPassword", ErrorMessage = "Las contraseñas no coinciden")]
+            public string ConfirmPassword { get; set; } = string.Empty;
         }
     }
 }
