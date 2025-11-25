@@ -30,15 +30,12 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var StudentDTO = _mapper.Map<List<StudentDTO>>(StudentDV);
 
-                return new Response<List<StudentDTO>>(
-                    StudentDTO,
-                    "Estudiantes obtenidos correctamente"
-                );
+                return Response<List<StudentDTO>>.Success(StudentDTO, "Lista de Estudiantes obtenida correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<List<StudentDTO>>(
-                    "Error al obtener lista de Estudiantes",
+                return  Response<List<StudentDTO>>.Failure(
+                    "Error al obtener la lista de Estudiantes",
                     new List<string> { ex.Message }
                 );
             }
@@ -54,20 +51,16 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentGT == null)
-                    return new Response<StudentDTO>("Estudiante no encontrado");
+                    return Response<StudentDTO>.Failure("Estudiante no encontrado");
 
                 var StudentDto = _mapper.Map<StudentDTO>(StudentGT);
 
-                return new Response<StudentDTO>(
-                    StudentDto,
-                    "Estudiante encontrado correctamente"
-                );
+                return Response<StudentDTO>.Success(StudentDto, "Estudiante obtenido correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<StudentDTO>(
-                    "Error al obtener el Estudiante",
-                    new List<string> { ex.Message }
+                return Response<StudentDTO>.Failure(
+                    "Error al obtener el Estudiante"
                 );
             }
         }
@@ -83,7 +76,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEst ==StudentDto.IdEst);
 
                 if (existingUser != null)
-                    return new Response<StudentDTO>("El Estudiante ya existe");
+                    return  Response<StudentDTO>.Failure("El Estudiante ya existe");
 
                 // Mapear DTO a modelo
                 var students = _mapper.Map<Student>(StudentDto);
@@ -96,16 +89,15 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Mapear resultado
                 var resultDto = _mapper.Map<StudentDTO>(students);
 
-                return new Response<StudentDTO>(
+                return Response<StudentDTO>.Success(
                     resultDto,
                     "Estudiante creado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<StudentDTO>(
-                    "Error al crear el Estudiante",
-                    new List<string> { ex.Message }
+                return  Response<StudentDTO>.Failure(
+                    "Error al crear el Estudiante"
                 );
             }
         }
@@ -120,7 +112,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentUP == null)
-                    return new Response<StudentDTO>("Estudiante no encontrado");
+                    return Response<StudentDTO>.Failure("Estudiante no encontrado");
 
 
                 // Actualizar propiedades
@@ -132,16 +124,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var resultDto = _mapper.Map<StudentDTO>(StudentUP);
 
-                return new Response<StudentDTO>(
+                return Response<StudentDTO>.Success(
                     resultDto,
                     "Estudiante actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<StudentDTO>(
-                    "Error al actualizar el Estudiante",
-                    new List<string> { ex.Message }
+                return Response<StudentDTO>.Failure(
+                    "Error al actualizar el Estudiante"
                 );
             }
         }
@@ -156,12 +147,12 @@ namespace PrestamoDispositivos.Services.Implementations
                    .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentDt == null)
-                    return new Response<bool>("Estudiante no encontrado");
+                    return Response<bool>.Failure("Estudiante no encontrado");
 
                 // Validar si tiene préstamos asociados
                 if (StudentDt.Prestamos != null && StudentDt.Prestamos.Any())
                 {
-                    return new Response<bool>(
+                    return  Response<bool>.Failure(
                         "No se puede eliminar el Estudiante porque tiene préstamos asociados"
                     );
                 }
@@ -169,11 +160,11 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.Estudiante.Remove(StudentDt);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "Estudiante eliminado correctamente");
+                return Response<bool>.Success(true, "Estudiante eliminado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
+                return  Response<bool>.Failure(
                     "Error al eliminar el Estudiante",
                     new List<string> { ex.Message }
                 );

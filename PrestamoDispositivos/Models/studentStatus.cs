@@ -13,10 +13,10 @@ namespace PrestamoDispositivos.Models
         public string EstEstu { get; set; } = string.Empty;
 
         //  Clave foránea hacia Student
-        public Guid StudentId { get; set; }
+        
 
         //  Relación 1:1 con Student
-        [ForeignKey("StudentId")]
+        
         public ICollection<Student> studentsStu { get; set; } 
     }
 }

@@ -30,16 +30,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var LoanEventoGTDTO = _mapper.Map<List<LoanEventDTO>>(LoanEventoGT);
 
-                return new Response<List<LoanEventDTO>>(
+                return  Response<List<LoanEventDTO>>.Success(
                     LoanEventoGTDTO,
                     "Eventos del prestamo obtenidos correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<List<LoanEventDTO>>(
-                    "Error al obtener lista de eventos del prestamos",
-                    new List<string> { ex.Message }
+                return  Response<List<LoanEventDTO>>.Failure(
+                    "Error al obtener lista de eventos del prestamos"
                 );
             }
         }
@@ -54,20 +53,19 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEvento == Guid.Parse(id.ToString()));
 
                 if (LoanEventGT == null)
-                    return new Response<LoanEventDTO>("el evento del prestamo no ha sido encontrado, probablemente no existe");
+                    return  Response<LoanEventDTO>.Failure("el evento del prestamo no ha sido encontrado, probablemente no existe");
 
                 var LoanEventoGTDTO = _mapper.Map<LoanEventDTO>(LoanEventGT);
 
-                return new Response<LoanEventDTO>(
+                return  Response<LoanEventDTO>.Success(
                     LoanEventoGTDTO,
                     "evento del prestamo encontrado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<LoanEventDTO>(
-                    "Error al obtener el evento del prestamo ",
-                    new List<string> { ex.Message }
+                return  Response<LoanEventDTO>.Failure(
+                    "Error al obtener el evento del prestamo "
                 );
             }
         }
@@ -84,7 +82,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEvento== LoanEvenDto.IdEvento);
 
                 if (existingLoanEvent != null)
-                    return new Response<LoanEventDTO>("El Evento del prestamo ya existe");
+                    return  Response<LoanEventDTO>.Failure("El Evento del prestamo ya existe");
 
                 // Mapear DTO a modelo
                 var LoanEvent= _mapper.Map<LoanEvent>(LoanEvenDto);
@@ -97,16 +95,15 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Mapear resultado
                 var resultDto = _mapper.Map<LoanEventDTO>(LoanEvenDto);
 
-                return new Response<LoanEventDTO>(
+                return  Response<LoanEventDTO>.Success(
                     resultDto,
                     "Evento del prestamo creado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<LoanEventDTO>(
-                    "Error al crear evento del prestamo",
-                    new List<string> { ex.Message }
+                return  Response<LoanEventDTO>.Failure(
+                    "Error al crear evento del prestamo"
                 );
             }
         }
@@ -121,7 +118,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEvento== Guid.Parse(id.ToString()));
 
                 if (LoanEventUP == null)
-                    return new Response<LoanEventDTO>("Evento del prestamo no encontrado");
+                    return  Response<LoanEventDTO>.Failure("Evento del prestamo no encontrado");
 
 
                 // Actualizar propiedades
@@ -133,16 +130,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var resultDto = _mapper.Map<LoanEventDTO>(LoanEventUP);
 
-                return new Response<LoanEventDTO>(
+                return  Response<LoanEventDTO>.Success(
                     resultDto,
                     "El evento del prestamo ha sido actualizado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<LoanEventDTO>(
-                    "Error al actualizar el evento del prestamo",
-                    new List<string> { ex.Message }
+                return  Response<LoanEventDTO>.Failure(
+                    "Error al actualizar el evento del prestamo"
                 );
             }
         }
@@ -158,12 +154,12 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdEvento== Guid.Parse(id.ToString()));
 
                 if (LoanEventDL== null)
-                    return new Response<bool>("Evento del prestamo no encontrado");
+                    return  Response<bool>.Failure("Evento del prestamo no encontrado");
 
                 // Validar si tiene préstamos asociados
                 if (LoanEventDL.EventosPrestamos != null && LoanEventDL.EventosPrestamos.Any())
                 {
-                    return new Response<bool>(
+                    return  Response<bool>.Failure(
                         "No se puede eliminar el evento del prestamo porque tiene préstamos asociados"
                     );
                 }
@@ -171,13 +167,12 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.EventoPrestamos.Remove(LoanEventDL);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "El evento del prestamo ha sido eliminado correctamente");
+                return  Response<bool>.Success(true, "El evento del prestamo ha sido eliminado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
-                    "Error al eliminar el evento del prestamo",
-                    new List<string> { ex.Message }
+                return  Response<bool>.Failure(
+                    "Error al eliminar el evento del prestamo"
                 );
             }
         }

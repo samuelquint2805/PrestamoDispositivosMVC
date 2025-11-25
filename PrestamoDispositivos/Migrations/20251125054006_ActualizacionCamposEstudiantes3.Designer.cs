@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PrestamoDispositivos.DataContext.Sections;
 
@@ -11,9 +12,11 @@ using PrestamoDispositivos.DataContext.Sections;
 namespace PrestamoDispositivos.Migrations
 {
     [DbContext(typeof(DatacontextPres))]
-    partial class DatacontextPresModelSnapshot : ModelSnapshot
+    [Migration("20251125054006_ActualizacionCamposEstudiantes3")]
+    partial class ActualizacionCamposEstudiantes3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,9 +206,6 @@ namespace PrestamoDispositivos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Contraseña")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -219,8 +219,6 @@ namespace PrestamoDispositivos.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdAdmin");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("AdminDisp");
                 });
@@ -296,15 +294,6 @@ namespace PrestamoDispositivos.Migrations
                         .HasForeignKey("EstadoEstId");
 
                     b.Navigation("EstadoEst");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PrestamoDispositivos.Models.deviceManager", b =>
-                {
-                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
 
                     b.Navigation("User");
                 });

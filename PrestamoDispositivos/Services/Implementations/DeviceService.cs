@@ -34,16 +34,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var deviceDTO = _mapper.Map<List<deviceDTO>>(devicesDV);
                 Console.WriteLine($"DTO convertido: {(deviceDTO == null ? "NULO" : deviceDTO.Count.ToString())}");
-                return new Response<List<deviceDTO>>(
+                return  Response<List<deviceDTO>>.Success(
                     deviceDTO,
                     "Dispositivos obtenidos correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<List<deviceDTO>>(
-                    "Error al obtener lista de dispositivos",
-                    new List<string> { ex.Message }
+                return  Response<List<deviceDTO>>.Failure(
+                    "Error al obtener lista de dispositivos"
                 );
             }
         }
@@ -58,20 +57,19 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdDisp == Guid.Parse(id.ToString()));
 
                 if (devices == null)
-                    return new Response<deviceDTO>("Dispositivo no encontrado");
+                    return  Response<deviceDTO>.Failure("Dispositivo no encontrado");
 
                 var devicesDto = _mapper.Map<deviceDTO>(devices);
 
-                return new Response<deviceDTO>(
+                return  Response<deviceDTO>.Success(
                     devicesDto,
                     "Dispositivo encontrado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<deviceDTO>(
-                    "Error al obtener el Dispositivo",
-                    new List<string> { ex.Message }
+                return  Response<deviceDTO>.Failure(
+                    "Error al obtener el Dispositivo"
                 );
             }
         }
@@ -87,7 +85,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdDisp == devicDto.IdDisp);
 
                 if (existingUser != null)
-                    return new Response<deviceDTO>("El Dispositivo ya existe");
+                    return  Response<deviceDTO>.Failure("El Dispositivo ya existe");
 
                 // Mapear DTO a modelo
                 var devices = _mapper.Map<Device>(devicDto);
@@ -100,16 +98,15 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Mapear resultado
                 var resultDto = _mapper.Map<deviceDTO>(devices);
 
-                return new Response<deviceDTO>(
+                return  Response<deviceDTO>.Success(
                     resultDto,
                     "Dispositivo creado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<deviceDTO>(
-                    "Error al crear el Dispositivo",
-                    new List<string> { ex.Message }
+                return  Response<deviceDTO>.Failure(
+                    "Error al crear el Dispositivo"
                 );
             }
         }
@@ -124,7 +121,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdDisp == Guid.Parse(id.ToString()));
 
                 if (devic == null)
-                    return new Response<deviceDTO>("Dispositivo no encontrado");
+                    return  Response<deviceDTO>.Failure("Dispositivo no encontrado");
 
                 
 
@@ -137,16 +134,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var resultDto = _mapper.Map<deviceDTO>(devic);
 
-                return new Response<deviceDTO>(
+                return  Response<deviceDTO>.Success(
                     resultDto,
                     "Dispositivo actualizado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<deviceDTO>(
-                    "Error al actualizar el Dispositivo",
-                    new List<string> { ex.Message }
+                return  Response<deviceDTO>.Failure(
+                    "Error al actualizar el Dispositivo"
                 );
             }
         }
@@ -161,12 +157,12 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdDisp== Guid.Parse(id.ToString()));
 
                 if (devic == null)
-                    return new Response<bool>("Dispositivo no encontrado");
+                    return  Response<bool>.Failure("Dispositivo no encontrado");
 
                 // Validar si tiene préstamos asociados
                 if (devic.Prestamos != null && devic.Prestamos.Any())
                 {
-                    return new Response<bool>(
+                    return  Response<bool>.Failure(
                         "No se puede eliminar el Dispositivo porque tiene préstamos asociados"
                     );
                 }
@@ -174,13 +170,12 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.Dispositivos.Remove(devic);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "Dispositivo eliminado correctamente");
+                return  Response<bool>.Success(true, "Dispositivo eliminado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
-                    "Error al eliminar el dispositivo",
-                    new List<string> { ex.Message }
+                return  Response<bool>.Failure(
+                    "Error al eliminar el dispositivo"
                 );
             }
         }

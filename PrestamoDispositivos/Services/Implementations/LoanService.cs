@@ -31,12 +31,12 @@ namespace PrestamoDispositivos.Services.Implementations
                 await _context.SaveChangesAsync();
 
 
-                return new Response<LoanDTO>(dto, " Préstamo creado correctamente");
+                return  Response<LoanDTO>.Success(dto, " Préstamo creado correctamente");
               
             }
             catch (Exception ex)
             {
-                return new Response<LoanDTO>(" Error al crear el préstamo", new List<string> { ex.Message });
+                return  Response<LoanDTO>.Failure(" Error al crear el préstamo");
             }
         }
 
@@ -47,7 +47,7 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 var loan = await _context.Prestamos.FirstOrDefaultAsync(x => x.IdPrestamos == id);
                 if (loan == null)
-                    return new Response<LoanDTO>(" Préstamo no encontrado");
+                    return  Response<LoanDTO>.Failure(" Préstamo no encontrado");
 
                 loan.IdEstudiante = dto.IdEstudiante;
                 loan.IdDispo = dto.IdDispo;
@@ -57,11 +57,11 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.Prestamos.Update(loan);
                 await _context.SaveChangesAsync();
 
-                return new Response<LoanDTO>(dto, " Préstamo actualizado correctamente");
+                return  Response<LoanDTO>.Success(dto, " Préstamo actualizado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<LoanDTO>(" Error al actualizar el préstamo", new List<string> { ex.Message });
+                return Response<LoanDTO>.Failure(" Error al actualizar el préstamo");
             }
         }
 
@@ -72,16 +72,16 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 var loan = await _context.Prestamos.FindAsync(id);
                 if (loan == null)
-                    return new Response<bool>(" Préstamo no encontrado");
+                    return  Response<bool>.Failure(" Préstamo no encontrado");
 
                 _context.Prestamos.Remove(loan);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, " Préstamo eliminado correctamente");
+                return  Response<bool>.Success(true, " Préstamo eliminado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<bool>(" Error al eliminar el préstamo", new List<string> { ex.Message });
+                return  Response<bool>.Failure(" Error al eliminar el préstamo");
             }
         }
 
@@ -103,16 +103,16 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdPrestamos == id);
 
                 if (loan == null)
-                    return new Response<LoanDTO>(" Préstamo no encontrado");
+                    return  Response<LoanDTO>.Failure(" Préstamo no encontrado");
 
               
                     var loanDto = _mapper.Map<LoanDTO>(loan);
 
-                return new Response<LoanDTO>(loanDto, "Préstamo encontrado correctamente");
+                return  Response<LoanDTO>.Success(loanDto, "Préstamo encontrado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<LoanDTO>(" Error al obtener el préstamo", new List<string> { ex.Message });
+                return  Response<LoanDTO>.Failure(" Error al obtener el préstamo");
             }
         }
 
@@ -124,11 +124,11 @@ namespace PrestamoDispositivos.Services.Implementations
                 List<Loan> loans =await _context.Prestamos.ToListAsync();
                 List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
 
-                return new Response<List<LoanDTO>>(dtoList, " Lista de préstamos obtenida correctamente");
+                return  Response<List<LoanDTO>>.Success(dtoList, " Lista de préstamos obtenida correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<List<LoanDTO>>("Error al obtener los préstamos", new List<string> { ex.Message });
+                return  Response<List<LoanDTO>>.Failure("Error al obtener los préstamos");
             }
         }
 
@@ -139,16 +139,16 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 var loan = await _context.Prestamos.FindAsync(dto.LoanId);
                 if (loan == null)
-                    return new Response<object>(" Préstamo no encontrado");
+                    return  Response<object>.Failure(" Préstamo no encontrado");
 
                 loan.IdEvento = dto.NewStatus;
                 await _context.SaveChangesAsync();
 
-                return new Response<object>(true, " Estado del préstamo actualizado correctamente");
+                return  Response<object>.Success(true, " Estado del préstamo actualizado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<object>("Error al cambiar el estado del préstamo", new List<string> { ex.Message });
+                return  Response<object>.Failure("Error al cambiar el estado del préstamo");
             }
         }
     }

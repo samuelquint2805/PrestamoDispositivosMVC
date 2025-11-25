@@ -31,16 +31,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var managersDto = _mapper.Map<List<deviceManagerDTO>>(managers);
 
-                return new Response<List<deviceManagerDTO>>(
+                return  Response<List<deviceManagerDTO>>.Success(
                     managersDto,
                     "Administradores obtenidos correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return new Response<List<deviceManagerDTO>>(
-                    "Error al obtener los administradores",
-                    new List<string> { ex.Message }
+                return  Response<List<deviceManagerDTO>>.Failure(
+                    "Error al obtener los administradores"
                 );
             }
         }
@@ -55,20 +54,19 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdAdmin == Guid.Parse(id.ToString()));
 
                 if (manager == null)
-                    return new Response<deviceManagerDTO>("Administrador no encontrado");
+                    return  Response<deviceManagerDTO>.Failure("Administrador no encontrado");
 
                 var managerDto = _mapper.Map<deviceManagerDTO>(manager);
 
-                return new Response<deviceManagerDTO>(
+                return  Response<deviceManagerDTO>.Success(
                     managerDto,
                     "Administrador encontrado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return new Response<deviceManagerDTO>(
-                    "Error al obtener el administrador",
-                    new List<string> { ex.Message }
+                return  Response<deviceManagerDTO>.Failure(
+                    "Error al obtener el administrador"
                 );
             }
         }
@@ -85,7 +83,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdAdmin == devicManDto.IdAdmin);
 
                 if (existingUser != null)
-                    return new Response<deviceManagerDTO>("El usuario ya existe");
+                    return  Response<deviceManagerDTO>.Failure("El usuario ya existe");
 
                 // Mapear DTO a modelo
                 var manager = _mapper.Map<deviceManager>(devicManDto);
@@ -98,16 +96,15 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Mapear resultado
                 var resultDto = _mapper.Map<deviceManagerDTO>(manager);
 
-                return new Response<deviceManagerDTO>(
+                return  Response<deviceManagerDTO>.Success(
                     resultDto,
                     "Administrador creado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<deviceManagerDTO>(
-                    "Error al crear el administrador",
-                    new List<string> { ex.Message }
+                return  Response<deviceManagerDTO>.Failure(
+                    "Error al crear el administrador"
                 );
             }
         }
@@ -121,7 +118,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdAdmin == Guid.Parse(id.ToString()));
 
                 if (manager == null)
-                    return new Response<deviceManagerDTO>("Administrador no encontrado");
+                    return  Response<deviceManagerDTO>.Failure("Administrador no encontrado");
 
                
 
@@ -138,16 +135,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var resultDto = _mapper.Map<deviceManagerDTO>(manager);
 
-                return new Response<deviceManagerDTO>(
+                return  Response<deviceManagerDTO>.Success(
                     resultDto,
                     "Administrador actualizado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<deviceManagerDTO>(
-                    "Error al actualizar el administrador",
-                    new List<string> { ex.Message }
+                return  Response<deviceManagerDTO>.Failure(
+                    "Error al actualizar el administrador"
                 );
             }
         }
@@ -162,12 +158,12 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdAdmin == Guid.Parse(id.ToString()));
 
                 if (manager == null)
-                    return new Response<bool>("Administrador no encontrado");
+                    return  Response<bool>.Failure("Administrador no encontrado");
 
                 // Validar si tiene préstamos asociados
                 if (manager.Loans != null && manager.Loans.Any())
                 {
-                    return new Response<bool>(
+                    return  Response<bool>.Failure(
                         "No se puede eliminar el administrador porque tiene préstamos asociados"
                     );
                 }
@@ -175,13 +171,12 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.AdminDisp.Remove(manager);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "Administrador eliminado correctamente");
+                return  Response<bool>.Success(true, "Administrador eliminado correctamente");
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
-                    "Error al eliminar el administrador",
-                    new List<string> { ex.Message }
+                return  Response<bool>.Failure(
+                    "Error al eliminar el administrador"
                 );
             }
         }

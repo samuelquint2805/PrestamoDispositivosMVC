@@ -41,8 +41,9 @@ namespace PrestamoDispositivos.Controllers
         }
 
 
-        // GET: DeviceController/Create
+        
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] StudentDTO dto)
         {
             if (!ModelState.IsValid)

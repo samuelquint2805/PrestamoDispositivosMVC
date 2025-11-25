@@ -33,16 +33,15 @@ namespace PrestamoDispositivos.Services
                 await _context.SaveChangesAsync();
 
                 //entity.ID = id;
-                return new Response<TDTO>(
+                return  Response<TDTO>.Success(
                     tDto,
                     "Registro creado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<TDTO>(
-                    "Error al crear el registro",
-                    new List<string> { ex.Message }
+                return  Response<TDTO>.Failure(
+                    "Error al crear el registro"
                 );
             }
         }
@@ -59,16 +58,15 @@ namespace PrestamoDispositivos.Services
 
                 TDTO resultDto = _mapper.Map<TDTO>(entity);
 
-                return new Response<TDTO>(
+                return  Response<TDTO>.Success(
                     resultDto,
                     "Registro actualizado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<TDTO>(
-                    "Error al actualizar el Registro",
-                    new List<string> { ex.Message }
+                return  Response<TDTO>.Failure(
+                    "Error al actualizar el Registro"
                 );
             }
         }
@@ -82,23 +80,20 @@ namespace PrestamoDispositivos.Services
 
                 if(entity == null)
                     {
-                    return new Response<object>(
-                        "Error al eliminar el registro",
-                        new List<string> { "Registro no encontrado" }
+                    return  Response<object>.Failure(
+                        "Error al eliminar el registro"
                     );
                 }
                 _context.Remove(entity);
                 await _context.SaveChangesAsync();
-                return new Response<object>(
-                    null,
+                return  Response<object>.Success(
                     "Registro eliminado correctamente"
                 );
             }
             catch (Exception ex)
             {
-                return new Response<object>(
-                    "Error al eliminar el registro",
-                    new List<string> { ex.Message }
+                return  Response<object>.Failure(
+                    "Error al eliminar el registro"
                 );
 
             }
@@ -112,14 +107,13 @@ namespace PrestamoDispositivos.Services
 
                 if (entity == null)
                 {
-                    return new Response<TDTO>(
-                        "Error al obtener el registro o no existe",
-                        new List<string> { "Registro no encontrado" }
+                    return  Response<TDTO>.Failure(
+                        "Error al obtener el registro o no existe"
                     );
                 }
 
                 TDTO resultDto = _mapper.Map<TDTO>(entity);
-                return new Response<TDTO>(
+                return  Response<TDTO>.Success(
                     resultDto,
                     "Registro obtenido correctamente"
                 );
@@ -127,9 +121,8 @@ namespace PrestamoDispositivos.Services
             catch (Exception ex)
             {
 
-               return new Response<TDTO>(
-                    "Error al obtener el registro",
-                    new List<string> { ex.Message }
+               return  Response<TDTO>.Failure(
+                    "Error al obtener el registro"
                 );
             }
         }
@@ -146,14 +139,13 @@ namespace PrestamoDispositivos.Services
 
                 if (entity == null)
                 {
-                    return new Response<TDTO>(
-                        "Error al obtener el obtener lista o no existe",
-                        new List<string> { "Registro no encontrado" }
+                    return  Response<TDTO>.Failure(
+                        "Error al obtener el obtener lista o no existe"
                     );
                 }
 
                 TDTO resultDto = _mapper.Map<TDTO>(entity);
-                return new Response<TDTO>(
+                return  Response<TDTO>.Success(
                     resultDto,
                     "Registro obtenido correctamente"
                 );
@@ -161,9 +153,8 @@ namespace PrestamoDispositivos.Services
             catch (Exception ex)
             {
 
-                return new Response<TDTO>(
-                     "Error al obtener el registro",
-                     new List<string> { ex.Message }
+                return  Response<TDTO>.Success(
+                     "Error al obtener el registro"
                  );
             }
         }

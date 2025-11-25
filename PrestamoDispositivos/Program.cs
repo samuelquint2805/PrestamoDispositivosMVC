@@ -163,12 +163,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Autenticación (cookie)
-app.UseAuthentication();
-app.UseAuthorization();
-
-//  Habilitar Notyf
-app.UseNotyf();
 
 app.MapControllerRoute(
     name: "default",

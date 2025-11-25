@@ -27,6 +27,11 @@ namespace PrestamoDispositivos.Models
         // Relación a muchos con Prestamos
         
         public ICollection<Loan> Loans { get; set; } = new List<Loan>();
+
+        //Relacion a uno con ApplicationUser (Identity)
+        [ForeignKey("User")]
+        public Guid? ApplicationUserId { get; set; }
+        public ApplicationUser? User { get; set; }
         #endregion
     }
 }

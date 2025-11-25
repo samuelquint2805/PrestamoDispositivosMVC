@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PrestamoDispositivos.DataContext.Sections;
 
@@ -11,9 +12,11 @@ using PrestamoDispositivos.DataContext.Sections;
 namespace PrestamoDispositivos.Migrations
 {
     [DbContext(typeof(DatacontextPres))]
-    partial class DatacontextPresModelSnapshot : ModelSnapshot
+    [Migration("20251125053138_ActualizacionCamposEstudiantes")]
+    partial class ActualizacionCamposEstudiantes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,6 +181,9 @@ namespace PrestamoDispositivos.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Telefono")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -192,7 +198,7 @@ namespace PrestamoDispositivos.Migrations
                         .IsUnique()
                         .HasFilter("[ApplicationUserId] IS NOT NULL");
 
-                    b.HasIndex("EstadoEstId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Estudiante");
                 });
@@ -201,9 +207,6 @@ namespace PrestamoDispositivos.Migrations
                 {
                     b.Property<Guid>("IdAdmin")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ApplicationUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Contraseña")
@@ -220,8 +223,6 @@ namespace PrestamoDispositivos.Migrations
 
                     b.HasKey("IdAdmin");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.ToTable("AdminDisp");
                 });
 
@@ -234,6 +235,9 @@ namespace PrestamoDispositivos.Migrations
                     b.Property<string>("EstEstu")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("IdStatus");
 
@@ -293,18 +297,9 @@ namespace PrestamoDispositivos.Migrations
 
                     b.HasOne("PrestamoDispositivos.Models.studentStatus", "EstadoEst")
                         .WithMany("studentsStu")
-                        .HasForeignKey("EstadoEstId");
+                        .HasForeignKey("StudentId");
 
                     b.Navigation("EstadoEst");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PrestamoDispositivos.Models.deviceManager", b =>
-                {
-                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
 
                     b.Navigation("User");
                 });

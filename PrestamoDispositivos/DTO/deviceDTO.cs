@@ -1,4 +1,4 @@
-﻿using PrestamoDispositivos.Models;
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace PrestamoDispositivos.DTO

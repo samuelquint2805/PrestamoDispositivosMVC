@@ -7,23 +7,47 @@
         public List<string> Errors { get; set; } = new();
         public T? Result { get; set; }
 
-        
-        public Response() { }
 
-        // Constructor para respuestas exitosas
-        public Response(T result, string message = "Operación exitosa")
+        public static Response<T> Failure(Exception ex, string message = "Ha ocurrido un error al generar al solicitud")
         {
-            IsSuccess = true;
-            Message = message;
-            Result = result;
+            return new Response<T>
+            {
+                IsSuccess = false,
+                Message = message,
+                Errors = new List<string>
+                {
+                    ex.Message,
+                }
+            };
         }
 
-        // Constructor para respuestas de error
-        public Response(string message, List<string>? errors = null)
+        public static Response<T> Failure(string message, List<string> errors = null)
         {
-            IsSuccess = false;
-            Message = message;
-            Errors = errors ?? new List<string>();
+            return new Response<T>
+            {
+                IsSuccess = false,
+                Message = message,
+                Errors = errors
+            };
+        }
+
+        public static Response<T> Success(T result, string message = "Tarea realizada con éxito")
+        {
+            return new Response<T>
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = result,
+            };
+        }
+
+        public static Response<T> Success(string message = "Tarea realizada con éxito")
+        {
+            return new Response<T>
+            {
+                IsSuccess = true,
+                Message = message,
+            };
         }
     }
 }

@@ -10,6 +10,7 @@ namespace PrestamoDispositivos.Controllers
     //[Authorize]
     //[ApiController]
     //[Route("api/[controller]")]
+
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;

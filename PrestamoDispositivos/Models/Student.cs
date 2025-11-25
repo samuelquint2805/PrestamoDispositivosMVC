@@ -37,6 +37,7 @@ namespace PrestamoDispositivos.Models
 
         //Relacion a uno con studenStatus
         [ForeignKey("EstadoEstudiante")]
+        public Guid? EstadoEstId { get; set; }
         public studentStatus? EstadoEst { get; set; }
 
        

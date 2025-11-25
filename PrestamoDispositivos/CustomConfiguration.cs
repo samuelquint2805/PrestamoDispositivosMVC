@@ -46,9 +46,7 @@ namespace PrestamoDispositivos
                 options.AddPolicy("StudentOnly", policy =>
                     policy.RequireRole("Estudiante"));
 
-                // Policy adicional: Cualquier usuario autenticado
-                options.AddPolicy("AuthenticatedUser", policy =>
-                    policy.RequireAuthenticatedUser());
+                
             });
 
             // Auto mapper
@@ -93,7 +91,18 @@ namespace PrestamoDispositivos
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                app.MapControllerRoute(
+                    name: "default ",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
 
+                endpoints.MapGet("/api/minimal", () =>
+                {
+                   return "Minimal API is working!";
+                });
+            });
             //  Habilitar Notyf
             app.UseNotyf();
            

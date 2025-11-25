@@ -29,16 +29,15 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var StudentDTO = _mapper.Map<List<studentStatusDTO>>(StudentStaDV);
 
-                return new Response<List<studentStatusDTO>>(
+                return  Response<List<studentStatusDTO>>.Success(
                     StudentDTO,
                     "Estado del estudiante obtenidos correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<List<studentStatusDTO>>(
-                    "Error al obtener lista del estado de los Estudiantes",
-                    new List<string> { ex.Message }
+                return  Response<List<studentStatusDTO>>.Failure(
+                    "Error al obtener lista del estado de los Estudiantes"
                 );
             }
         }
@@ -53,20 +52,20 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdStatus == Guid.Parse(id.ToString()));
 
                 if (StudentStaGT == null)
-                    return new Response<studentStatusDTO>("Estado del Estudiante no encontrado");
+                    return Response<studentStatusDTO>.Failure("Estado del Estudiante no encontrado");
 
                 var StudentStaDto = _mapper.Map<studentStatusDTO>(StudentStaGT);
 
-                return new Response<studentStatusDTO>(
+                return Response<studentStatusDTO>.Success(
                     StudentStaDto,
                     "Estado del Estudiante encontrado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return new Response<studentStatusDTO>(
-                    "Error al obtener el Estado del Estudiante",
-                    new List<string> { ex.Message }
+                return  Response<studentStatusDTO>.Failure(
+                    "Error al obtener el Estado del Estudiante"
+                   
                 );
             }
         }
@@ -82,11 +81,12 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdStatus == StudentStaDto.IdStatus);
 
                 if (existingUser != null)
-                    return new Response<studentStatusDTO>("El estado del estudiante ya existe");
+                    return Response<studentStatusDTO>.Failure("El estado del estudiante ya existe");
 
                 // Mapear DTO a modelo
-                var studentsSta = _mapper.Map<studentStatus>(StudentStaDto);
+               
                 StudentStaDto.IdStatus = Guid.NewGuid();
+                var studentsSta = _mapper.Map<studentStatus>(StudentStaDto);
 
                 // Guardar en base de datos
                 _context.EstadoEstudiantes.Add(studentsSta);
@@ -95,16 +95,16 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Mapear resultado
                 var resultDto = _mapper.Map<studentStatusDTO>(studentsSta);
 
-                return new Response<studentStatusDTO>(
+                return Response<studentStatusDTO>.Success(
                     resultDto,
                     "Estado del Estudiante creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<studentStatusDTO>(
-                    "Error al crear el estado del estudiante",
-                    new List<string> { ex.Message }
+                return Response<studentStatusDTO>.Failure(
+                    "Error al crear el estado del estudiante"
+                    
                 );
             }
         }
@@ -119,7 +119,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(x => x.IdStatus == Guid.Parse(id.ToString()));
 
                 if (StudentUP == null)
-                    return new Response<studentStatusDTO>("estado del estudiante no encontrado");
+                    return  Response<studentStatusDTO>.Failure("estado del estudiante no encontrado");
 
 
 
@@ -132,16 +132,16 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 var resultDto = _mapper.Map<studentStatusDTO>(StudentUP);
 
-                return new Response<studentStatusDTO>(
+                return  Response<studentStatusDTO>.Success(
                     resultDto,
                     "Estado del estudiante actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<studentStatusDTO>(
-                    "Error al actualizar el Estudiante",
-                    new List<string> { ex.Message }
+                return  Response<studentStatusDTO>.Failure(
+                    "Error al actualizar el Estudiante"
+                     
                 );
             }
         }
@@ -158,12 +158,12 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 // Validar si existe
                 if (StudentStaDt == null)
-                    return new Response<bool>("Estado del estudiante no encontrado");
+                    return  Response<bool>.Failure("Estado del estudiante no encontrado");
 
                 // Validar si está asociado a un estudiante
                 if (StudentStaDt.studentsStu != null)
                 {
-                    return new Response<bool>(
+                    return  Response<bool>.Failure(
                         "No se puede eliminar el estado del estudiante porque está asociado a un estudiante."
                     );
                 }
@@ -172,13 +172,13 @@ namespace PrestamoDispositivos.Services.Implementations
                 _context.EstadoEstudiantes.Remove(StudentStaDt);
                 await _context.SaveChangesAsync();
 
-                return new Response<bool>(true, "Estado del estudiante eliminado correctamente.");
+                return  Response<bool>.Success(true, "Estado del estudiante eliminado correctamente.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<bool>(
-                    "Error al eliminar el estado del estudiante",
-                    new List<string> { ex.Message }
+                return  Response<bool>.Failure(
+                    "Error al eliminar el estado del estudiante"
+                   
                 );
             }
         }
