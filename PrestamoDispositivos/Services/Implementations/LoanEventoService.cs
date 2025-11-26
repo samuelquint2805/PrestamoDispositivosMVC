@@ -35,7 +35,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Eventos del prestamo obtenidos correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<List<LoanEventDTO>>.Failure(
                     "Error al obtener lista de eventos del prestamos"
@@ -62,7 +62,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "evento del prestamo encontrado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<LoanEventDTO>.Failure(
                     "Error al obtener el evento del prestamo "
@@ -100,7 +100,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Evento del prestamo creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<LoanEventDTO>.Failure(
                     "Error al crear evento del prestamo"
@@ -135,7 +135,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "El evento del prestamo ha sido actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<LoanEventDTO>.Failure(
                     "Error al actualizar el evento del prestamo"
@@ -169,7 +169,7 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return  Response<bool>.Success(true, "El evento del prestamo ha sido eliminado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<bool>.Failure(
                     "Error al eliminar el evento del prestamo"

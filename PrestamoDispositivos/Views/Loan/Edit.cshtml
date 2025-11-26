@@ -1,6 +1,9 @@
 ﻿@model PrestamoDispositivos.DTO.LoanDTO
 @{
     ViewData["Title"] = "Editar Préstamo";
+    var devices = ViewBag.Devices as List<PrestamoDispositivos.DTO.deviceDTO> ?? new List<PrestamoDispositivos.DTO.deviceDTO>();
+    var administrators = ViewBag.Administrators as List<PrestamoDispositivos.DTO.deviceManagerDTO> ?? new List<PrestamoDispositivos.DTO.deviceManagerDTO>();
+    var loanEvents = ViewBag.LoanEvents as List<PrestamoDispositivos.DTO.LoanEventDTO> ?? new List<PrestamoDispositivos.DTO.LoanEventDTO>();
 }
 
 <section id="edit-loan" class="contact py-5">
@@ -21,33 +24,91 @@
                         <span asp-validation-for="FechaEvento" class="text-danger"></span>
                     </div>
 
+
                     <div class="mb-3">
-                        <label asp-for="EstadoPrestamo" class="form-label fw-semibold">Estado</label>
+                        <label asp-for="EstadoPrestamo" class="form-label fw-semibold">
+                            <i class="bi bi-info-circle me-1"></i> Estado del Préstamo
+                        </label>
                         <select asp-for="EstadoPrestamo" class="form-select">
-                            <option>Activo</option>
-                            <option>Finalizado</option>
-                            <option>Cancelado</option>
+                            <option value="">-- Selecciona un estado --</option>
+                            <option value="Nuevo">Nuevo</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Renovar">Renovar</option>
+                            <option value="Cancelar">Cancelar</option>
+                            <option value="Finalizado">Finalizado</option>
                         </select>
+                        <span asp-validation-for="EstadoPrestamo" class="text-danger"></span>
                     </div>
 
+
+                    <!-- Dispositivo -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Estudiante</label>
-                        <input asp-for="IdEstudiante" class="form-control" />
+                        <label asp-for="IdDispo" class="form-label fw-semibold">
+                            <i class="bi bi-laptop me-1"></i> Dispositivo Disponible
+                        </label>
+                        <select asp-for="IdDispo" class="form-select">
+                            <option value="">-- Selecciona un dispositivo --</option>
+                            @foreach (var device in devices)
+                            {
+                                <option value="@device.IdDisp">
+                                    @device.Tipo - @device.Procesador
+                                    @if (device.Almacenamiento != 0)
+                                    {
+                                        <text>(@device.Almacenamiento)</text>
+                                    }
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="IdDispo" class="text-danger"></span>
+                        @if (!devices.Any())
+                        {
+                            <small class="text-warning d-block mt-1">
+                                <i class="bi bi-exclamation-triangle me-1"></i> No hay dispositivos disponibles en este momento
+                            </small>
+                        }
                     </div>
 
+                    <!-- Administrador -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Dispositivo</label>
-                        <input asp-for="IdDispo" class="form-control" />
+                        <label asp-for="IdAdminDev" class="form-label fw-semibold">
+                            <i class="bi bi-person-gear me-1"></i> Administrador Responsable
+                        </label>
+                        <select asp-for="IdAdminDev" class="form-select">
+                            <option value="">-- Selecciona un administrador --</option>
+                            @foreach (var admin in administrators)
+                            {
+                                <option value="@admin.IdAdmin">@admin.Nombre - Usuario: @admin.Usuario</option>
+                            }
+                        </select>
+                        <span asp-validation-for="IdAdminDev" class="text-danger"></span>
+                        @if (!administrators.Any())
+                        {
+                            <small class="text-warning d-block mt-1">
+                                <i class="bi bi-exclamation-triangle me-1"></i> No hay administradores disponibles
+                            </small>
+                        }
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Administrador</label>
-                        <input asp-for="IdAdminDev" class="form-control" />
-                    </div>
 
+                    <!-- Tipo de Evento -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Evento</label>
-                        <input asp-for="IdEvento" class="form-control" />
+                        <label asp-for="IdEvento" class="form-label fw-semibold">
+                            <i class="bi bi-calendar-check me-1"></i> Tipo de Evento
+                        </label>
+                        <select asp-for="IdEvento" class="form-select">
+                            <option value="">-- Selecciona un tipo de evento --</option>
+                            @foreach (var evt in loanEvents)
+                            {
+                                <option value="@evt.IdEvento">@evt.TipoPrestamos</option>
+                            }
+                        </select>
+                        <span asp-validation-for="IdEvento" class="text-danger"></span>
+                        @if (!loanEvents.Any())
+                        {
+                            <small class="text-warning d-block mt-1">
+                                <i class="bi bi-exclamation-triangle me-1"></i> No hay tipos de eventos configurados
+                            </small>
+                        }
                     </div>
 
                     <div class="text-center">

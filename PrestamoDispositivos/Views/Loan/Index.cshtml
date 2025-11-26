@@ -42,9 +42,9 @@
                                             @loan.EstadoPrestamo
                                         </span>
                                     </td>
-                                    <td>@loan.Estudiante?.Nombre</td>
-                                    <td>@loan.Dispositivo?.Tipo</td>
-                                    <td>@loan.DeviceManager?.Nombre</td>
+                                    <td>@(loan.Estudiante?.Nombre ?? "—")</td>
+                                    <td>@(loan.Dispositivo?.Tipo ?? "—")</td>
+                                    <td>@(loan.DeviceManager?.Nombre ?? "—")</td>
                                     <td class="text-center">
                                         <a asp-action="Edit" asp-route-id="@loan.IdPrestamos" class="btn btn-sm btn-warning">
                                             <i class="bi bi-pencil-square"></i>

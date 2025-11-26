@@ -17,9 +17,8 @@
             <th>Teléfono</th>
             <th>Edad</th>
             <th>Semestre</th>
-            <th>Correo</th>
             <th>Carnet</th>
-            <th>Acciones</th>
+            <th>Estado</th>
         </tr>
     </thead>
     <tbody>
@@ -29,10 +28,22 @@
             {
                 <tr>
                     <td>@item.Nombre</td>
+                    <td>@item.ApplicationUserId</td>
                     <td>@item.Telefono</td>
                     <td>@item.Edad</td>
                     <td>@item.semestreCursado</td>
                     <td>@item.Carnet</td>
+                   
+                    <td>
+                        @if (item.EstadoEst != null)
+                        {
+                            @item.EstadoEst.EstEstu
+                        }
+                        else
+                        {
+                            <span class="text-danger">Sin Estado</span>
+                        }
+                    </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.IdEst" class="btn btn-warning btn-sm">Editar</a>
                         <form asp-action="Delete" asp-route-id="@item.IdEst" method="post" style="display:inline">

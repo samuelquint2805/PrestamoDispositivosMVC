@@ -36,21 +36,35 @@ namespace PrestamoDispositivos.Controllers
 
             return View(response.Result);
         }
-
-        //  CREAR préstamo (formulario)
-        [HttpGet]
-        public IActionResult Create()
+        private async Task LoadDropdownData()
         {
+            var studentsResponse = await _loanService.GetAllStudentsAsync();
+            var devicesResponse = await _loanService.GetAvailableDevicesAsync();
+            var adminsResponse = await _loanService.GetAllAdministratorsAsync();
+            var eventsResponse = await _loanService.GetAllLoanEventsAsync();
+
+            ViewBag.Students = studentsResponse.IsSuccess ? studentsResponse.Result : new List<StudentDTO>();
+            ViewBag.Devices = devicesResponse.IsSuccess ? devicesResponse.Result : new List<deviceDTO>();
+            ViewBag.Administrators = adminsResponse.IsSuccess ? adminsResponse.Result : new List<deviceManagerDTO>();
+            ViewBag.LoanEvents = eventsResponse.IsSuccess ? eventsResponse.Result : new List<LoanEventDTO>();
+        }
+        // CREAR préstamo (formulario)
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            // Cargar los datos para los dropdowns
+            await LoadDropdownData();
             return View();
         }
 
-        //  CREAR préstamo (POST)
+        // CREAR préstamo (POST)
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] LoanDTO dto)
         {
             if (!ModelState.IsValid)
             {
                 _notyfService.Error("⚠️ Corrige los errores del formulario.");
+                await LoadDropdownData();
                 return View(dto);
             }
 
@@ -59,6 +73,7 @@ namespace PrestamoDispositivos.Controllers
             if (!response.IsSuccess)
             {
                 _notyfService.Error(response.Message ?? "❌ Error al crear el préstamo.");
+                await LoadDropdownData();
                 return View(dto);
             }
 
@@ -66,15 +81,20 @@ namespace PrestamoDispositivos.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // Método auxiliar para cargar datos de los dropdowns
+       
+
         //  EDITAR préstamo (mostrar formulario)
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute]Guid id)
         {
+            await LoadDropdownData();
             var response = await _loanService.GetLoanByIdAsync(id);
 
             if (!response.IsSuccess)
             {
                 _notyfService.Error(response.Message ?? "❌ Préstamo no encontrado.");
+                await LoadDropdownData();
                 return RedirectToAction(nameof(Index));
             }
 

@@ -25,18 +25,20 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
+                
                 var StudentDV = await _context.Estudiante
-                    .ToListAsync();
+            // AÑADIR .Include() para cargar el objeto de navegación
+            .Include(s => s.EstadoEst)
+            .ToListAsync();
 
                 var StudentDTO = _mapper.Map<List<StudentDTO>>(StudentDV);
 
                 return Response<List<StudentDTO>>.Success(StudentDTO, "Lista de Estudiantes obtenida correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<List<StudentDTO>>.Failure(
-                    "Error al obtener la lista de Estudiantes",
-                    new List<string> { ex.Message }
+                    "Error al obtener la lista de Estudiantes"
                 );
             }
         }
@@ -57,7 +59,7 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return Response<StudentDTO>.Success(StudentDto, "Estudiante obtenido correctamente");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return Response<StudentDTO>.Failure(
                     "Error al obtener el Estudiante"
@@ -78,9 +80,19 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (existingUser != null)
                     return  Response<StudentDTO>.Failure("El Estudiante ya existe");
 
+                var existingCarnet = await _context.Estudiante
+                    .FirstOrDefaultAsync(x => x.Carnet == StudentDto.Carnet);
+
+                if (existingUser != null)
+                    return Response<StudentDTO>.Failure("El Carnet ya existe, digite otro");
+
+
                 // Mapear DTO a modelo
-                var students = _mapper.Map<Student>(StudentDto);
+                Guid defaultStatusId = Guid.Parse("1EAA1209-075C-4E29-91C9-33824518AD93");
+                StudentDto.EstadoEstId = defaultStatusId;
                 StudentDto.IdEst = Guid.NewGuid();
+                var students = _mapper.Map<Student>(StudentDto);
+               
 
                 // Guardar en base de datos
                 _context.Estudiante.Add(students);
@@ -94,7 +106,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Estudiante creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<StudentDTO>.Failure(
                     "Error al crear el Estudiante"
@@ -162,11 +174,10 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return Response<bool>.Success(true, "Estudiante eliminado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<bool>.Failure(
-                    "Error al eliminar el Estudiante",
-                    new List<string> { ex.Message }
+                    "Error al eliminar el Estudiante"
                 );
             }
         }

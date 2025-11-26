@@ -39,7 +39,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Dispositivos obtenidos correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<List<deviceDTO>>.Failure(
                     "Error al obtener lista de dispositivos"
@@ -66,7 +66,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Dispositivo encontrado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<deviceDTO>.Failure(
                     "Error al obtener el Dispositivo"
@@ -103,7 +103,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Dispositivo creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<deviceDTO>.Failure(
                     "Error al crear el Dispositivo"
@@ -139,7 +139,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Dispositivo actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<deviceDTO>.Failure(
                     "Error al actualizar el Dispositivo"
@@ -172,7 +172,7 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return  Response<bool>.Success(true, "Dispositivo eliminado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<bool>.Failure(
                     "Error al eliminar el dispositivo"

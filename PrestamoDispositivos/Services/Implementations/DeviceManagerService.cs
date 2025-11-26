@@ -101,7 +101,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Administrador creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<deviceManagerDTO>.Failure(
                     "Error al crear el administrador"
@@ -140,7 +140,7 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Administrador actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return  Response<deviceManagerDTO>.Failure(
                     "Error al actualizar el administrador"
@@ -173,7 +173,7 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return  Response<bool>.Success(true, "Administrador eliminado correctamente");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<bool>.Failure(
                     "Error al eliminar el administrador"

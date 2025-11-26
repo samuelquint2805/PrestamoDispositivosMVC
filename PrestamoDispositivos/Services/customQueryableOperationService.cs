@@ -38,7 +38,7 @@ namespace PrestamoDispositivos.Services
                     "Registro creado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<TDTO>.Failure(
                     "Error al crear el registro"
@@ -63,7 +63,7 @@ namespace PrestamoDispositivos.Services
                     "Registro actualizado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<TDTO>.Failure(
                     "Error al actualizar el Registro"
@@ -90,7 +90,7 @@ namespace PrestamoDispositivos.Services
                     "Registro eliminado correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return  Response<object>.Failure(
                     "Error al eliminar el registro"
@@ -118,7 +118,7 @@ namespace PrestamoDispositivos.Services
                     "Registro obtenido correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                return  Response<TDTO>.Failure(
@@ -150,7 +150,7 @@ namespace PrestamoDispositivos.Services
                     "Registro obtenido correctamente"
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 return  Response<TDTO>.Success(
