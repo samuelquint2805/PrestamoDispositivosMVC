@@ -44,26 +44,42 @@
                 <ul>
                     <li><a asp-controller="Home" asp-action="Index">Inicio</a></li>
                     <li><a asp-controller="Device" asp-action="Index">Dispositivos</a></li>
-                    <li><a asp-controller="Loan" asp-action="Index">Préstamos</a></li>
+
+                    @* Mostrar la lista global de préstamos SOLO a administradores de dispositivos *@
+                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                    {
+                        <li><a asp-controller="Loan" asp-action="Index">Préstamos</a></li>
+                    }
+
                     <li class="dropdown">
                         <a href="#"><span>Gestión</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
-                            <li><a asp-controller="Device" asp-action="Create">Nuevo Dispositivo</a></li>
-                            <li><a asp-controller="Loan" asp-action="Create">Nuevo Préstamo</a></li>
+                            @* Nuevo Dispositivo solo para administradores *@
+                            @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                            {
+                                <li><a asp-controller="Device" asp-action="Create">Nuevo Dispositivo</a></li>
+                            }
+
+                            @* Nuevo Préstamo accesible a usuarios autenticados (estudiantes también) *@
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li><a asp-controller="Loan" asp-action="Create">Nuevo Préstamo</a></li>
+                            }
+
                             <li><a href="#">Reportes</a></li>
                         </ul>
                     </li>
+
                     <li class="dropdown">
                         <a href="#"><span>Ingresar</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
-                            <li><a asp-controller="Account" asp-action="Login">soy Estudiante...</a>
-
-                                </li>
+                            <li><a asp-controller="Account" asp-action="Login">soy Estudiante...</a></li>
                             <li><a asp-controller="Account" asp-action="Login">soy Administrador...</a></li>
-                            
                         </ul>
                     </li>
+
                     <li><a href="#contact">Contacto</a></li>
+
                     <!-- ✅ NUEVO: Ícono de usuario con menú desplegable -->
                     @if (User.Identity?.IsAuthenticated == true)
                     {
@@ -76,7 +92,7 @@
                                 <div class="user-info d-none d-md-block">
                                     <span class="user-name">@User.Identity.Name</span>
                                     <small class="user-role d-block">
-                                        @if (User.IsInRole("DeviceManAdmin"))
+                                        @if (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin"))
                                         {
                                             <i class="bi bi-shield-fill-check text-warning"></i>
                                             <span>Administrador</span>
@@ -103,7 +119,7 @@
                                             <h6 class="mb-0 fw-bold">@User.Identity.Name</h6>
                                             <small class="text-muted">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
                                             <div class="mt-1">
-                                                @if (User.IsInRole("DeviceManAdmin"))
+                                                @if (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin"))
                                                 {
                                                     <span class="badge bg-warning text-dark">
                                                         <i class="bi bi-shield-fill-check"></i> Administrador
@@ -122,7 +138,8 @@
 
                                 <!-- Opciones del Dropdown -->
                                 <div class="dropdown-body">
-                                    @if (User.IsInRole("DeviceManAdmin"))
+                                    @* Opciones para administradores de dispositivos *@
+                                    @if (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin"))
                                     {
                                         <a asp-controller="DeviceManagers" asp-action="Index" class="dropdown-item">
                                             <i class="bi bi-speedometer2 me-2"></i>
@@ -139,6 +156,7 @@
                                         <div class="dropdown-divider"></div>
                                     }
 
+                                    @* Opciones para estudiantes *@
                                     @if (User.IsInRole("Estudiante"))
                                     {
                                         <a asp-controller="Prestamos" asp-action="MisPrestamos" class="dropdown-item">
@@ -231,7 +249,7 @@
 
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-            </nav>
+            </nav>                              
 
         </div>
     </header>
@@ -261,7 +279,11 @@
                     <ul>
                         <li><a asp-controller="Home" asp-action="Index">Inicio</a></li>
                         <li><a asp-controller="Device" asp-action="Index">Dispositivos</a></li>
-                        <li><a asp-controller="Loan" asp-action="Index">Préstamos</a></li>
+                        @* Mostrar listado global de préstamos solo a admins *@
+                        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                        {
+                            <li><a asp-controller="Loan" asp-action="Index">Préstamos</a></li>
+                        }
                         <li><a href="#">Términos de servicio</a></li>
                         <li><a href="#">Política de privacidad</a></li>
                     </ul>
@@ -270,8 +292,16 @@
                 <div class="col-lg-2 col-6 footer-links">
                     <h4>Acciones Rápidas</h4>
                     <ul>
-                        <li><a asp-controller="Device" asp-action="Create">Nuevo Dispositivo</a></li>
-                        <li><a asp-controller="Loan" asp-action="Create">Nuevo Préstamo</a></li>
+                        @* Nuevo Dispositivo solo visible para admins *@
+                        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                        {
+                            <li><a asp-controller="Device" asp-action="Create">Nuevo Dispositivo</a></li>
+                        }
+                        @* Nuevo Préstamo visible a usuarios autenticados *@
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li><a asp-controller="Loan" asp-action="Create">Nuevo Préstamo</a></li>
+                        }
                         <li><a href="#">Reportes</a></li>
                         <li><a href="#">Estadísticas</a></li>
                         <li><a href="#">Ayuda</a></li>

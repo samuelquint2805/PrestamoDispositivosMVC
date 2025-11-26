@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
@@ -92,6 +93,7 @@ namespace PrestamoDispositivos.Controllers
 
 
         // GET: DeviceController/Create
+        [Authorize(Roles = "DeviceManAdmin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] deviceManagerDTO dto)
         {
@@ -113,7 +115,7 @@ namespace PrestamoDispositivos.Controllers
 
         }
 
-
+        [Authorize(Roles = "DeviceManAdmin")]
         [HttpGet]
 
         // GET: DeviceController/Edit/5
@@ -127,7 +129,7 @@ namespace PrestamoDispositivos.Controllers
             }
             return View(response.Result);
         }
-
+        [Authorize(Roles = "DeviceManAdmin")]
         // POST: DeviceController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -147,7 +149,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
 
-
+        [Authorize(Roles = "DeviceManAdmin")]
         // POST: DeviceController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

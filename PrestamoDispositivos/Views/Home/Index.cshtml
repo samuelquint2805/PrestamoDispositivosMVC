@@ -15,10 +15,15 @@
                     </p>
                     <div class="hero-cta" data-aos="fade-up" data-aos-delay="400">
                         <a asp-controller="Device" asp-action="Index" class="btn-primary">Ver Dispositivos</a>
-                        <a asp-controller="Device" asp-action="Create" class="btn-secondary">
-                            <i class="bi bi-plus-circle"></i>
-                            Agregar Dispositivo
-                        </a>
+
+                        @* Mostrar "Agregar Dispositivo" sólo a administradores *@
+                        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                        {
+                            <a asp-controller="Device" asp-action="Create" class="btn-secondary">
+                                <i class="bi bi-plus-circle"></i>
+                                Agregar Dispositivo
+                            </a>
+                        }
                     </div>
                     <div class="hero-stats" data-aos="fade-up" data-aos-delay="500">
                         <div class="stat-item">
@@ -54,6 +59,7 @@
         </div>
     </div>
 </section><!-- /Hero Section -->
+
 <!-- Services Section -->
 <section id="services" class="services section">
     <div class="container section-title" data-aos="fade-up">
@@ -92,35 +98,56 @@
                 </a>
             </div>
 
-            <!-- Estudiantes -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <a asp-controller="Student" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-people-fill"></i>
+            @* Gestión de Estudiantes: sólo para administradores *@
+            @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <a asp-controller="Student" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <h3>Gestión de Estudiantes</h3>
+                            <p>Administra la información de los estudiantes vinculados al sistema.</p>
+                            <span class="service-link">Ver Estudiantes <i class="bi bi-arrow-right"></i></span>
                         </div>
-                        <h3>Gestión de Estudiantes</h3>
-                        <p>Administra la información de los estudiantes vinculados al sistema.</p>
-                        <span class="service-link">Ver Estudiantes <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
 
-            <!-- Administradores -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <a asp-controller="DeviceManager" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-person-gear"></i>
+                @* Gestión de Administradores *@
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <a asp-controller="DeviceManager" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon">
+                                <i class="bi bi-person-gear"></i>
+                            </div>
+                            <h3>Gestión de Administradores</h3>
+                            <p>Controla los administradores y permisos de acceso al sistema.</p>
+                            <span class="service-link">Ver Administradores <i class="bi bi-arrow-right"></i></span>
                         </div>
-                        <h3>Gestión de Administradores</h3>
-                        <p>Controla los administradores y permisos de acceso al sistema.</p>
-                        <span class="service-link">Ver Administradores <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
 
-            <!-- Eventos de Préstamo -->
+                @* Estado de Estudiantes *@
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <a asp-controller="StudentStatus" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon">
+                                <i class="bi bi-person-check"></i>
+                            </div>
+                            <h3>Estado de Estudiantes</h3>
+                            <p>Verifica y actualiza el estado académico y de préstamo de los estudiantes.</p>
+                            <span class="service-link">Ver Estados <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </a>
+                </div>
+            }
+            else
+            {
+                @* Si no es administrador, evita mostrar las tarjetas de gestión sensibles (estudiantes, admins, estados) *@
+            }
+
+            <!-- Eventos de Préstamo (visible a todos) -->
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <a asp-controller="LoanEvent" asp-action="Index" class="text-decoration-none">
                     <div class="service-item">
@@ -134,22 +161,10 @@
                 </a>
             </div>
 
-            <!-- Estado de Estudiantes -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <a asp-controller="StudentStatus" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-person-check"></i>
-                        </div>
-                        <h3>Estado de Estudiantes</h3>
-                        <p>Verifica y actualiza el estado académico y de préstamo de los estudiantes.</p>
-                        <span class="service-link">Ver Estados <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
 </section><!-- /Services Section -->
+
 <!-- Quick Stats Section -->
 <section id="stats" class="section light-background">
     <div class="container" data-aos="fade-up">
@@ -223,6 +238,7 @@
         </div>
     </div>
 </section><!-- /Stats Section -->
+
 <!-- CTA Section -->
 <section id="cta" class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
     <div class="container text-center" data-aos="fade-up">
@@ -236,9 +252,14 @@
                     <a asp-controller="Device" asp-action="Index" class="btn btn-light btn-lg px-5">
                         <i class="bi bi-laptop me-2"></i>Ver Dispositivos
                     </a>
-                    <a asp-controller="Device" asp-action="Create" class="btn btn-outline-light btn-lg px-5">
-                        <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo
-                    </a>
+
+                    @* "Agregar Nuevo" sólo para administradores *@
+                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                    {
+                        <a asp-controller="Device" asp-action="Create" class="btn btn-outline-light btn-lg px-5">
+                            <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo
+                        </a>
+                    }
                 </div>
             </div>
         </div>

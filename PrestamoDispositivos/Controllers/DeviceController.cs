@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Services.Abstractions;
@@ -35,19 +36,22 @@ namespace PrestamoDispositivos.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
         public IActionResult Create()
         {
                return View();
         }
 
-
-        // GET: DeviceController/Create
+        // POST: DeviceController/Create
         [HttpPost]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( [FromForm] deviceDTO dto)
         {
             if(!ModelState.IsValid)
             {
-            _notyfService.Error("Por favor, corrija los errores en el formulario.");
+                _notyfService.Error("Por favor, corrija los errores en el formulario.");
+                return View(dto);
             }
 
             Response <deviceDTO> response = await _deviceService.CreateDeviceAsync(dto);
@@ -66,6 +70,7 @@ namespace PrestamoDispositivos.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
         // GET: DeviceController/Edit/5
         public async Task <IActionResult> Edit([FromRoute] Guid id)
         {
@@ -81,6 +86,7 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
         public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] deviceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -107,6 +113,7 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)

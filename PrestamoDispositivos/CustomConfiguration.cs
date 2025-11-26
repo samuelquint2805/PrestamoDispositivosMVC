@@ -5,39 +5,48 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos.DataContext.Sections;
-using PrestamoDispositivos.Models;
 using PrestamoDispositivos.Services.Abstractions;
 using PrestamoDispositivos.Services.Implementations;
 using System;
-
 
 namespace PrestamoDispositivos
 {
     public static class CustomConfiguration
     {
-
+        // ============================================================
+        // 1) CONFIGURACIÓN PRINCIPAL
+        // ============================================================
         public static WebApplicationBuilder AddCustomConfiguration(this WebApplicationBuilder builder)
         {
-
-            //Data context
+            // ================
+            // A) DATABASE
+            // ================
             builder.Services.AddDbContext<DatacontextPres>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            // ================
+            // B) AUTENTICACIÓN (COOKIE)
+            // ================
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-          .AddCookie(options =>
-          {
-              options.LoginPath = "/Account/Login";
-              options.LogoutPath = "/Account/Logout";
-              options.AccessDeniedPath = "/Account/AccessDenied";
-              options.ExpireTimeSpan = TimeSpan.FromHours(1);
-              options.SlidingExpiration = true;
-              options.Cookie.Name = "PrestamoDispositivosAuth";
-              options.Cookie.HttpOnly = true;
-              options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-          });
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
 
+                    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                    options.SlidingExpiration = true;
+
+                    options.Cookie.Name = "PrestamoDispositivosAuth";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                });
+
+            // ================
+            // C) AUTORIZACIÓN (POLICIES)
+            // ================
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("DeviceManagerAdmin", policy =>
@@ -45,16 +54,16 @@ namespace PrestamoDispositivos
 
                 options.AddPolicy("StudentOnly", policy =>
                     policy.RequireRole("Estudiante"));
-
-                
             });
 
-            // Auto mapper
+            // ================
+            // D) AUTOMAPPER
+            // ================
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-         
-
-            //toast notification
+            // ================
+            // E) TOAST NOTIFICATION
+            // ================
             builder.Services.AddNotyf(config =>
             {
                 config.DurationInSeconds = 7;
@@ -62,50 +71,38 @@ namespace PrestamoDispositivos
                 config.Position = NotyfPosition.TopRight;
             });
 
-            //self services
+            // ================
+            // F) SERVICES INJECTION
+            // ================
             AddServices(builder);
-            return builder;
 
+            return builder;
         }
 
+        // ============================================================
+        // 2) REGISTRO DE SERVICIOS (SIN 2FA)
+        // ============================================================
         private static void AddServices(WebApplicationBuilder builder)
         {
-            //Services injection
-
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<IStudentStatusService, StudentStatusService>();
             builder.Services.AddScoped<IDeviceService, DeviceService>();
             builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
             builder.Services.AddScoped<ILoanService, LoanService>();
             builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
-            builder.Services.AddScoped<TwoFactorService>();
-            builder.Services.AddScoped<SmtpEmailSender>(); // Si no está registrado
         }
 
-
-
+        // ============================================================
+        // 3) CONFIGURACIÓN FINAL DEL PIPELINE — LLAMADO DESDE Program.cs
+        // ============================================================
         public static WebApplication WebAppCustomConfiguration(this WebApplication app)
         {
-               
-            
-
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                app.MapControllerRoute(
-                    name: "default ",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-                endpoints.MapGet("/api/minimal", () =>
-                {
-                   return "Minimal API is working!";
-                });
-            });
-            //  Habilitar Notyf
+            // Notyf notifications
             app.UseNotyf();
-           
+
             return app;
         }
     }

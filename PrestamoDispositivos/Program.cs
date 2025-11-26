@@ -1,8 +1,7 @@
-using AspNetCoreHero.ToastNotification;
+ï»¿using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using AspNetCoreHero.ToastNotification.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using PrestamoDispositivos;
 using PrestamoDispositivos.DataContext.Sections;
@@ -11,13 +10,27 @@ using PrestamoDispositivos.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Agregar configuración personalizada
+// 
+// 1) CONFIGURACIÃ“N PERSONALIZADA (DB, SERVICIOS, COOKIE)
+// 
 builder.AddCustomConfiguration();
 
-// Agregar controladores con vistas
+// 
+// 2) CONTROLLERS + VISTAS (CON AUTORIZACIÃ“N GLOBAL)
+// 
 builder.Services.AddControllersWithViews();
 
-// Agregar Notyf 
+//  AUTORIZACIÃ“N GLOBAL
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()   // OBLIGA login en TODA la app
+        .Build();
+});
+
+// 
+// 3) NOTYF
+// 
 builder.Services.AddNotyf(config =>
 {
     config.DurationInSeconds = 5;
@@ -25,24 +38,10 @@ builder.Services.AddNotyf(config =>
     config.Position = NotyfPosition.TopRight;
 });
 
-//  Registrar DbContext
-builder.Services.AddDbContext<DatacontextPres>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-//  Registrar servicios
-builder.Services.AddScoped<ILoanService, LoanService>();
-
-// Registrar servicios auxiliares para 2FA y envío de correo
-builder.Services.AddScoped<TwoFactorService>();
-builder.Services.AddTransient<SmtpEmailSender>();
-
-// Configurar autenticación por cookie (autenticación manual)
-// si quieres usar TempData que depende de cookie-TempDataProvider no requiere configuración adicional
-
-var app = builder.Build();
-
-// Seeder inicial (opcional): crea un admin si no existe
-using (var scope = app.Services.CreateScope())
+// 
+// 4) SEEDER INICIAL (CREA ADMIN, SUPERVISOR, ESTUDIANTES)
+// 
+using (var scope = builder.Services.BuildServiceProvider().CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
@@ -51,12 +50,10 @@ using (var scope = app.Services.CreateScope())
     {
         var db = services.GetRequiredService<DatacontextPres>();
 
-        // Asegurar que la BD existe
         db.Database.EnsureCreated();
+        logger.LogInformation("Ejecutando seeder inicial...");
 
-        logger.LogInformation("?? Ejecutando seeder de usuarios...");
-
-        // 1?? Crear Admin Principal
+        // ADMIN PRINCIPAL
         if (!db.Users.Any(u => u.Email == "admin@sistema.com"))
         {
             var admin = new PrestamoDispositivos.Models.ApplicationUser
@@ -64,17 +61,14 @@ using (var scope = app.Services.CreateScope())
                 UserName = "admin",
                 Email = "admin@sistema.com",
                 Role = "DeviceManAdmin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
                 LockoutEnabled = true,
-                AccessFailedCount = 0,
-                TwoFactorEnabled = false,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!")
             };
 
             db.Users.Add(admin);
-            logger.LogInformation("? Usuario admin creado: admin@sistema.com / Admin123!");
         }
 
-        // 2?? Crear Admin Secundario (ejemplo con @admin.gmail.com)
+        // ADMIN SECUNDARIO
         if (!db.Users.Any(u => u.Email == "supervisor@admin.gmail.com"))
         {
             var supervisor = new PrestamoDispositivos.Models.ApplicationUser
@@ -82,76 +76,59 @@ using (var scope = app.Services.CreateScope())
                 UserName = "supervisor",
                 Email = "supervisor@admin.gmail.com",
                 Role = "DeviceManAdmin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Super123!"),
                 LockoutEnabled = true,
-                AccessFailedCount = 0,
-                TwoFactorEnabled = false,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Super123!")
             };
 
             db.Users.Add(supervisor);
-            logger.LogInformation("? Usuario supervisor creado: supervisor@admin.gmail.com / Super123!");
         }
 
-        // 3?? Crear Estudiantes de Ejemplo
+        // ESTUDIANTES
         var estudiantesEjemplo = new[]
         {
-            new { UserName = "juan.perez", Email = "juan.perez@estudiante.com", Password = "Juan123!" },
-            new { UserName = "maria.lopez", Email = "maria.lopez@estudiante.com", Password = "Maria123!" },
-            new { UserName = "carlos.ruiz", Email = "carlos.ruiz@estudiante.com", Password = "Carlos123!" }
+            ("juan.perez",  "juan.perez@estudiante.com",  "Juan123!"),
+            ("maria.lopez", "maria.lopez@estudiante.com", "Maria123!"),
+            ("carlos.ruiz", "carlos.ruiz@estudiante.com", "Carlos123!")
         };
 
-        foreach (var est in estudiantesEjemplo)
+        foreach (var (user, email, pass) in estudiantesEjemplo)
         {
-            if (!db.Users.Any(u => u.Email == est.Email))
+            if (!db.Users.Any(u => u.Email == email))
             {
-                var estudiante = new PrestamoDispositivos.Models.ApplicationUser
+                db.Users.Add(new PrestamoDispositivos.Models.ApplicationUser
                 {
-                    UserName = est.UserName,
-                    Email = est.Email,
+                    UserName = user,
+                    Email = email,
                     Role = "Estudiante",
-                    LockoutEnabled = true,
-                    AccessFailedCount = 0,
-                    TwoFactorEnabled = false,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(est.Password)
-                };
-
-                db.Users.Add(estudiante);
-                logger.LogInformation($"? Estudiante creado: {est.Email} / {est.Password}");
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(pass),
+                    LockoutEnabled = true
+                });
             }
         }
 
-        // Guardar cambios
-        int cambios = db.SaveChanges();
-
-        if (cambios > 0)
-        {
-            logger.LogInformation($"? Seeder completado: {cambios} usuarios creados.");
-        }
-        else
-        {
-            logger.LogInformation("?? No se crearon usuarios (ya existen en BD).");
-        }
-
-        // Mostrar resumen en consola
-        logger.LogInformation("========================================");
-        logger.LogInformation("?? USUARIOS DISPONIBLES:");
-        logger.LogInformation("========================================");
-        logger.LogInformation("?? ADMINISTRADORES:");
-        logger.LogInformation("   - admin@sistema.com / Admin123!");
-        logger.LogInformation("   - supervisor@admin.gmail.com / Super123!");
-        logger.LogInformation("????? ESTUDIANTES:");
-        logger.LogInformation("   - juan.perez@estudiante.com / Juan123!");
-        logger.LogInformation("   - maria.lopez@estudiante.com / Maria123!");
-        logger.LogInformation("   - carlos.ruiz@estudiante.com / Carlos123!");
-        logger.LogInformation("========================================");
+        db.SaveChanges();
+        logger.LogInformation("Seeder completado.");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "? Error en el seeder inicial: {Message}", ex.Message);
+        logger.LogError(ex, "Error ejecutando el seeder inicial.");
     }
 }
 
-// Middleware
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+
+var app = builder.Build();
+
+// 
+// MIDDLEWARE
+// 
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -163,11 +140,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// AUTENTICACIÃ“N + AUTORIZACIÃ“N
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+//
+// ENDPOINTS
+// 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 
+//
+// CONFIGURACIÃ“N FINAL DE LA APP (Notyf, etc.)
+// 
 app.WebAppCustomConfiguration();
 
 app.Run();

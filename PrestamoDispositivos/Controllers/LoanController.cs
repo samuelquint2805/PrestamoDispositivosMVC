@@ -23,6 +23,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         // LISTAR todos los préstamos
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -49,6 +50,7 @@ namespace PrestamoDispositivos.Controllers
             ViewBag.LoanEvents = eventsResponse.IsSuccess ? eventsResponse.Result : new List<LoanEventDTO>();
         }
         // CREAR préstamo (formulario)
+      
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -58,6 +60,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         // CREAR préstamo (POST)
+      
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] LoanDTO dto)
         {
@@ -82,9 +85,10 @@ namespace PrestamoDispositivos.Controllers
         }
 
         // Método auxiliar para cargar datos de los dropdowns
-       
+
 
         //  EDITAR préstamo (mostrar formulario)
+       
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute]Guid id)
         {
@@ -124,6 +128,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         //  ELIMINAR préstamo
+    
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute]Guid id)
         {
