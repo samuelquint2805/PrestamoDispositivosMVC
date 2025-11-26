@@ -21,6 +21,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         // GET: DeviceController
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index()
         {

@@ -2,8 +2,10 @@
 using AspNetCoreHero.ToastNotification.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.Services.Abstractions;
 using PrestamoDispositivos.Services.Implementations;
@@ -70,7 +72,21 @@ namespace PrestamoDispositivos
                 config.IsDismissable = true;
                 config.Position = NotyfPosition.TopRight;
             });
-
+            builder.Services.AddAuthentication()
+                          .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                          {
+                              options.TokenValidationParameters = new TokenValidationParameters
+                              {
+                                  ValidateIssuer = true,
+                                  ValidateAudience = true,
+                                  ValidateLifetime = true,
+                                  ValidateIssuerSigningKey = true,
+                                  IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"])),
+                                  ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                                  ValidAudience = builder.Configuration["Jwt:Audience"],
+                                  ClockSkew = TimeSpan.Zero
+                              };
+                          });
             // ================
             // F) SERVICES INJECTION
             // ================

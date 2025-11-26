@@ -26,13 +26,11 @@ namespace PrestamoDispositivos.Controllers
             _context = context;
             _notyf = notyf;
         }
-
-        // ========================
-        //     REGISTRO
-        // ========================
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View();
 
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -49,43 +47,204 @@ namespace PrestamoDispositivos.Controllers
                 return View(model);
             }
 
+            // Determinar el rol según el email
             string userRole = DetermineUserRole(model.Email);
 
+            // Crear el ApplicationUser
             ApplicationUser newUser = new ApplicationUser
             {
+                Id = Guid.NewGuid(),
+                ApplicationUserId = null,
                 UserName = model.UserName,
                 Email = model.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 Role = userRole,
                 LockoutEnabled = true,
                 AccessFailedCount = 0,
-                TwoFactorEnabled = false // SIEMPRE DESACTIVADO
+                TwoFactorEnabled = false
             };
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            await SignInUser(newUser, false);
-            _notyf.Success($"¡Bienvenido, {newUser.UserName}! Tu cuenta como {userRole} ha sido creada.");
+            // Guardar el ID en TempData para usarlo en el siguiente paso
+            TempData["NewUserId"] = newUser.Id.ToString();
+            TempData["NewUserRole"] = userRole;
 
-            return RedirectToAction("Index", "Home");
+            _notyf.Success($"Usuario creado. Ahora completa tu perfil de {(userRole == "DeviceManAdmin" ? "Administrador" : "Estudiante")}.");
+
+            // Redirigir según el rol
+            if (userRole == "DeviceManAdmin")
+                return RedirectToAction("CompleteAdminProfile", "Account");
+            else
+                return RedirectToAction("CompleteStudentProfile", "Account");
         }
 
-        private string DetermineUserRole(string email)
+        // ========================
+        //  COMPLETAR PERFIL ADMIN
+        // ========================
+        [HttpGet]
+        public IActionResult CompleteAdminProfile()
         {
-            if (email.EndsWith("@admin.gmail.com", StringComparison.OrdinalIgnoreCase))
-                return "DeviceManAdmin";
-
-            var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            if (TempData["NewUserId"] == null)
             {
-                "admin@ejemplo.com",
-                "supervisor@ejemplo.com"
+                _notyf.Error("Sesión expirada. Por favor, regístrate nuevamente.");
+                return RedirectToAction("Register");
+            }
+
+            TempData.Keep("NewUserId");
+            TempData.Keep("NewUserRole");
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteAdminProfile(CompleteAdminProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData.Keep("NewUserId");
+                TempData.Keep("NewUserRole");
+                return View(model);
+            }
+
+            var userIdStr = TempData["NewUserId"]?.ToString();
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
+            {
+                _notyf.Error("Sesión expirada. Por favor, regístrate nuevamente.");
+                return RedirectToAction("Register");
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                _notyf.Error("Usuario no encontrado.");
+                return RedirectToAction("Register");
+            }
+
+            // Verificar si ya existe un admin con ese usuario
+            var existingAdmin = await _context.AdminDisp
+                .FirstOrDefaultAsync(a => a.Usuario == model.Usuario);
+
+            if (existingAdmin != null)
+            {
+                _notyf.Error("El nombre de usuario de administrador ya existe.");
+                TempData.Keep("NewUserId");
+                TempData.Keep("NewUserRole");
+                return View(model);
+            }
+
+            // Crear el deviceManager
+            var deviceManager = new deviceManager
+            {
+                IdAdmin = Guid.NewGuid(),
+                Nombre = model.Nombre,
+                Usuario = model.Usuario,
+                Contraseña = BCrypt.Net.BCrypt.HashPassword(model.Contraseña),
+                ApplicationUserId = userId
             };
 
-            if (adminEmails.Contains(email))
-                return "DeviceManAdmin";
+            _context.AdminDisp.Add(deviceManager);
+            await _context.SaveChangesAsync();
 
-            return "Estudiante";
+            // Actualizar el ApplicationUser para que apunte a sí mismo
+            user.ApplicationUserId = userId;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // Iniciar sesión automáticamente
+            await SignInUser(user, false);
+
+            _notyf.Success("¡Perfil de administrador completado exitosamente!");
+            return RedirectToAction("Index", "DeviceManager");
+        }
+
+        // ========================
+        // COMPLETAR PERFIL ESTUDIANTE
+        // ========================
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult CompleteStudentProfile()
+        {
+            if (TempData["NewUserId"] == null)
+            {
+                _notyf.Error("Sesión expirada. Por favor, regístrate nuevamente.");
+                return RedirectToAction("Register");
+            }
+
+            TempData.Keep("NewUserId");
+            TempData.Keep("NewUserRole");
+
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteStudentProfile(CompleteStudentProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData.Keep("NewUserId");
+                TempData.Keep("NewUserRole");
+                return View(model);
+            }
+
+            var userIdStr = TempData["NewUserId"]?.ToString();
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
+            {
+                _notyf.Error("Sesión expirada. Por favor, regístrate nuevamente.");
+                return RedirectToAction("Register");
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                _notyf.Error("Usuario no encontrado.");
+                return RedirectToAction("Register");
+            }
+
+            // Verificar si ya existe un estudiante con ese carnet
+            var existingStudent = await _context.Estudiante
+                .FirstOrDefaultAsync(s => s.Carnet == model.Carnet);
+
+            if (existingStudent != null)
+            {
+                _notyf.Error("El carnet ya está registrado.");
+                TempData.Keep("NewUserId");
+                TempData.Keep("NewUserRole");
+                return View(model);
+            }
+
+            // Estado por defecto (Activo)
+            Guid defaultStatusId = Guid.Parse("1EAA1209-075C-4E29-91C9-33824518AD93");
+
+            // Crear el Student
+            var student = new Student
+            {
+                IdEst = Guid.NewGuid(),
+                Nombre = model.Nombre,
+                Telefono = model.Telefono,
+                Edad = model.Edad,
+                semestreCursado = model.SemestreCursado,
+                Carnet = model.Carnet,
+                ApplicationUserId = userId,
+                EstadoEstId = defaultStatusId
+            };
+
+            _context.Estudiante.Add(student);
+            await _context.SaveChangesAsync();
+
+            // Actualizar el ApplicationUser para que apunte a sí mismo
+            user.ApplicationUserId = userId;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // Iniciar sesión automáticamente
+            await SignInUser(user, false);
+
+            _notyf.Success("¡Perfil de estudiante completado exitosamente!");
+            return RedirectToAction("Index", "Home");
         }
 
         // ========================
@@ -97,6 +256,7 @@ namespace PrestamoDispositivos.Controllers
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
+
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -114,7 +274,6 @@ namespace PrestamoDispositivos.Controllers
                 return View(model);
             }
 
-            // Bloqueo
             if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
                 return View("Lockout");
 
@@ -137,7 +296,6 @@ namespace PrestamoDispositivos.Controllers
                 return View(model);
             }
 
-            // Login correcto
             user.AccessFailedCount = 0;
             await _context.SaveChangesAsync();
 
@@ -145,8 +303,6 @@ namespace PrestamoDispositivos.Controllers
 
             _notyf.Success($"¡Bienvenido, {user.UserName}!");
 
-
-            // Redirección por rol
             if (user.Role == "DeviceManAdmin")
                 return RedirectToAction("Index", "DeviceManager");
 
@@ -165,6 +321,27 @@ namespace PrestamoDispositivos.Controllers
             _notyf.Information("Sesión cerrada.");
             return RedirectToAction("Login");
         }
+
+        private string DetermineUserRole(string email)
+        {
+            if (email.EndsWith("@admin.gmail.com", StringComparison.OrdinalIgnoreCase))
+                return "DeviceManAdmin";
+
+            var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "admin@ejemplo.com",
+                "supervisor@ejemplo.com"
+            };
+
+            if (adminEmails.Contains(email))
+                return "DeviceManAdmin";
+
+            return "Estudiante";
+        }
+
+        
+       
+
 
         // ========================
         //   PERFIL Y AJUSTES

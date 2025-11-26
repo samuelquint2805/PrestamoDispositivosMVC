@@ -70,15 +70,6 @@
                         </ul>
                     </li>
 
-                    <li class="dropdown">
-                        <a href="#"><span>Ingresar</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                        <ul>
-                            <li><a asp-controller="Account" asp-action="Login">soy Estudiante...</a></li>
-                            <li><a asp-controller="Account" asp-action="Login">soy Administrador...</a></li>
-                        </ul>
-                    </li>
-
-                    <li><a href="#contact">Contacto</a></li>
 
                     <!-- ✅ NUEVO: Ícono de usuario con menú desplegable -->
                     @if (User.Identity?.IsAuthenticated == true)

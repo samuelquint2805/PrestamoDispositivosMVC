@@ -9,16 +9,40 @@ namespace PrestamoDispositivos.Controllers.API
     [ApiController]
     public class AspiController : ControllerBase
     {
-        public static ObjectResult controllerBasecValidation <T>(Response<T> response, ModelStateDictionary? modelState = null, int? statuscode = null)
+        public static ObjectResult ControllerBasicValidation<T>(Response<T> response, ModelStateDictionary? modelState = null, int? statusCode = null)
         {
-            if (!modelState.IsValid && modelState is not null)
+            if (modelState is not null && !modelState.IsValid)
             {
-                response.IsSuccess = false;
-                response.Message = "Validation errors occurred.";
-                response.Errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new ObjectResult(Response<T>.Failure("Debe Ajustar los errores de validación"));
+                List<string> errors = modelState.Values.SelectMany(v => v.Errors)
+                                                       .Select(e => e.ErrorMessage)
+                                                       .ToList();
+
+                return new ObjectResult(Response<T>.Failure("Debe ajustar los errores de validación", errors))
+                {
+                    StatusCode = StatusCodes.Status400BadRequest
+                };
             }
-            return null; // No validation errors
+
+            if (statusCode is not null && statusCode >= 100 && statusCode <= 599)
+            {
+                return new ObjectResult(response)
+                {
+                    StatusCode = statusCode
+                };
+            }
+
+            if (response.IsSuccess)
+            {
+                return new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+
+            return new ObjectResult(response)
+            {
+                StatusCode = StatusCodes.Status400BadRequest
+            };
         }
     }
 }
