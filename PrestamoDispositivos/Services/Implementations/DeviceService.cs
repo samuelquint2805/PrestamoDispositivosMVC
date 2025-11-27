@@ -27,13 +27,9 @@ namespace PrestamoDispositivos.Services.Implementations
             {
                 var devicesDV = await _context.Dispositivos
                     .ToListAsync();
-                Console.WriteLine($"Cantidad: {devicesDV.Count}");
-
-               
-
 
                 var deviceDTO = _mapper.Map<List<deviceDTO>>(devicesDV);
-                Console.WriteLine($"DTO convertido: {(deviceDTO == null ? "NULO" : deviceDTO.Count.ToString())}");
+               
                 return  Response<List<deviceDTO>>.Success(
                     deviceDTO,
                     "Dispositivos obtenidos correctamente"

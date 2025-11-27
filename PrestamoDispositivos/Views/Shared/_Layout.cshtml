@@ -65,6 +65,10 @@
                             {
                                 <li><a asp-controller="Loan" asp-action="Create">Nuevo Préstamo</a></li>
                             }
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li><a asp-controller="Account" asp-action="Index">usuarios</a></li>
+                            }
 
                             <li><a href="#">Reportes</a></li>
                         </ul>

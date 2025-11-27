@@ -1,14 +1,17 @@
-﻿using System;
+﻿using PrestamoDispositivos.Services.Abstractions;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrestamoDispositivos.Models
 {
     // Clase de usuario para autenticación manual (no Identity)
-    public class ApplicationUser
+    public class ApplicationUser 
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+
+
         [ForeignKey("User")]
         public Guid? ApplicationUserId { get; set; }
         public ApplicationUser? User { get; set; }

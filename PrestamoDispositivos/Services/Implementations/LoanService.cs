@@ -193,7 +193,7 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var devices = await _context.Dispositivos
-                    .Where(d => d.EstadoDisp == "Disponible")
+                    .Where(d => d.EstadoDisp == "Nuevo")
                     .OrderBy(d => d.Tipo)
                     .ToListAsync();
 

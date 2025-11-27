@@ -1,12 +1,19 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AspNetCoreHero.ToastNotification.Notyf;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PrestamoDispositivos.Core;
 using PrestamoDispositivos.DataContext.Sections;
+using PrestamoDispositivos.DTO;
 using PrestamoDispositivos.Models;
 using PrestamoDispositivos.Models.ViewModels;
+using PrestamoDispositivos.Services;
+using PrestamoDispositivos.Services.Abstractions;
+using PrestamoDispositivos.Services.Implementations;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -17,18 +24,97 @@ namespace PrestamoDispositivos.Controllers
     {
         private readonly DatacontextPres _context;
         private readonly INotyfService _notyf;
-
+        private readonly IAppUser _appUser;
+       
         private const int MaxFailedAccessAttempts = 5;
         private static readonly TimeSpan DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
 
-        public AccountController(DatacontextPres context, INotyfService notyf)
+        public AccountController(DatacontextPres context, INotyfService notyf, IAppUser appUser)
         {
             _context = context;
             _notyf = notyf;
+            _appUser = appUser;
+            
         }
+
+        [HttpGet]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        public async Task<IActionResult> Index()
+        {
+            Response<List<ApplicationUserDTO>> response = await _appUser.GetAllUserUsAsync();
+
+            if (!response.IsSuccess)
+            {
+                
+                return View(new List<ApplicationUserDTO>());
+            }
+
+            return View(response.Result ?? new List<ApplicationUserDTO>());
+        }
+        [HttpGet]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        // GET: DeviceController/Edit/5
+        public async Task<IActionResult> Edit([FromRoute] Guid id)
+        {
+            Response<ApplicationUserDTO> response = await _appUser.GetuserByIdAsync(id);
+            if (!response.IsSuccess)
+            {
+               
+                return RedirectToAction(nameof(Index));
+            }
+            return View(response.Result);
+        }
+
+        // POST: DeviceController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] ApplicationUserDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+               
+                return View(dto);
+            }
+
+            var response = await _appUser.UpdateUserUsAsync(id, dto);
+
+            if (!response.IsSuccess)
+            {
+              
+                return View(dto);
+            }
+
+           
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+
+        // POST: DeviceController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            if (!ModelState.IsValid)
+            {
+                
+                RedirectToAction(nameof(Index));
+            }
+            Response<bool> response = await _appUser.DeleteSUserUsAsync(id);
+
+         
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View();
+
+       
 
         [AllowAnonymous]
         [HttpPost]

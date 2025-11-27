@@ -114,6 +114,7 @@ namespace PrestamoDispositivos
             builder.Services.AddScoped<IDeviceService, DeviceService>();
             builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
             builder.Services.AddScoped<ILoanService, LoanService>();
+            builder.Services.AddScoped<IAppUser, AppUser>();
             builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
         }
