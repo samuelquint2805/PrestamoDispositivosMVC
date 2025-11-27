@@ -169,6 +169,7 @@ namespace PrestamoDispositivos.Controllers
         // ========================
         //  COMPLETAR PERFIL ADMIN
         // ========================
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult CompleteAdminProfile()
         {
@@ -185,6 +186,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteAdminProfile(CompleteAdminProfileViewModel model)
         {
@@ -209,25 +211,12 @@ namespace PrestamoDispositivos.Controllers
                 return RedirectToAction("Register");
             }
 
-            // Verificar si ya existe un admin con ese usuario
-            var existingAdmin = await _context.AdminDisp
-                .FirstOrDefaultAsync(a => a.Usuario == model.Usuario);
-
-            if (existingAdmin != null)
-            {
-                _notyf.Error("El nombre de usuario de administrador ya existe.");
-                TempData.Keep("NewUserId");
-                TempData.Keep("NewUserRole");
-                return View(model);
-            }
 
             // Crear el deviceManager
             var deviceManager = new deviceManager
             {
                 IdAdmin = Guid.NewGuid(),
                 Nombre = model.Nombre,
-                Usuario = model.Usuario,
-                Contraseña = BCrypt.Net.BCrypt.HashPassword(model.Contraseña),
                 ApplicationUserId = userId
             };
 

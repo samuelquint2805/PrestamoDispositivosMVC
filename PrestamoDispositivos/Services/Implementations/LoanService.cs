@@ -241,5 +241,51 @@ namespace PrestamoDispositivos.Services.Implementations
                 return Response<List<LoanEventDTO>>.Failure("Error al obtener eventos");
             }
         }
+        public async Task<Response<bool>> ReturnDeviceAsync(Guid loanId)
+        {
+            try
+            {
+                // Buscar el préstamo con sus relaciones
+                var loan = await _context.Prestamos
+                    .Include(l => l.Dispositivo)
+                    .FirstOrDefaultAsync(l => l.IdPrestamos == loanId);
+
+                if (loan == null)
+                    return Response<bool>.Failure("❌ Préstamo no encontrado");
+
+                // Verificar que el préstamo esté activo
+                if (loan.EstadoPrestamo == "Finalizado")
+                    return Response<bool>.Failure("⚠️ Este préstamo ya fue finalizado");
+
+                // Buscar el evento "Devuelto" en la tabla EventoPrestamos
+                var eventoDevuelto = await _context.EventoPrestamos
+                    .FirstOrDefaultAsync(e => e.TipoPrestamos.ToLower() == "devuelto");
+
+                if (eventoDevuelto == null)
+                    return Response<bool>.Failure("⚠️ No se encontró el evento 'Devuelto' en el sistema");
+
+                // Actualizar el estado del préstamo
+                loan.EstadoPrestamo = "Finalizado";
+                loan.IdEvento = eventoDevuelto.IdEvento;
+                loan.FechaEvento = DateTime.Now; // Actualizar a la fecha de devolución
+
+                // Actualizar el estado del dispositivo a disponible
+                if (loan.Dispositivo != null)
+                {
+                    loan.Dispositivo.EstadoDisp = "Nuevo";
+                    _context.Dispositivos.Update(loan.Dispositivo);
+                }
+
+                // Guardar cambios
+                _context.Prestamos.Update(loan);
+                await _context.SaveChangesAsync();
+
+                return Response<bool>.Success(true, "✅ Dispositivo devuelto correctamente. El préstamo ha sido finalizado.");
+            }
+            catch (Exception ex)
+            {
+                return Response<bool>.Failure($"❌ Error al devolver el dispositivo: {ex.Message}");
+            }
+        }
     }
 }

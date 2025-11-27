@@ -15,5 +15,7 @@ namespace PrestamoDispositivos.Services.Abstractions
         Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync();
         Task<Response<List<deviceManagerDTO>>> GetAllAdministratorsAsync();
         Task<Response<List<LoanEventDTO>>> GetAllLoanEventsAsync();
+
+        Task<Response<bool>> ReturnDeviceAsync(Guid loanId);
     }
 }

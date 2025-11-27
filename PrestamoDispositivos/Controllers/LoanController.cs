@@ -155,5 +155,22 @@ namespace PrestamoDispositivos.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ReturnDevice([FromRoute] Guid id)
+        {
+            var response = await _loanService.ReturnDeviceAsync(id);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message ?? "❌ Error al devolver el dispositivo.");
+            }
+            else
+            {
+                _notyfService.Success(response.Message ?? "✅ Dispositivo devuelto correctamente.");
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

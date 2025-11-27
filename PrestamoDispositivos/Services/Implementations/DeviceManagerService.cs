@@ -124,11 +124,9 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 // Actualizar propiedades
                 manager.Nombre = devicManDto.Nombre;
-                manager.Usuario = devicManDto.Usuario;
+               
 
-                // Solo actualizar contraseña si se proporciona una nueva
-                if (!string.IsNullOrWhiteSpace(devicManDto.Contraseña))
-                    manager.Contraseña = devicManDto.Contraseña;
+               
 
                 _context.AdminDisp.Update(manager);
                 await _context.SaveChangesAsync();
