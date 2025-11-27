@@ -149,9 +149,13 @@ app.UseAuthorization();
 // 
 app.UseEndpoints(endpoints =>
 {
+    endpoints.MapControllers();
+
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    endpoints.MapGet("/api/minimal", () => "API Minimal funcionando correctamente.");
 });
 
 //

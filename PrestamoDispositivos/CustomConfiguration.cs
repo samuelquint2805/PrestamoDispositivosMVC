@@ -15,22 +15,16 @@ namespace PrestamoDispositivos
 {
     public static class CustomConfiguration
     {
-        // ============================================================
-        // 1) CONFIGURACIÓN PRINCIPAL
-        // ============================================================
+      
         public static WebApplicationBuilder AddCustomConfiguration(this WebApplicationBuilder builder)
         {
-            // ================
-            // A) DATABASE
-            // ================
             builder.Services.AddDbContext<DatacontextPres>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            // ================
-            // B) AUTENTICACIÓN (COOKIE)
-            // ================
+
+
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -72,21 +66,36 @@ namespace PrestamoDispositivos
                 config.IsDismissable = true;
                 config.Position = NotyfPosition.TopRight;
             });
+
             builder.Services.AddAuthentication()
-                          .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                          {
-                              options.TokenValidationParameters = new TokenValidationParameters
-                              {
-                                  ValidateIssuer = true,
-                                  ValidateAudience = true,
-                                  ValidateLifetime = true,
-                                  ValidateIssuerSigningKey = true,
-                                  IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"])),
-                                  ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                                  ValidAudience = builder.Configuration["Jwt:Audience"],
-                                  ClockSkew = TimeSpan.Zero
-                              };
-                          });
+     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+     {
+         var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+
+         // Validar que la clave existe
+         if (string.IsNullOrEmpty(jwtSecret))
+         {
+             throw new InvalidOperationException("JWT Secret no está configurada en appsettings.json");
+         }
+
+         // Validar longitud mínima
+         if (jwtSecret.Length < 32)
+         {
+             throw new InvalidOperationException("JWT Secret debe tener al menos 32 caracteres");
+         }
+
+         options.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidateIssuer = true,
+             ValidateAudience = true,
+             ValidateLifetime = true,
+             ValidateIssuerSigningKey = true,
+             IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSecret)),
+             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+             ValidAudience = builder.Configuration["JwtSettings:Audience"],
+             ClockSkew = TimeSpan.Zero
+         };
+     });
             // ================
             // F) SERVICES INJECTION
             // ================
@@ -106,6 +115,7 @@ namespace PrestamoDispositivos
             builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
             builder.Services.AddScoped<ILoanService, LoanService>();
             builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
         }
 
         // ============================================================

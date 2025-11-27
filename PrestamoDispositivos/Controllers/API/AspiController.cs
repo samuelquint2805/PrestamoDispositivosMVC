@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PrestamoDispositivos.Core;
 
 namespace PrestamoDispositivos.Controllers.API
 {
+    [AllowAnonymous]
+    [Authorize(Roles = "DeviceManAdmin")]
     [Route("api/[controller]")]
     [ApiController]
     public class AspiController : ControllerBase
