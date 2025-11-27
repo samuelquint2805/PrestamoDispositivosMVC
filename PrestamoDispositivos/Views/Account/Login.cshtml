@@ -1,25 +1,77 @@
 ﻿@model PrestamoDispositivos.Models.ViewModels.LoginViewModel
 
-<h2>Iniciar sesión</h2>
+<style>
+    body { background: linear-gradient(135deg,#0d6efd10 0%, #6f42c110 100%); }
+    .login-card {
+        max-width: 420px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(17,24,39,0.08);
+        overflow: hidden;
+    }
+    .login-header {
+        background: linear-gradient(90deg,#0d6efd,#6f42c1);
+        color: #fff;
+        padding: 28px 20px;
+        text-align: center;
+    }
+    .login-body { padding: 24px; background: #fff; }
+    .form-control { padding-right: 3.5rem; } 
+    .toggle-pass {
+        border: none;
+        background: transparent;
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .small-note { font-size: .85rem; color: #6c757d; margin-top: .5rem; text-align:center; }
+</style>
 
-<form asp-action="Login" method="post">
-    <input asp-for="ReturnUrl" type="hidden" />
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card login-card">
+        <div class="login-header">
+            <h3 class="mb-0">Iniciar sesión</h3>
+            <small class="d-block mt-1">Accede con tu usuario o correo</small>
+        </div>
+
+        <div class="login-body">
+            <form asp-action="Login" method="post" novalidate>
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div class="form-floating mb-3 position-relative">
+                    <input asp-for="Email" class="form-control" id="emailInput" placeholder="Usuario o correo" />
+                    <label for="emailInput">Usuario o correo</label>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="form-floating mb-3 position-relative">
+                    <input asp-for="Password" class="form-control" id="passwordInput" placeholder="Contraseña" />
+                    <label for="passwordInput">Contraseña</label>
+                    <button type="button" class="toggle-pass" onclick="togglePassword()" aria-label="Mostrar contraseña">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path id="eyeIcon" d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" fill="#fff"/>
+                        </svg>
+                    </button>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
+
+                <div class="small-note">
+                    Solo usuario/correo y contraseña.
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-check">
-        <input asp-for="RememberMe" class="form-check-input" />
-        <label asp-for="RememberMe" class="form-check-label"></label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-</form>
+<script>
+    function togglePassword() {
+        const pw = document.getElementById('passwordInput');
+        if (!pw) return;
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+    }
+</script>
