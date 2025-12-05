@@ -102,10 +102,7 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
-                //metodo con mapper pero sin incluir busqueda por ID
-                // List<Loan> loans = await _context.Prestamos.ToListAsync();
-                //List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
-
+               
                 //metodo de busqueda por ID incluyendo las relaciones usando DTO
                 var loan = await _context.Prestamos
                     .Include(x => x.Estudiante)
@@ -129,6 +126,28 @@ namespace PrestamoDispositivos.Services.Implementations
         }
 
         // Obtener todos los préstamos
+        public async Task<Response<List<LoanDTO>>> GetAllLoansPerStudentAsync(Guid idEst)
+        {
+
+            try
+            {
+                List<Loan> loans = await _context.Prestamos
+                    .Include(l => l.Estudiante)
+                    .Include(l => l.Dispositivo)
+                    .Include(l => l.DeviceManager)
+                    .Where(l => l.IdEstudiante == idEst) // ✅ Filtrar por estudiante
+                    .OrderByDescending(l => l.FechaEvento) // Más recientes primero
+                         .ToListAsync();
+
+                List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
+
+                return Response<List<LoanDTO>>.Success(dtoList, "Lista de préstamos obtenida correctamente");
+            }
+            catch (Exception)
+            {
+                return Response<List<LoanDTO>>.Failure("Error al obtener los préstamos");
+            }
+        }
         public async Task<Response<List<LoanDTO>>> GetAllLoansAsync()
         {
             try

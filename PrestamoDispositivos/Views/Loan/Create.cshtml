@@ -5,6 +5,8 @@
     var devices = ViewBag.Devices as List<PrestamoDispositivos.DTO.deviceDTO> ?? new List<PrestamoDispositivos.DTO.deviceDTO>();
     var administrators = ViewBag.Administrators as List<PrestamoDispositivos.DTO.deviceManagerDTO> ?? new List<PrestamoDispositivos.DTO.deviceManagerDTO>();
     var loanEvents = ViewBag.LoanEvents as List<PrestamoDispositivos.DTO.LoanEventDTO> ?? new List<PrestamoDispositivos.DTO.LoanEventDTO>();
+    var currentStudentId = ViewBag.CurrentStudentId as Guid?;
+    var isStudentCreating = ViewBag.IsStudentCreating ?? false;
 }
 
 <section id="create-loan" class="contact py-5">
@@ -48,19 +50,49 @@
                         <label asp-for="IdEstudiante" class="form-label fw-semibold">
                             <i class="bi bi-person-badge me-1"></i> Estudiante
                         </label>
-                        <select asp-for="IdEstudiante" class="form-select">
-                            <option value="">-- Selecciona un estudiante --</option>
-                            @foreach (var student in students)
-                            {
-                                <option value="@student.IdEst">@student.Nombre - Carnet: @student.Carnet</option>
-                            }
-                        </select>
-                        <span asp-validation-for="IdEstudiante" class="text-danger"></span>
-                        @if (!students.Any())
+
+                        @if (isStudentCreating)
                         {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bi bi-exclamation-triangle me-1"></i> No hay estudiantes disponibles
-                            </small>
+                            <!-- Si es estudiante, mostrar solo su nombre (read-only) -->
+                            var currentStudent = students.FirstOrDefault(s => s.IdEst == currentStudentId);
+                            if (currentStudent != null)
+                            {
+                                <input type="text"
+                                       class="form-control"
+                                       value="@currentStudent.Nombre - Carnet: @currentStudent.Carnet"
+                                       readonly
+                                       disabled />
+                                <input type="hidden" asp-for="IdEstudiante" value="@currentStudentId" />
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Este préstamo será registrado a tu nombre
+                                </small>
+                            }
+                            else
+                            {
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Error: No se encontró tu perfil de estudiante
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Si es admin, mostrar dropdown completo -->
+                            <select asp-for="IdEstudiante" class="form-select">
+                                <option value="">-- Selecciona un estudiante --</option>
+                                @foreach (var student in students)
+                                {
+                                    <option value="@student.IdEst">@student.Nombre - Carnet: @student.Carnet</option>
+                                }
+                            </select>
+                            <span asp-validation-for="IdEstudiante" class="text-danger"></span>
+                            @if (!students.Any())
+                            {
+                                <small class="text-warning d-block mt-1">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> No hay estudiantes disponibles
+                                </small>
+                            }
                         }
                     </div>
 
@@ -75,7 +107,7 @@
                             {
                                 <option value="@device.IdDisp">
                                     @device.Tipo - @device.Procesador
-                                    @if (device.Almacenamiento != 0)
+                                    @if (device.Almacenamiento == 0 || device.Almacenamiento < 0)
                                     {
                                         <text>(@device.Almacenamiento)</text>
                                     }
@@ -136,7 +168,15 @@
                     <!-- Botones -->
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-success px-4">
-                            <i class="bi bi-check-circle me-1"></i> Guardar Préstamo
+                            <i class="bi bi-check-circle me-1"></i>
+                            @if (isStudentCreating)
+                            {
+                                <text>Solicitar Préstamo</text>
+                            }
+                            else
+                            {
+                                <text>Guardar Préstamo</text>
+                            }
                         </button>
                         <a asp-action="Index" class="btn btn-secondary px-4 ms-2">
                             <i class="bi bi-arrow-left-circle me-1"></i> Volver
