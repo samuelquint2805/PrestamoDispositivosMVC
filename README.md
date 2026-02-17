@@ -34,6 +34,6 @@ El proyecto está desarrollado utilizando el patrón **MVC (Modelo-Vista-Control
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/tu-usuario/PrestamosDispositivosMVC.git](https://github.com/samuelquint2805/PrestamoDispositivosMVC)
+   git clone [https://github.com/tu-usuario/PrestamosDispositivosMVC.git]
 
    
