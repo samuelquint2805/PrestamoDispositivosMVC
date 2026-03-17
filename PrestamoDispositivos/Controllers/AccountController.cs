@@ -292,8 +292,22 @@ namespace PrestamoDispositivos.Controllers
             }
 
             // Estado por defecto (Activo)
-            Guid defaultStatusId = Guid.Parse("1EAA1209-075C-4E29-91C9-33824518AD93");
+           
+            var activeStatus = await _context.EstadoEstudiantes
+                .FirstOrDefaultAsync(s => s.EstEstu == "Activo");
 
+            if (activeStatus == null)
+            {
+                activeStatus = new studentStatus
+                {
+                    IdStatus = Guid.NewGuid(),
+                    EstEstu = "Activo"
+                };
+                _context.EstadoEstudiantes.Add(activeStatus);
+                await _context.SaveChangesAsync();
+            }
+
+            Guid defaultStatusId = activeStatus.IdStatus;
             // Crear el Student
             var student = new Student
             {
