@@ -292,7 +292,7 @@ namespace PrestamoDispositivos.Controllers
             }
 
             // Estado por defecto (Activo)
-           
+            
             var activeStatus = await _context.EstadoEstudiantes
                 .FirstOrDefaultAsync(s => s.EstEstu == "Activo");
 
@@ -360,7 +360,7 @@ namespace PrestamoDispositivos.Controllers
             if (user == null)
             {
                 ModelState.AddModelError("", "Credenciales inválidas.");
-                return View(model);
+                return RedirectToAction("Index", "Home");
             }
 
             if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
@@ -406,9 +406,12 @@ namespace PrestamoDispositivos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
-            _notyf.Information("Sesión cerrada.");
-            return RedirectToAction("Login");
+            // 1. Cerramos la sesión en el sistema de autenticación por cookies
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // 2. Redirigimos a la página de inicio (Controller: Home, Action: Index)
+            // Esto cargará la vista por defecto que usa tu Layout
+            return RedirectToAction("Index", "Home");
         }
 
         private string DetermineUserRole(string email)

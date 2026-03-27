@@ -23,9 +23,7 @@ builder.Services.AddControllersWithViews();
 //  AUTORIZACIÓN GLOBAL
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()   // OBLIGA login en TODA la app
-        .Build();
+    
 });
 
 // 
@@ -115,12 +113,7 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     }
 }
 
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+
 
 
 var app = builder.Build();
