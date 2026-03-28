@@ -9,7 +9,7 @@ namespace PrestamoDispositivos.DTO
         public Guid IdDisp { get; set; }
         
         public required string Tipo { get; set; }
-        
+        public required string Serial { get; set; }
         public required string Procesador { get; set; }
         
         public required int Almacenamiento { get; set; }

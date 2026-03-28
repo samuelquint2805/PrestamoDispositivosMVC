@@ -36,6 +36,25 @@
                             @Html.AntiForgeryToken()
 
                             <div class="row">
+                                <!-- Serial -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Serial" class="form-label">
+                                        <i class="bi bi-hdd text-primary me-1"></i>
+                                        Serial
+                                    </label>
+                                    <div class="input-group">
+                                        <input asp-for="Serial"
+                                               type="text"
+                                               class="form-control"
+                                               placeholder="ABCD123456"
+                                               maxlength="50" />
+                                    </div>
+                                    <span asp-validation-for="Serial" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Número de serie del dispositivo (letras y números)
+                                    </div>
+                                </div>
 
                                 <!-- Tipo de Dispositivo -->
                                 <div class="col-md-6 mb-3">

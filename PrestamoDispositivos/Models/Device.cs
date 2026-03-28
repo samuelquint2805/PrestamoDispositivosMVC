@@ -14,6 +14,8 @@ namespace PrestamoDispositivos.Models
         public Guid IdDisp { get; set; }
         [Required(ErrorMessage = "El campo de Tipo es requerido")]
         public string? Tipo { get; set; }
+        [Required(ErrorMessage = "El campo de Serial es requerido")]
+        public string? Serial { get; set; }
         [Required(ErrorMessage = "El campo de Procesador es requerido")]
         public string? Procesador { get; set; }
         [Required(ErrorMessage = "El campo de Almacenamiento es requerido")]
