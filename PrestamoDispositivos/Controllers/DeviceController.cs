@@ -37,7 +37,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        [Authorize(Roles = "SuperAdmin,Lender")]
         public IActionResult Create()
         {
                return View();
@@ -45,7 +45,7 @@ namespace PrestamoDispositivos.Controllers
 
         // POST: DeviceController/Create
         [HttpPost]
-        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        [Authorize(Roles = "SuperAdmin,Lender")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( [FromForm] deviceDTO dto)
         {
@@ -71,7 +71,7 @@ namespace PrestamoDispositivos.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        [Authorize(Roles = "SuperAdmin,Lender")]
         // GET: DeviceController/Edit/5
         public async Task <IActionResult> Edit([FromRoute] Guid id)
         {
@@ -87,7 +87,7 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
+        [Authorize(Roles = "SuperAdmin,Lender")]
         public async Task<IActionResult> Edit([FromRoute] Guid id, [FromForm] deviceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -114,8 +114,8 @@ namespace PrestamoDispositivos.Controllers
         // POST: DeviceController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "DeviceManagerAdmin,DeviceManAdmin")]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        [Authorize(Roles = "SuperAdmin,Lender")]
+        public async Task<IActionResult> Delete([FromForm] Guid id)
         {
             if (!ModelState.IsValid)
             {

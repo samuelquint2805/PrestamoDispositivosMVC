@@ -13,12 +13,14 @@ namespace PrestamoDispositivos.Core
             // Example:
             // CreateMap<Student, StudentDTO>();
             CreateMap<Device, deviceDTO>().ReverseMap();
-            CreateMap<deviceManager, deviceManagerDTO>().ReverseMap();
+            CreateMap<Administrator, AdministratorDTO>().ReverseMap();
             CreateMap<Loan, LoanDTO>().ReverseMap();
-            CreateMap<LoanEvent, LoanEventDTO>().ReverseMap();
+            CreateMap<AuditReportsClass, AuditReportClassDTO>().ReverseMap();
             CreateMap<Student, StudentDTO>().ReverseMap();
-            CreateMap<studentStatus, studentStatusDTO>().ReverseMap();
+            CreateMap<lender, lenderDTO >().ReverseMap();
             CreateMap<ApplicationUser, ApplicationUserDTO>().ReverseMap();
+            CreateMap<Request, RequestoDTO>().ReverseMap();
+            CreateMap<setRol, setRolDTO>().ReverseMap();
 
 
         }

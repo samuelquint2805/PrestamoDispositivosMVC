@@ -43,7 +43,7 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var UserGT = await _context.Users
-                    .FirstOrDefaultAsync(x => x.Id == Guid.Parse(id.ToString()));
+                    .FirstOrDefaultAsync(x => x.idUsuario == Guid.Parse(id.ToString()));
 
                 if (UserGT == null)
                     return Response<ApplicationUserDTO>.Failure("Usuario no encontrado");
@@ -65,7 +65,7 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var UserUP = await _context.Users
-                    .FirstOrDefaultAsync(x => x.Id == Guid.Parse(id.ToString()));
+                    .FirstOrDefaultAsync(x => x.idUsuario == Guid.Parse(id.ToString()));
 
                 if (UserUP == null)
                     return Response<ApplicationUserDTO>.Failure("Usuario no encontrado");
@@ -100,7 +100,7 @@ namespace PrestamoDispositivos.Services.Implementations
                 // Usamos el Id directamente, ya que el parámetro 'id' y User.Id son ambos Guid.
                 // También incluimos el rol para la lógica, aunque no es estrictamente necesario aquí.
                 var appUser = await _context.Users
-                    .FirstOrDefaultAsync(x => x.Id == id); // <--- CORRECCIÓN CLAVE: Buscar por GUID directamente
+                    .FirstOrDefaultAsync(x => x.idUsuario == id); // <--- CORRECCIÓN CLAVE: Buscar por GUID directamente
 
                 if (appUser == null)
                     return Response<bool>.Failure("Usuario de Identity no encontrado");
@@ -108,31 +108,35 @@ namespace PrestamoDispositivos.Services.Implementations
                 // 2. Intentar encontrar y eliminar el perfil de Estudiante
                 // La FK es ApplicationUserId, que coincide con el ID del ApplicationUser
                 var studentProfile = await _context.Estudiante
-                    .Include(s => s.Prestamos)
                     .FirstOrDefaultAsync(s => s.ApplicationUserId == id);
 
-                if (studentProfile != null)
+                if(studentProfile != null)
                 {
-                    // A. Validación: Estudiante no debe tener préstamos asociados
-                    if (studentProfile.Prestamos != null && studentProfile.Prestamos.Any())
+                    var hasLoans = await _context.Prestamos
+                        .AnyAsync(p => p.IdUser == studentProfile.ApplicationUserId);
+                    if (hasLoans != true)
+                    {
+                        // A. Eliminar el perfil de Estudiante
+                        _context.Estudiante.Remove(studentProfile);
+                    }
+                    else
                     {
                         return Response<bool>.Failure(
-                            "No se puede eliminar el usuario porque tiene préstamos asociados"
+                            "No se puede eliminar el perfil de Estudiante porque tiene préstamos asociados."
                         );
                     }
 
-                    // B. Eliminar el perfil de Estudiante
-                    _context.Estudiante.Remove(studentProfile);
                 }
+               
 
                 // 3. Intentar encontrar y eliminar el perfil de Administrador (deviceManager)
-                var adminProfile = await _context.AdminDisp
+                var adminProfile = await _context.Administradores
                     .FirstOrDefaultAsync(a => a.ApplicationUserId == id);
 
                 if (adminProfile != null)
                 {
                     // C. Eliminar el perfil de Administrador
-                    _context.AdminDisp.Remove(adminProfile);
+                    _context.Administradores.Remove(adminProfile);
 
                     // NOTA: Si DeviceManager puede tener Loans (DeviceManager?.Loans.Any()), 
                     // la validación de préstamos debe ir aquí también.

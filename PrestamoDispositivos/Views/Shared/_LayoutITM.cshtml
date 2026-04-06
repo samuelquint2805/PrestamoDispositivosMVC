@@ -1,0 +1,363 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — ITM Préstamo de Equipos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --itm-navy:    #0a2240;
+            --itm-blue:    #1a4080;
+            --itm-accent:  #c8a84b;   /* dorado 80 años */
+            --itm-light:   #e8eef5;
+            --itm-border:  #c8d4e0;
+            --itm-text:    #1e2d3d;
+            --itm-muted:   #6b7f95;
+            --itm-white:   #ffffff;
+            --radius:      4px;
+            --shadow:      0 2px 12px rgba(10,34,64,.10);
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Source Sans 3', sans-serif;
+            background: #f0f4f8;
+            color: var(--itm-text);
+        }
+
+        /* ── HEADER ─────────────────────────────── */
+        .itm-header {
+            background: var(--itm-navy);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 72px;
+            border-bottom: 3px solid var(--itm-accent);
+        }
+
+        .itm-header__logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .itm-header__logo-text {
+            font-family: 'Barlow Condensed', sans-serif;
+            color: var(--itm-white);
+            font-size: 1.05rem;
+            line-height: 1.25;
+            font-weight: 600;
+            letter-spacing: .03em;
+        }
+
+        .itm-header__logo-text span {
+            display: block;
+            font-size: .72rem;
+            font-weight: 300;
+            color: #a8bcd0;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .itm-header__badge {
+            background: var(--itm-accent);
+            color: var(--itm-navy);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: .25rem .55rem;
+            border-radius: 2px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-left: auto;
+        }
+
+        /* ── PAGE WRAPPER ────────────────────────── */
+        .itm-page {
+            min-height: calc(100vh - 72px - 64px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1rem;
+        }
+
+        /* ── CARD ────────────────────────────────── */
+        .itm-card {
+            background: var(--itm-white);
+            border: 1px solid var(--itm-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 420px;
+            padding: 2.2rem 2.4rem 2.4rem;
+            animation: fadeUp .35s ease both;
+        }
+
+        .itm-card--wide { max-width: 520px; }
+
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .itm-card__title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--itm-navy);
+            margin-bottom: 1.6rem;
+            letter-spacing: .02em;
+            border-bottom: 2px solid var(--itm-accent);
+            padding-bottom: .55rem;
+        }
+
+        /* ── FORM ELEMENTS ───────────────────────── */
+        .itm-label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--itm-muted);
+            margin-bottom: .3rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .itm-input {
+            width: 100%;
+            border: 1px solid var(--itm-border);
+            border-radius: var(--radius);
+            padding: .62rem .85rem;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: .97rem;
+            color: var(--itm-text);
+            background: #fafbfc;
+            transition: border-color .18s, box-shadow .18s;
+            outline: none;
+        }
+
+        .itm-input::placeholder { color: #b0bec8; }
+
+        .itm-input:focus {
+            border-color: var(--itm-blue);
+            box-shadow: 0 0 0 3px rgba(26,64,128,.12);
+            background: var(--itm-white);
+        }
+
+        .itm-input.input-validation-error {
+            border-color: #c0392b;
+        }
+
+        .field-validation-error {
+            color: #c0392b;
+            font-size: .78rem;
+            margin-top: .22rem;
+            display: block;
+        }
+
+        .itm-field { margin-bottom: 1.1rem; }
+
+        /* ── BUTTON ──────────────────────────────── */
+        .itm-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            background: var(--itm-blue);
+            color: var(--itm-white);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: var(--radius);
+            padding: .68rem 1.4rem;
+            cursor: pointer;
+            transition: background .18s, transform .1s;
+            width: 100%;
+            margin-top: .5rem;
+        }
+
+        .itm-btn:hover  { background: var(--itm-navy); }
+        .itm-btn:active { transform: scale(.98); }
+
+        .itm-btn--outline {
+            background: transparent;
+            color: var(--itm-blue);
+            border: 1.5px solid var(--itm-blue);
+        }
+
+        .itm-btn--outline:hover { background: var(--itm-light); }
+
+        /* ── LINKS ───────────────────────────────── */
+        .itm-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.1rem;
+            font-size: .88rem;
+        }
+
+        .itm-links a {
+            color: var(--itm-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color .15s;
+        }
+
+        .itm-links a:hover { color: var(--itm-navy); text-decoration: underline; }
+
+        /* ── VALIDATION SUMMARY ──────────────────── */
+        .validation-summary-errors {
+            background: #fdf0ef;
+            border: 1px solid #e8b4b0;
+            border-radius: var(--radius);
+            padding: .7rem .9rem;
+            margin-bottom: 1rem;
+            font-size: .85rem;
+            color: #9b2a1f;
+        }
+
+        .validation-summary-errors ul { padding-left: 1.1rem; }
+
+        /* ── DIVIDER ─────────────────────────────── */
+        .itm-divider {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: var(--itm-muted);
+            font-size: .8rem;
+            margin: 1rem 0;
+        }
+
+        .itm-divider::before,
+        .itm-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--itm-border);
+        }
+
+        /* ── STEP INDICATOR ──────────────────────── */
+        .itm-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 1.6rem;
+        }
+
+        .itm-step {
+            flex: 1;
+            text-align: center;
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--itm-muted);
+            position: relative;
+            padding-bottom: .5rem;
+            border-bottom: 3px solid var(--itm-border);
+        }
+
+        .itm-step.active {
+            color: var(--itm-blue);
+            border-bottom-color: var(--itm-blue);
+        }
+
+        .itm-step.done {
+            color: #2e7d32;
+            border-bottom-color: #2e7d32;
+        }
+
+        /* ── ROLE BADGE ──────────────────────────── */
+        .role-tag {
+            display: inline-block;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: .2rem .55rem;
+            border-radius: 2px;
+            margin-left: .4rem;
+        }
+
+        .role-tag--student  { background: #e3f2fd; color: #1565c0; }
+        .role-tag--lender   { background: #e8f5e9; color: #2e7d32; }
+        .role-tag--admin    { background: #fff3e0; color: #e65100; }
+
+        /* ── FOOTER ──────────────────────────────── */
+        .itm-footer {
+            background: var(--itm-navy);
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: .8rem 2rem;
+            border-top: 2px solid var(--itm-accent);
+        }
+
+        .itm-footer__logo-img {
+            height: 36px;
+            opacity: .85;
+            filter: brightness(0) invert(1);
+        }
+
+        .itm-footer__text {
+            color: #7a9ab8;
+            font-size: .75rem;
+            text-align: center;
+        }
+
+        /* ── GRID ────────────────────────────────── */
+        .itm-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1rem;
+        }
+
+        @@media (max-width: 480px) {
+            .itm-card { padding: 1.6rem 1.4rem; }
+            .itm-grid-2 { grid-template-columns: 1fr; gap: 0; }
+            .itm-header { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER ITM -->
+    <header class="itm-header">
+        <div class="itm-header__logo">
+            <!-- SVG simplificado del logo ITM -->
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="44" height="44" rx="3" fill="#1a4080"/>
+                <text x="22" y="30" text-anchor="middle" font-family="Barlow Condensed, sans-serif"
+                      font-size="18" font-weight="700" fill="white" letter-spacing="1">ITM</text>
+            </svg>
+            <div class="itm-header__logo-text">
+                Institución Universitaria
+                <span>Préstamo de Equipos Informáticos</span>
+            </div>
+        </div>
+        <div class="itm-header__badge">80 Años</div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="itm-page">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER ITM -->
+    <footer class="itm-footer">
+        <div class="itm-footer__text">
+            © @DateTime.Now.Year Instituto Tecnológico Metropolitano · Medellín, Colombia
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

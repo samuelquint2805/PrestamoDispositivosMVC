@@ -49,7 +49,6 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var devices = await _context.Dispositivos
-                    .Include(x => x.Prestamos)
                     .FirstOrDefaultAsync(x => x.IdDisp == Guid.Parse(id.ToString()));
 
                 if (devices == null)
@@ -113,7 +112,6 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var devic = await _context.Dispositivos
-                    
                     .FirstOrDefaultAsync(x => x.IdDisp == Guid.Parse(id.ToString()));
 
                 if (devic == null)

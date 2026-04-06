@@ -10,6 +10,7 @@ using PrestamoDispositivos.DataContext.Sections;
 using PrestamoDispositivos.Services.Abstractions;
 using PrestamoDispositivos.Services.Implementations;
 using System;
+using static PrestamoDispositivos.Services.Implementations.RequestObserver;
 
 namespace PrestamoDispositivos
 {
@@ -40,16 +41,24 @@ namespace PrestamoDispositivos
                     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 });
 
+
             // ================
             // C) AUTORIZACIÓN (POLICIES)
             // ================
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("DeviceManagerAdmin", policy =>
-                    policy.RequireRole("DeviceManAdmin"));
+                options.AddPolicy("SuperAdminOnly", policy =>
+                    policy.RequireRole("SuperAdmin"));
+
+                options.AddPolicy("LenderOnly", policy =>
+                    policy.RequireRole("Lender"));
 
                 options.AddPolicy("StudentOnly", policy =>
-                    policy.RequireRole("Estudiante"));
+                    policy.RequireRole("Student"));
+
+                // Política combinada: SuperAdmin o Lender pueden gestionar préstamos
+                options.AddPolicy("LoanManagement", policy =>
+                    policy.RequireRole("SuperAdmin", "Lender"));
             });
 
             // ================
@@ -67,35 +76,35 @@ namespace PrestamoDispositivos
                 config.Position = NotyfPosition.TopRight;
             });
 
-            builder.Services.AddAuthentication()
-     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-     {
-         var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+     //       builder.Services.AddAuthentication()
+     //.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+     //{
+     //    var jwtSecret = builder.Configuration["JwtSettings:Secret"];
 
-         // Validar que la clave existe
-         if (string.IsNullOrEmpty(jwtSecret))
-         {
-             throw new InvalidOperationException("JWT Secret no está configurada en appsettings.json");
-         }
+     //    // Validar que la clave existe
+     //    if (string.IsNullOrEmpty(jwtSecret))
+     //    {
+     //        throw new InvalidOperationException("JWT Secret no está configurada en appsettings.json");
+     //    }
 
-         // Validar longitud mínima
-         if (jwtSecret.Length < 32)
-         {
-             throw new InvalidOperationException("JWT Secret debe tener al menos 32 caracteres");
-         }
+     //    // Validar longitud mínima
+     //    if (jwtSecret.Length < 32)
+     //    {
+     //        throw new InvalidOperationException("JWT Secret debe tener al menos 32 caracteres");
+     //    }
 
-         options.TokenValidationParameters = new TokenValidationParameters
-         {
-             ValidateIssuer = true,
-             ValidateAudience = true,
-             ValidateLifetime = true,
-             ValidateIssuerSigningKey = true,
-             IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSecret)),
-             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-             ValidAudience = builder.Configuration["JwtSettings:Audience"],
-             ClockSkew = TimeSpan.Zero
-         };
-     });
+     //    options.TokenValidationParameters = new TokenValidationParameters
+     //    {
+     //        ValidateIssuer = true,
+     //        ValidateAudience = true,
+     //        ValidateLifetime = true,
+     //        ValidateIssuerSigningKey = true,
+     //        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSecret)),
+     //        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+     //        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+     //        ClockSkew = TimeSpan.Zero
+     //    };
+     //});
             // ================
             // F) SERVICES INJECTION
             // ================
@@ -109,14 +118,19 @@ namespace PrestamoDispositivos
         // ============================================================
         private static void AddServices(WebApplicationBuilder builder)
         {
-            builder.Services.AddScoped<IStudentService, StudentService>();
-            builder.Services.AddScoped<IStudentStatusService, StudentStatusService>();
-            builder.Services.AddScoped<IDeviceService, DeviceService>();
-            builder.Services.AddScoped<IDeviceManagerService, DeviceManagerService>();
-            builder.Services.AddScoped<ILoanService, LoanService>();
+            builder.Services.AddScoped<IAdministratorServicie, AdminstratorService>();
             builder.Services.AddScoped<IAppUser, AppUser>();
-            builder.Services.AddScoped<ILoanEventService, LoanEventoService>();
-            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<IDeviceService, DeviceService>();
+            builder.Services.AddScoped<ILoanService, LoanService>();
+            builder.Services.AddScoped<ILenderService, lenderService>();
+            builder.Services.AddScoped<IAppUser, AppUser>();
+            builder.Services.AddScoped<IRequestService, RequestService>();
+            builder.Services.AddScoped<IRolservice, RolService>();
+            builder.Services.AddSingleton<IRequestObservable, RequestObservableManager>();
+            builder.Services.AddScoped<AuditRequestObserver>();
+            builder.Services.AddScoped<NotificationRequestObserver>();
+            builder.Services.AddScoped<IRequestService, RequestService>();
+
         }
 
         // ============================================================
@@ -124,13 +138,23 @@ namespace PrestamoDispositivos
         // ============================================================
         public static WebApplication WebAppCustomConfiguration(this WebApplication app)
         {
+           
             app.UseAuthentication();
             app.UseAuthorization();
 
             // Notyf notifications
             app.UseNotyf();
+            using (var scope = app.Services.CreateScope())
+            {
+                var observable = app.Services.GetRequiredService<IRequestObservable>();
+                var auditObs = scope.ServiceProvider.GetRequiredService<AuditRequestObserver>();
+                var notifyObs = scope.ServiceProvider.GetRequiredService<NotificationRequestObserver>();
 
-            return app;
+                observable.AddObserver(auditObs);
+                observable.AddObserver(notifyObs);
+            }
+
+                return app;
         }
     }
 }

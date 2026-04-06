@@ -1,4 +1,4 @@
-﻿@model PrestamoDispositivos.DTO.LoanDTO
+﻿@* @model PrestamoDispositivos.DTO.LoanDTO
 @{
     ViewData["Title"] = "Editar Préstamo";
     var devices = ViewBag.Devices as List<PrestamoDispositivos.DTO.deviceDTO> ?? new List<PrestamoDispositivos.DTO.deviceDTO>();
@@ -128,3 +128,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+ *@

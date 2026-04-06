@@ -1,25 +1,47 @@
 ﻿@model PrestamoDispositivos.Models.ViewModels.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Iniciar Sesión";
+}
 
-<form asp-controller="Account" asp-action="Login" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="ReturnUrl" />
+<div class="itm-card">
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label">Usuario o Correo</label>
-        <input asp-for="Email" class="form-control" placeholder="Ingrese su usuario" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+    <h1 class="itm-card__title">Página Para Préstamo de Equipos Informáticos</h1>
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+    <form asp-action="Login" asp-controller="Account" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="itm-field">
+            <label class="itm-label" asp-for="Email">Correo Institucional</label>
+            <input class="itm-input" asp-for="Email"
+                   type="email"
+                   placeholder="Correo Institucional"
+                   autocomplete="username" />
+            <span asp-validation-for="Email" class="field-validation-error"></span>
+        </div>
+
+        <div class="itm-field">
+            <label class="itm-label" asp-for="Password">Contraseña</label>
+            <input class="itm-input" asp-for="Password"
+                   type="password"
+                   placeholder="Contraseña"
+                   autocomplete="current-password" />
+            <span asp-validation-for="Password" class="field-validation-error"></span>
+        </div>
+
+        <button type="submit" class="itm-btn">Iniciar Sesión</button>
+    </form>
+
+    <div class="itm-links">
+        <a asp-action="Register" asp-controller="Account">Crear Cuenta</a>
+        <a asp-action="ForgotPassword" asp-controller="Account">Olvidé Contraseña</a>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label">Contraseña</label>
-        <input asp-for="Password" type="password" class="form-control" placeholder="********" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
+</div>
 
-    <div class="mb-3 form-check">
-        <input asp-for="RememberMe" class="form-check-input" />
-        <label asp-for="RememberMe" class="form-check-label">Recordarme</label>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

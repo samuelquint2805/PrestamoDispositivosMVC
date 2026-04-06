@@ -1,2 +1,23 @@
-﻿<h2>Cuenta bloqueada</h2>
-<p>Tu cuenta ha sido bloqueada temporalmente por demasiados intentos fallidos. Intenta de nuevo más tarde o contacta al administrador.</p>
+﻿@{
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Cuenta Bloqueada";
+}
+
+<div class="itm-card" style="text-align:center;">
+
+    <div style="font-size:2.8rem; margin-bottom:.8rem;">🔒</div>
+
+    <h1 class="itm-card__title" style="text-align:center; border:none; color:#c0392b;">
+        Cuenta Bloqueada
+    </h1>
+
+    <p style="font-size:.95rem; color:#6b7f95; margin-bottom:1.5rem; line-height:1.6;">
+        Tu cuenta ha sido bloqueada temporalmente por múltiples intentos fallidos.<br>
+        Por favor, espera unos minutos antes de intentarlo nuevamente.
+    </p>
+
+    <a asp-action="Login" asp-controller="Account" class="itm-btn" style="text-decoration:none; display:flex;">
+        Volver al Inicio de Sesión
+    </a>
+
+</div>

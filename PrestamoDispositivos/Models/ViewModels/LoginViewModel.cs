@@ -4,17 +4,19 @@ namespace PrestamoDispositivos.Models.ViewModels
 {
     public class LoginViewModel
     {
-        [Required]
-        [Display(Name = "Correo o usuario")]
-        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El correo electrónico es requerido.")]
+        [EmailAddress(ErrorMessage = "Formato de correo inválido.")]
+        [Display(Name = "Correo Electrónico")]
+        public string Email { get; set; } = "";
 
-        [Required]
+        [Required(ErrorMessage = "La contraseña es requerida.")]
         [DataType(DataType.Password)]
-        public string Password { get; set; } = string.Empty;
+        [Display(Name = "Contraseña")]
+        public string Password { get; set; } = "";
 
         [Display(Name = "Recordarme")]
         public bool RememberMe { get; set; }
 
-        public string? ReturnUrl { get; set; } 
+        public string? ReturnUrl { get; set; }
     }
 }

@@ -25,10 +25,8 @@ namespace PrestamoDispositivos.Services.Implementations
         {
             try
             {
-                
+
                 var StudentDV = await _context.Estudiante
-            // AÑADIR .Include() para cargar el objeto de navegación
-            .Include(s => s.EstadoEst)
             .ToListAsync();
 
                 var StudentDTO = _mapper.Map<List<StudentDTO>>(StudentDV);
@@ -37,7 +35,7 @@ namespace PrestamoDispositivos.Services.Implementations
             }
             catch (Exception)
             {
-                return  Response<List<StudentDTO>>.Failure(
+                return Response<List<StudentDTO>>.Failure(
                     "Error al obtener la lista de Estudiantes"
                 );
             }
@@ -49,7 +47,6 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var StudentGT = await _context.Estudiante
-                    .Include(x => x.Prestamos)
                     .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentGT == null)
@@ -59,7 +56,7 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 return Response<StudentDTO>.Success(StudentDto, "Estudiante obtenido correctamente");
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return Response<StudentDTO>.Failure(
                     "Error al obtener el Estudiante"
@@ -75,24 +72,23 @@ namespace PrestamoDispositivos.Services.Implementations
 
                 // Verificar si el usuario ya existe
                 var existingUser = await _context.Estudiante
-                    .FirstOrDefaultAsync(x => x.IdEst ==StudentDto.IdEst);
+                    .FirstOrDefaultAsync(x => x.IdEst == StudentDto.IdEst);
 
                 if (existingUser != null)
-                    return  Response<StudentDTO>.Failure("El Estudiante ya existe");
+                    return Response<StudentDTO>.Failure("El Estudiante ya existe");
 
                 var existingCarnet = await _context.Estudiante
-                    .FirstOrDefaultAsync(x => x.Carnet == StudentDto.Carnet);
+                    .FirstOrDefaultAsync(x => x.carnet == StudentDto.carnet);
 
                 if (existingUser != null)
                     return Response<StudentDTO>.Failure("El Carnet ya existe, digite otro");
 
 
                 // Mapear DTO a modelo
-                Guid defaultStatusId = Guid.Parse("1EAA1209-075C-4E29-91C9-33824518AD93");
-                StudentDto.EstadoEstId = defaultStatusId;
+              
                 StudentDto.IdEst = Guid.NewGuid();
                 var students = _mapper.Map<Student>(StudentDto);
-               
+
 
                 // Guardar en base de datos
                 _context.Estudiante.Add(students);
@@ -108,7 +104,7 @@ namespace PrestamoDispositivos.Services.Implementations
             }
             catch (Exception)
             {
-                return  Response<StudentDTO>.Failure(
+                return Response<StudentDTO>.Failure(
                     "Error al crear el Estudiante"
                 );
             }
@@ -120,7 +116,6 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var StudentUP = await _context.Estudiante
-                    .Include(x => x.Prestamos)
                     .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentUP == null)
@@ -155,16 +150,15 @@ namespace PrestamoDispositivos.Services.Implementations
             try
             {
                 var StudentDt = await _context.Estudiante
-                   .Include(x => x.Prestamos)
                    .FirstOrDefaultAsync(x => x.IdEst == Guid.Parse(id.ToString()));
 
                 if (StudentDt == null)
                     return Response<bool>.Failure("Estudiante no encontrado");
 
                 // Validar si tiene préstamos asociados
-                if (StudentDt.Prestamos != null && StudentDt.Prestamos.Any())
+                if (StudentDt.User.PrestamosUser != null && StudentDt.User.PrestamosUser.Any())
                 {
-                    return  Response<bool>.Failure(
+                    return Response<bool>.Failure(
                         "No se puede eliminar el Estudiante porque tiene préstamos asociados"
                     );
                 }
@@ -176,7 +170,7 @@ namespace PrestamoDispositivos.Services.Implementations
             }
             catch (Exception)
             {
-                return  Response<bool>.Failure(
+                return Response<bool>.Failure(
                     "Error al eliminar el Estudiante"
                 );
             }

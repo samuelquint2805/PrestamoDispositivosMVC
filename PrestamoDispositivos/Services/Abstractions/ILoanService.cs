@@ -10,11 +10,9 @@ namespace PrestamoDispositivos.Services.Abstractions
         Task<Response<bool>> DeleteLoanAsync(Guid id);
         Task<Response<LoanDTO>> GetLoanByIdAsync(Guid id);
         Task<Response<List<LoanDTO>>> GetAllLoansAsync();
-        Task<Response<object>> ToggleLoanStatusAsync(ToggleLoanStatusDTO dto);
         Task<Response<List<StudentDTO>>> GetAllStudentsAsync();
         Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync();
-        Task<Response<List<deviceManagerDTO>>> GetAllAdministratorsAsync();
-        Task<Response<List<LoanEventDTO>>> GetAllLoanEventsAsync();
+        Task<Response<List<AdministratorDTO>>> GetAllAdministratorsAsync();
         Task<Response<List<LoanDTO>>> GetAllLoansPerStudentAsync(Guid id);
         Task<Response<bool>> ReturnDeviceAsync(Guid loanId);
     }
