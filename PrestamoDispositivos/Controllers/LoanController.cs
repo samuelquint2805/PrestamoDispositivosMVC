@@ -153,7 +153,7 @@ namespace PrestamoDispositivos.Controllers
         public async Task<IActionResult> Create([FromForm] LoanDTO dto)
         {
             // Si es estudiante, forzar que el préstamo sea para sí mismo
-            if (User.IsInRole("Estudiante"))
+            if (User.IsInRole("Student"))
             {
                 var userId = GetCurrentUserId();
                 if (userId != null)
@@ -163,8 +163,7 @@ namespace PrestamoDispositivos.Controllers
 
                     if (student != null)
                     {
-                        // Forzar que el préstamo sea para este estudiante
-                        dto.User.studentUsuario.IdEst = student.IdEst;
+                        dto.IdUser = student.ApplicationUserId;
                     }
                     else
                     {
@@ -173,6 +172,8 @@ namespace PrestamoDispositivos.Controllers
                     }
                 }
             }
+
+            dto.EstadoPrestamo = "Prestado";
 
             if (!ModelState.IsValid)
             {
