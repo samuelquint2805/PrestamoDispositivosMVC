@@ -166,27 +166,79 @@ namespace PrestamoDispositivos.Services.Implementations
             }
         }
 
-
-        //futura implementación de métodos para obtener estudiantes, dispositivos disponibles y administradores
-        public Task<Response<List<StudentDTO>>> GetAllStudentsAsync()
+        public async Task<Response<bool>> ReturnDeviceAsync(Guid loanId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var loan = await _context.Prestamos
+                    .Include(l => l.Dispositivo)
+                    .FirstOrDefaultAsync(l => l.IdPrestamos == loanId);
+
+                if (loan == null)
+                    return Response<bool>.Failure("Préstamo no encontrado");
+
+                // Actualizar estado del préstamo
+                loan.EstadoPrestamo = "Devuelto";
+
+                // Actualizar estado del dispositivo
+                loan.Dispositivo.EstadoEquipo = "Disponible";
+
+                await _context.SaveChangesAsync();
+
+                return Response<bool>.Success(true, "Dispositivo devuelto correctamente");
+            }
+            catch (Exception)
+            {
+                return Response<bool>.Failure("Error al devolver el dispositivo");
+            }
         }
 
-        public Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync()
+        public async Task<Response<List<StudentDTO>>> GetAllStudentsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<Student> students = await _context.Estudiante.ToListAsync();
+                List<StudentDTO> dtoList = _mapper.Map<List<StudentDTO>>(students);
+                return Response<List<StudentDTO>>.Success(dtoList, "Lista de estudiantes obtenida correctamente");
+            }
+            catch (Exception)
+            {
+                return Response<List<StudentDTO>>.Failure("Error al obtener los estudiantes");
+            }
         }
 
-        public Task<Response<List<AdministratorDTO>>> GetAllAdministratorsAsync()
+        public async Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<Device> devices = await _context.Dispositivos
+                    .Where(d => d.EstadoEquipo == "Disponible")
+                    .ToListAsync();
+
+                List<deviceDTO> dtoList = _mapper.Map<List<deviceDTO>>(devices);
+                return Response<List<deviceDTO>>.Success(dtoList, "Dispositivos disponibles obtenidos correctamente");
+            }
+            catch (Exception)
+            {
+                return Response<List<deviceDTO>>.Failure("Error al obtener los dispositivos disponibles");
+            }
         }
 
-        public Task<Response<bool>> ReturnDeviceAsync(Guid loanId)
+        public async Task<Response<List<AdministratorDTO>>> GetAllAdministratorsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<Administrator> admins = await _context.Administradores.ToListAsync();
+                List<AdministratorDTO> dtoList = _mapper.Map<List<AdministratorDTO>>(admins);
+                return Response<List<AdministratorDTO>>.Success(dtoList, "Lista de administradores obtenida correctamente");
+            }
+            catch (Exception)
+            {
+                return Response<List<AdministratorDTO>>.Failure("Error al obtener los administradores");
+            }
         }
+
+
 
         // Cambiar estado del préstamo
         //public async Task<Response<object>> ToggleLoanStatusAsync(ToggleLoanStatusDTO dto)

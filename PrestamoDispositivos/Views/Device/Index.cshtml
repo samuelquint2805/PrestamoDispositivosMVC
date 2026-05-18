@@ -78,10 +78,10 @@
                                 @if (isStudent && statusLower == "disponible")
                                 {
                                     @* IMPORTANTE: asp-route-id es lo que pone el ID en la URL *@
-                                    <a asp-controller="Request"
-                                           asp-action="Reserve"
-                                           asp-fo
-                                           class="btn-itm-primary">
+                                    <a asp-controller="Loan"
+                                       asp-action="Create"
+                                       asp-route-id="@device.IdDisp"
+                                       class="btn-itm-primary">
                                         <i class="bi bi-calendar-check me-1"></i> Solicitar
                                     </a>
                                 }

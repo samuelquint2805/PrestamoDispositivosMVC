@@ -120,11 +120,15 @@ namespace PrestamoDispositivos.Controllers
 
         // CREAR préstamo (formulario) - ESTUDIANTES Y ADMIN
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromRoute] Guid id)
         {
+            var dto = new LoanDTO { IdDispo = id };
+
+            var device = await _context.Dispositivos.FindAsync(id);
+            ViewBag.MarcaDispositivo = device?.Marca;
+
             await LoadDropdownData();
 
-            // Si es estudiante, pre-seleccionar su propio ID
             if (User.IsInRole("Estudiante"))
             {
                 var userId = GetCurrentUserId();
@@ -141,7 +145,7 @@ namespace PrestamoDispositivos.Controllers
                 }
             }
 
-            return View();
+            return View(dto);
         }
 
         // CREAR préstamo (POST) - ESTUDIANTES Y ADMIN
