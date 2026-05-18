@@ -22,54 +22,110 @@ namespace PrestamoDispositivos.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.ApplicationUser", b =>
+            modelBuilder.Entity("ApplicationUserAuditReportsClass", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("ReporAuditIdAudit")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ReportUsidUsuario")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReporAuditIdAudit", "ReportUsidUsuario");
+
+                    b.HasIndex("ReportUsidUsuario");
+
+                    b.ToTable("UserAuditReports", (string)null);
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.Administrator", b =>
+                {
+                    b.Property<Guid>("IdAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ApplicationUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                    b.Property<int>("numeroCelular")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("LockoutEnd")
-                        .HasColumnType("datetime2");
+                    b.HasKey("IdAdmin");
+
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique()
+                        .HasFilter("[ApplicationUserId] IS NOT NULL");
+
+                    b.ToTable("Administradores");
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("idUsuario")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorreoElectrónico")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
+                    b.Property<Guid?>("RolUser")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("codigo2FA")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TwoFactorCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("TwoFactorCodeExpiry")
+                    b.Property<DateTime>("fechaRegistro")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                    b.Property<Guid?>("idSuperior")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("usuario")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("idUsuario");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("RolUser");
+
+                    b.HasIndex("idSuperior");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.AuditReportsClass", b =>
+                {
+                    b.Property<Guid?>("IdAudit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FechaEvento")
+                        .IsRequired()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("accion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdAudit");
+
+                    b.ToTable("ReportesyAuditorias");
                 });
 
             modelBuilder.Entity("PrestamoDispositivos.Models.Device", b =>
@@ -78,15 +134,15 @@ namespace PrestamoDispositivos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Almacenamiento")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<string>("EstadoDisp")
+                    b.Property<string>("Especificaciones")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Procesador")
+                    b.Property<string>("EstadoEquipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Marca")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -94,13 +150,10 @@ namespace PrestamoDispositivos.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TarjetaGrafica")
+                    b.Property<string>("URLImagen")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("IdDisp");
 
@@ -120,44 +173,45 @@ namespace PrestamoDispositivos.Migrations
                     b.Property<DateTime>("FechaEvento")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("IdAdminDev")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("IdDispo")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("IdEstudiante")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("IdEvento")
+                    b.Property<Guid?>("IdUser")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("IdPrestamos");
 
-                    b.HasIndex("IdAdminDev");
-
                     b.HasIndex("IdDispo");
 
-                    b.HasIndex("IdEstudiante");
-
-                    b.HasIndex("IdEvento");
+                    b.HasIndex("IdUser");
 
                     b.ToTable("Prestamos");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.LoanEvent", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.Request", b =>
                 {
-                    b.Property<Guid>("IdEvento")
+                    b.Property<Guid>("IdSolicitud")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("TipoPrestamos")
+                    b.Property<string>("EstadoSolicitud")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("IdEvento");
+                    b.Property<DateTime>("FechaAprobacion")
+                        .HasColumnType("datetime2");
 
-                    b.ToTable("EventoPrestamos");
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("idUser")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("IdSolicitud");
+
+                    b.HasIndex("idUser");
+
+                    b.ToTable("solicitud");
                 });
 
             modelBuilder.Entity("PrestamoDispositivos.Models.Student", b =>
@@ -169,25 +223,17 @@ namespace PrestamoDispositivos.Migrations
                     b.Property<Guid?>("ApplicationUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Carnet")
+                    b.Property<int>("DocumentoID")
                         .HasColumnType("int");
-
-                    b.Property<int>("Edad")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("EstadoEstId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("carnet")
+                        .HasColumnType("int");
 
-                    b.Property<int>("semestreCursado")
+                    b.Property<int>("numeroCelular")
                         .HasColumnType("int");
 
                     b.HasKey("IdEst");
@@ -196,14 +242,12 @@ namespace PrestamoDispositivos.Migrations
                         .IsUnique()
                         .HasFilter("[ApplicationUserId] IS NOT NULL");
 
-                    b.HasIndex("EstadoEstId");
-
                     b.ToTable("Estudiante");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.deviceManager", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.lender", b =>
                 {
-                    b.Property<Guid>("IdAdmin")
+                    b.Property<Guid>("idPres")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -214,88 +258,138 @@ namespace PrestamoDispositivos.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("IdAdmin");
+                    b.Property<int?>("numeroCelular")
+                        .IsRequired()
+                        .HasColumnType("int");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasKey("idPres");
 
-                    b.ToTable("AdminDisp");
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique()
+                        .HasFilter("[ApplicationUserId] IS NOT NULL");
+
+                    b.ToTable("Prestamista");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.studentStatus", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.setRol", b =>
                 {
-                    b.Property<Guid>("IdStatus")
+                    b.Property<Guid>("idRol")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("EstEstu")
+                    b.Property<string>("descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("IdStatus");
+                    b.Property<string>("nombreRol")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("EstadoEstudiantes");
+                    b.Property<string>("permisos")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("idRol");
+
+                    b.ToTable("Rol");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.ApplicationUser", b =>
+            modelBuilder.Entity("ApplicationUserAuditReportsClass", b =>
+                {
+                    b.HasOne("PrestamoDispositivos.Models.AuditReportsClass", null)
+                        .WithMany()
+                        .HasForeignKey("ReporAuditIdAudit")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReportUsidUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.Administrator", b =>
                 {
                     b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .WithOne("AdminUsuario")
+                        .HasForeignKey("PrestamoDispositivos.Models.Administrator", "ApplicationUserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.Loan", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.ApplicationUser", b =>
                 {
-                    b.HasOne("PrestamoDispositivos.Models.deviceManager", "DeviceManager")
-                        .WithMany("Loans")
-                        .HasForeignKey("IdAdminDev");
-
-                    b.HasOne("PrestamoDispositivos.Models.Device", "Dispositivo")
-                        .WithMany("Prestamos")
-                        .HasForeignKey("IdDispo");
-
-                    b.HasOne("PrestamoDispositivos.Models.Student", "Estudiante")
-                        .WithMany("Prestamos")
-                        .HasForeignKey("IdEstudiante")
+                    b.HasOne("PrestamoDispositivos.Models.setRol", "Rol")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("RolUser")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("PrestamoDispositivos.Models.LoanEvent", "EventoPrestamos")
-                        .WithMany("EventosPrestamos")
-                        .HasForeignKey("IdEvento");
+                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "Superior")
+                        .WithMany()
+                        .HasForeignKey("idSuperior");
 
-                    b.Navigation("DeviceManager");
+                    b.Navigation("Rol");
+
+                    b.Navigation("Superior");
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.Loan", b =>
+                {
+                    b.HasOne("PrestamoDispositivos.Models.Device", "Dispositivo")
+                        .WithMany("Prestamos")
+                        .HasForeignKey("IdDispo")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
+                        .WithMany("PrestamosUser")
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Dispositivo");
 
-                    b.Navigation("Estudiante");
+                    b.Navigation("User");
+                });
 
-                    b.Navigation("EventoPrestamos");
+            modelBuilder.Entity("PrestamoDispositivos.Models.Request", b =>
+                {
+                    b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
+                        .WithMany("Solicitudes")
+                        .HasForeignKey("idUser")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PrestamoDispositivos.Models.Student", b =>
                 {
                     b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("PrestamoDispositivos.Models.Student", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("PrestamoDispositivos.Models.studentStatus", "EstadoEst")
-                        .WithMany("studentsStu")
-                        .HasForeignKey("EstadoEstId");
-
-                    b.Navigation("EstadoEst");
+                        .WithOne("studentUsuario")
+                        .HasForeignKey("PrestamoDispositivos.Models.Student", "ApplicationUserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.deviceManager", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.lender", b =>
                 {
                     b.HasOne("PrestamoDispositivos.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .WithOne("LenderUsuario")
+                        .HasForeignKey("PrestamoDispositivos.Models.lender", "ApplicationUserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PrestamoDispositivos.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("AdminUsuario");
+
+                    b.Navigation("LenderUsuario");
+
+                    b.Navigation("PrestamosUser");
+
+                    b.Navigation("Solicitudes");
+
+                    b.Navigation("studentUsuario");
                 });
 
             modelBuilder.Entity("PrestamoDispositivos.Models.Device", b =>
@@ -303,24 +397,9 @@ namespace PrestamoDispositivos.Migrations
                     b.Navigation("Prestamos");
                 });
 
-            modelBuilder.Entity("PrestamoDispositivos.Models.LoanEvent", b =>
+            modelBuilder.Entity("PrestamoDispositivos.Models.setRol", b =>
                 {
-                    b.Navigation("EventosPrestamos");
-                });
-
-            modelBuilder.Entity("PrestamoDispositivos.Models.Student", b =>
-                {
-                    b.Navigation("Prestamos");
-                });
-
-            modelBuilder.Entity("PrestamoDispositivos.Models.deviceManager", b =>
-                {
-                    b.Navigation("Loans");
-                });
-
-            modelBuilder.Entity("PrestamoDispositivos.Models.studentStatus", b =>
-                {
-                    b.Navigation("studentsStu");
+                    b.Navigation("Usuarios");
                 });
 #pragma warning restore 612, 618
         }

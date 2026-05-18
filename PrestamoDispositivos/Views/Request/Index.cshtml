@@ -1,0 +1,213 @@
+﻿@model List<PrestamoDispositivos.DTO.RequestoDTO>
+@{
+    ViewData["Title"] = "Solicitudes";
+    bool isManager = ViewBag.IsManager == true;
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #0a2240 0%, #1a4080 100%);
+        color: #fff; padding: 1.8rem 0 1.4rem;
+        margin-bottom: 2rem; border-bottom: 3px solid #c8a84b;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: .2rem; }
+    .page-header p  { color: #a8bcd0; font-size: .9rem; margin: 0; }
+
+    /* filter pills */
+    .filter-pills { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .pill {
+        padding: .3rem .9rem; border-radius: 20px; font-size: .8rem; font-weight: 600;
+        border: 1.5px solid #c8d4e0; background: #fff; color: #4a5568;
+        text-decoration: none; transition: all .18s;
+    }
+    .pill:hover, .pill.active { background: #1a4080; color: #fff; border-color: #1a4080; }
+    .pill.p-aprobada  { border-color: #2e7d32; color: #2e7d32; }
+    .pill.p-aprobada:hover, .pill.p-aprobada.active  { background: #2e7d32; color: #fff; }
+    .pill.p-rechazada { border-color: #c62828; color: #c62828; }
+    .pill.p-rechazada:hover, .pill.p-rechazada.active { background: #c62828; color: #fff; }
+    .pill.p-cancelada { border-color: #757575; color: #757575; }
+    .pill.p-cancelada:hover, .pill.p-cancelada.active { background: #757575; color: #fff; }
+
+    /* table */
+    .req-table { width: 100%; border-collapse: collapse; background: #fff;
+                 border-radius: 8px; overflow: hidden;
+                 box-shadow: 0 2px 10px rgba(10,34,64,.07); }
+    .req-table thead { background: #0a2240; color: #fff; }
+    .req-table thead th { padding: .75rem 1rem; font-size: .78rem; font-weight: 700;
+                          letter-spacing: .05em; text-transform: uppercase; }
+    .req-table tbody tr { border-bottom: 1px solid #e8eef5; transition: background .15s; }
+    .req-table tbody tr:last-child { border-bottom: none; }
+    .req-table tbody tr:hover { background: #f5f8fc; }
+    .req-table td { padding: .7rem 1rem; font-size: .88rem; color: #1e2d3d; vertical-align: middle; }
+
+    /* status badge */
+    .sbadge { display: inline-block; padding: .2rem .65rem; border-radius: 20px;
+              font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .sbadge-pendiente  { background: #fff3e0; color: #e65100; }
+    .sbadge-aprobada   { background: #e8f5e9; color: #2e7d32; }
+    .sbadge-rechazada  { background: #fce4ec; color: #c62828; }
+    .sbadge-cancelada  { background: #eeeeee; color: #616161; }
+
+    /* action btns */
+    .btn-sm-itm {
+        padding: .28rem .7rem; border-radius: 4px; font-size: .78rem; font-weight: 600;
+        border: 1.5px solid; display: inline-flex; align-items: center; gap: .25rem;
+        text-decoration: none; cursor: pointer; background: transparent; transition: all .15s;
+    }
+    .btn-approve { color: #2e7d32; border-color: #2e7d32; }
+    .btn-approve:hover { background: #e8f5e9; }
+    .btn-reject  { color: #c62828; border-color: #c62828; }
+    .btn-reject:hover  { background: #fce4ec; }
+    .btn-view    { color: #1a4080; border-color: #1a4080; }
+    .btn-view:hover    { background: #e8eef5; }
+    .btn-cancel-req { color: #757575; border-color: #bdbdbd; }
+    .btn-cancel-req:hover { background: #f5f5f5; }
+    .btn-del     { color: #c62828; border-color: #c62828; }
+    .btn-del:hover     { background: #fce4ec; }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #6b7f95; }
+    .empty-state i { font-size: 3rem; color: #c8d4e0; margin-bottom: 1rem; }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-send-check me-2"></i>
+            @(isManager ? "Gestión de Solicitudes" : "Mis Solicitudes")
+        </h1>
+        <p>@(isManager
+            ? "Revisa y aprueba o rechaza las solicitudes de préstamo de los estudiantes."
+            : "Consulta el estado de tus solicitudes de dispositivos.")</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+
+    <!-- Filtros por estado -->
+    <div class="filter-pills">
+        <a asp-action="Index" class="pill @(ViewBag.FiltroEstado == "Todos" ? "active" : "")">
+            Todas (@Model.Count)
+        </a>
+        <a asp-action="Index" asp-route-estado="Pendiente"
+           class="pill @(ViewBag.FiltroEstado == "Pendiente" ? "active" : "")">
+            Pendientes
+        </a>
+        <a asp-action="Index" asp-route-estado="Aprobada"
+           class="pill p-aprobada @(ViewBag.FiltroEstado == "Aprobada" ? "active" : "")">
+            Aprobadas
+        </a>
+        <a asp-action="Index" asp-route-estado="Rechazada"
+           class="pill p-rechazada @(ViewBag.FiltroEstado == "Rechazada" ? "active" : "")">
+            Rechazadas
+        </a>
+        <a asp-action="Index" asp-route-estado="Cancelada"
+           class="pill p-cancelada @(ViewBag.FiltroEstado == "Cancelada" ? "active" : "")">
+            Canceladas
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox d-block"></i>
+            <h4 style="color:#0a2240;">No hay solicitudes</h4>
+            <p>@(isManager ? "No hay solicitudes registradas con ese filtro." : "Aún no has hecho ninguna solicitud. Ve a dispositivos y reserva uno.")</p>
+            @if (!isManager)
+            {
+                <a asp-controller="Device" asp-action="Index"
+                   style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.5rem;
+                          background:#1a4080;color:#fff;padding:.5rem 1.2rem;border-radius:4px;
+                          text-decoration:none;font-weight:600;">
+                    <i class="bi bi-laptop"></i> Ver Dispositivos
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="req-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha Solicitud</th>
+                        @if (isManager) { <th>Estudiante</th> }
+                        <th>Estado</th>
+                        <th>Fecha Aprobación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int i = 1; }
+                    @foreach (var req in Model)
+                    {
+                        string badgeCls = req.EstadoSolicitud?.ToLower() switch {
+                            "pendiente" => "sbadge-pendiente",
+                            "aprobada"  => "sbadge-aprobada",
+                            "rechazada" => "sbadge-rechazada",
+                            "cancelada" => "sbadge-cancelada",
+                            _           => ""
+                        };
+
+                        <tr>
+                            <td style="color:#6b7f95; font-size:.8rem;">@(i++)</td>
+                            <td>@req.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                            @if (isManager)
+                            {
+                                <td>
+                                    <strong>@(req.User?.usuario ?? "—")</strong><br>
+                                    <span style="font-size:.76rem;color:#6b7f95;">@(req.User?.CorreoElectrónico ?? "")</span>
+                                </td>
+                            }
+                            <td><span class="sbadge @badgeCls">@req.EstadoSolicitud</span></td>
+                            <td>
+                                @(req.FechaAprobacion == DateTime.MinValue
+                                    ? "—"
+                                    : req.FechaAprobacion.ToString("dd/MM/yyyy HH:mm"))
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+
+                                    @* Lender / SuperAdmin: revisar *@
+                                    @if (isManager && req.EstadoSolicitud == "Pendiente")
+                                    {
+                                        <a asp-action="Review" asp-route-id="@req.IdSolicitud"
+                                           class="btn-sm-itm btn-view">
+                                            <i class="bi bi-eye"></i> Revisar
+                                        </a>
+                                    }
+
+                                    @* Student: cancelar si está pendiente *@
+                                    @if (!isManager && req.EstadoSolicitud == "Pendiente")
+                                    {
+                                        <form asp-action="Cancel" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@req.IdSolicitud" />
+                                            <button type="submit" class="btn-sm-itm btn-cancel-req"
+                                                    onclick="return confirm('¿Cancelar esta solicitud?')">
+                                                <i class="bi bi-x-circle"></i> Cancelar
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @* SuperAdmin: eliminar *@
+                                    @if (User.IsInRole("SuperAdmin"))
+                                    {
+                                        <form asp-action="Delete" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@req.IdSolicitud" />
+                                            <button type="submit" class="btn-sm-itm btn-del"
+                                                    onclick="return confirm('¿Eliminar permanentemente esta solicitud?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

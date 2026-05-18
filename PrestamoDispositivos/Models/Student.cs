@@ -9,42 +9,27 @@ namespace PrestamoDispositivos.Models
     {
         #region Atributos
         [Key]
+        [Required]
         public Guid IdEst { get; set; }
-        [Required(ErrorMessage = "El campo de Nombre es requerido")]
-        public string Nombre { get; set; } = String.Empty;
-        
-        [Required(ErrorMessage = "El campo de Teléfono es requerido")]
-        [MaxLength(50)]
-        public string? Telefono { get; set; }
-        [Required(ErrorMessage = "El campo de Edad es requerido")]
-        public int Edad { get; set; }
-        [Required(ErrorMessage = "El campo de Semestre Cursado es requerido")]
-        public int semestreCursado { get; set; }
-        
-        [Required(ErrorMessage = "El campo de Correo Institucional es requerido")]
-        
-        public int Carnet { get; set; }
+
+        [Required(ErrorMessage = "El campo Nombre es requerido")]
+        public required string Nombre { get; set; }
+        [Required(ErrorMessage = "El campo Carnet es requerido")]
+        public required int carnet { get; set; }
+        [Required(ErrorMessage = "El campo Documento de identificación es requerido")]
+        public required int DocumentoID { get; set; }
+        [Required(ErrorMessage = "El campo Celular es requerido")]
+        public required int numeroCelular { get; set; }
+
 
         #endregion
 
-
-        // apartado para Relaciones con otras clases (tablas)
         #region Relaciones
-
-        // Relación con ApplicationUser (Identity)
-        [ForeignKey("User")]
+        //Relacion a uno con ApplicationUser (Identity)
+       
         public Guid? ApplicationUserId { get; set; }
         public ApplicationUser? User { get; set; }
-
-        //Relacion a uno con studenStatus
-        [ForeignKey("EstadoEstudiante")]
-        public Guid? EstadoEstId { get; set; }
-        public studentStatus? EstadoEst { get; set; }
-
-       
-        // Relación a uno con Prestamos
-        [InverseProperty("Estudiante")]
-        public ICollection<Loan> Prestamos { get; set; } = new List<Loan>();
         #endregion
+
     }
 }

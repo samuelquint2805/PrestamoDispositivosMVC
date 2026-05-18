@@ -36,86 +36,6 @@ builder.Services.AddNotyf(config =>
     config.Position = NotyfPosition.TopRight;
 });
 
-// 
-// 4) SEEDER INICIAL (CREA ADMIN, SUPERVISOR, ESTUDIANTES)
-// 
-using (var scope = builder.Services.BuildServiceProvider().CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-
-    try
-    {
-        var db = services.GetRequiredService<DatacontextPres>();
-
-        db.Database.EnsureCreated();
-        logger.LogInformation("Ejecutando seeder inicial...");
-
-        // ADMIN PRINCIPAL
-        if (!db.Users.Any(u => u.Email == "admin@sistema.com"))
-        {
-            var admin = new PrestamoDispositivos.Models.ApplicationUser
-            {
-                UserName = "admin",
-                Email = "admin@sistema.com",
-                Role = "DeviceManAdmin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
-                LockoutEnabled = true,
-            };
-
-            db.Users.Add(admin);
-        }
-
-        // ADMIN SECUNDARIO
-        if (!db.Users.Any(u => u.Email == "supervisor@admin.gmail.com"))
-        {
-            var supervisor = new PrestamoDispositivos.Models.ApplicationUser
-            {
-                UserName = "supervisor",
-                Email = "supervisor@admin.gmail.com",
-                Role = "DeviceManAdmin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Super123!"),
-                LockoutEnabled = true,
-            };
-
-            db.Users.Add(supervisor);
-        }
-
-        // ESTUDIANTES
-        var estudiantesEjemplo = new[]
-        {
-            ("juan.perez",  "juan.perez@estudiante.com",  "Juan123!"),
-            ("maria.lopez", "maria.lopez@estudiante.com", "Maria123!"),
-            ("carlos.ruiz", "carlos.ruiz@estudiante.com", "Carlos123!")
-        };
-
-        foreach (var (user, email, pass) in estudiantesEjemplo)
-        {
-            if (!db.Users.Any(u => u.Email == email))
-            {
-                db.Users.Add(new PrestamoDispositivos.Models.ApplicationUser
-                {
-                    UserName = user,
-                    Email = email,
-                    Role = "Estudiante",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(pass),
-                    LockoutEnabled = true
-                });
-            }
-        }
-
-        db.SaveChanges();
-        logger.LogInformation("Seeder completado.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error ejecutando el seeder inicial.");
-    }
-}
-
-
-
-
 var app = builder.Build();
 
 // 
@@ -137,23 +57,21 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-//
-// ENDPOINTS
-// 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
 
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-    endpoints.MapGet("/api/minimal", () => "API Minimal funcionando correctamente.");
-});
+app.MapGet("/api/minimal", () => "API Minimal funcionando correctamente.");
 
-//
-// CONFIGURACIÓN FINAL DE LA APP (Notyf, etc.)
-// 
+
 app.WebAppCustomConfiguration();
+
+using (var scope = app.Services.CreateScope())
+{
+    var rolService = scope.ServiceProvider.GetRequiredService<IRolservice>();
+    await rolService.SeedDefaultRolesAsync();
+    // Esto crea automáticamente Student, Lender y SuperAdmin si no existen
+}
 
 app.Run();

@@ -1,30 +1,125 @@
 ﻿@{
     ViewData["Title"] = "Inicio - Sistema de Préstamos";
+
+    bool isAuth      = User.Identity?.IsAuthenticated == true;
+    bool isSuperAdmin = isAuth && User.IsInRole("SuperAdmin");
+    bool isLender    = isAuth && User.IsInRole("Lender");
+    bool isStudent   = isAuth && User.IsInRole("Student");
+    bool canManage   = isSuperAdmin || isLender;   // gestión de préstamos y equipos
+    string userName  = User.Identity?.Name ?? "";
 }
 
-<!-- Hero Section -->
+<!-- ══════════════════════════════════════════════
+     BARRA DE SESIÓN (solo visible cuando NO hay sesión)
+══════════════════════════════════════════════ -->
+@if (!isAuth)
+{
+    <div style="background:#0a2240; padding:.55rem 1.5rem; display:flex; align-items:center;
+                justify-content:flex-end; gap:1rem; border-bottom:2px solid #c8a84b;">
+        <span style="color:#a8bcd0; font-size:.85rem;">¿Ya tienes cuenta?</span>
+        <a asp-controller="Account" asp-action="Login"
+           style="color:#fff; font-weight:600; font-size:.85rem; text-decoration:none;
+                  border:1px solid #c8a84b; padding:.25rem .75rem; border-radius:3px;">
+            Iniciar Sesión
+        </a>
+        <a asp-controller="Account" asp-action="Register"
+           style="background:#c8a84b; color:#0a2240; font-weight:700; font-size:.85rem;
+                  text-decoration:none; padding:.25rem .8rem; border-radius:3px;">
+            Crear Cuenta
+        </a>
+    </div>
+}
+
+<!-- ══════════════════════════════════════════════
+     BANNER DE BIENVENIDA (cuando hay sesión activa)
+══════════════════════════════════════════════ -->
+@if (isAuth)
+{
+    <div style="background:#e8f4fd; border-bottom:1px solid #bee3f8;
+                padding:.6rem 1.5rem; display:flex; align-items:center;
+                justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
+        <div style="font-size:.9rem; color:#1a4080;">
+            Bienvenido, <strong>@userName</strong> &mdash;
+            @if (isSuperAdmin)
+            {
+                <span style="background:#fff3e0; color:#e65100; font-size:.72rem; font-weight:700;
+                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
+                    SuperAdmin
+                </span>
+            }
+            else if (isLender)
+            {
+                <span style="background:#e8f5e9; color:#2e7d32; font-size:.72rem; font-weight:700;
+                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
+                    Prestamista
+                </span>
+            }
+            else
+            {
+                <span style="background:#e3f2fd; color:#1565c0; font-size:.72rem; font-weight:700;
+                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
+                    Estudiante
+                </span>
+            }
+        </div>
+        <div style="display:flex; gap:.75rem; align-items:center; font-size:.85rem;">
+            <a asp-controller="Account" asp-action="Profile"
+               style="color:#1a4080; text-decoration:none; font-weight:600;">
+                Mi Perfil
+            </a>
+            <a asp-controller="Account" asp-action="Settings"
+               style="color:#1a4080; text-decoration:none; font-weight:600;">
+                Configuración
+            </a>
+            <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        style="background:none; border:1px solid #c0392b; color:#c0392b; font-size:.8rem;
+                               font-weight:600; padding:.2rem .65rem; border-radius:3px; cursor:pointer;">
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+<!-- ══════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════ -->
 <section id="hero" class="hero section light-background">
     <div class="container" data-aos="fade-up" data-aos-delay="100">
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <div class="hero-content">
-                    <h1 data-aos="fade-up" data-aos-delay="200">Sistema de Gestión de Préstamos de Dispositivos</h1>
+                    <h1 data-aos="fade-up" data-aos-delay="200">
+                        Sistema de Gestión de Préstamos de Dispositivos
+                    </h1>
                     <p data-aos="fade-up" data-aos-delay="300">
                         Administra de manera eficiente todos los dispositivos tecnológicos de tu organización.
                         Control total sobre préstamos, disponibilidad y mantenimiento.
                     </p>
                     <div class="hero-cta" data-aos="fade-up" data-aos-delay="400">
-                        <a asp-controller="Device" asp-action="Index" class="btn-primary">Ver Dispositivos</a>
+                        <a asp-controller="Device" asp-action="Index" class="btn-primary">
+                            Ver Dispositivos
+                        </a>
 
-                        @* Mostrar "Agregar Dispositivo" sólo a administradores *@
-                        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                        @* Agregar dispositivo: solo SuperAdmin o Lender *@
+                        @if (canManage)
                         {
                             <a asp-controller="Device" asp-action="Create" class="btn-secondary">
-                                <i class="bi bi-plus-circle"></i>
-                                Agregar Dispositivo
+                                <i class="bi bi-plus-circle"></i> Agregar Dispositivo
+                            </a>
+                        }
+
+                        @* Si no está autenticado, invitar a registrarse *@
+                        @if (!isAuth)
+                        {
+                            <a asp-controller="Account" asp-action="Register" class="btn-secondary">
+                                <i class="bi bi-person-plus"></i> Registrarse
                             </a>
                         }
                     </div>
+
                     <div class="hero-stats" data-aos="fade-up" data-aos-delay="500">
                         <div class="stat-item">
                             <div class="stat-number">24/7</div>
@@ -44,11 +139,10 @@
 
             <div class="col-lg-6">
                 <div class="hero-image" data-aos="fade-left" data-aos-delay="300">
-                    <img src="~/assets/img/about/about-square-10.webp" alt="Sistema de Préstamos" class="img-fluid">
+                    <img src="~/assets/img/about/about-square-10.webp"
+                         alt="Sistema de Préstamos" class="img-fluid">
                     <div class="floating-card" data-aos="zoom-in" data-aos-delay="600">
-                        <div class="card-icon">
-                            <i class="bi bi-laptop"></i>
-                        </div>
+                        <div class="card-icon"><i class="bi bi-laptop"></i></div>
                         <div class="card-content">
                             <h5>Gestión Inteligente</h5>
                             <div class="growth-percentage">+100%</div>
@@ -58,25 +152,66 @@
             </div>
         </div>
     </div>
-</section><!-- /Hero Section -->
+</section>
 
-<!-- Services Section -->
+<!-- ══════════════════════════════════════════════
+     TARJETAS DE ACCESO RÁPIDO (no autenticado)
+══════════════════════════════════════════════ -->
+@if (!isAuth)
+{
+    <section class="section light-background">
+        <div class="container" data-aos="fade-up">
+            <div class="row justify-content-center gy-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-item text-center">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </div>
+                        <h3>¿Ya tienes cuenta?</h3>
+                        <p>Accede con tu correo institucional y gestiona tus préstamos.</p>
+                        <a asp-controller="Account" asp-action="Login" class="service-link">
+                            Iniciar Sesión <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-item text-center">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <h3>¿Primera vez?</h3>
+                        <p>Regístrate con tu correo. El rol se asigna automáticamente.</p>
+                        <a asp-controller="Account" asp-action="Register" class="service-link">
+                            Crear Cuenta <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ══════════════════════════════════════════════
+     SERVICIOS / FUNCIONALIDADES
+══════════════════════════════════════════════ -->
 <section id="services" class="services section">
     <div class="container section-title" data-aos="fade-up">
         <span class="subtitle">Funcionalidades</span>
         <h2>¿Qué Puedes Hacer?</h2>
-        <p>Explora las herramientas disponibles para gestionar dispositivos, usuarios y préstamos de forma eficiente.</p>
+        <p>Explora las herramientas disponibles según tu rol en el sistema.</p>
     </div>
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
         <div class="row gy-5">
-            <!-- Dispositivos -->
+
+            <!-- Dispositivos — visible a todos -->
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <a asp-controller="Device" asp-action="Index" class="text-decoration-none">
                     <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-laptop"></i>
-                        </div>
+                        <div class="service-icon"><i class="bi bi-laptop"></i></div>
                         <h3>Gestionar Dispositivos</h3>
                         <p>Administra el inventario completo de dispositivos tecnológicos.</p>
                         <span class="service-link">Ver Dispositivos <i class="bi bi-arrow-right"></i></span>
@@ -84,29 +219,55 @@
                 </a>
             </div>
 
-            <!-- Préstamos -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <a asp-controller="Loan" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-calendar-check"></i>
+            <!-- Préstamos — solo autenticados -->
+            @if (isAuth)
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <a asp-controller="Loan" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon"><i class="bi bi-calendar-check"></i></div>
+                            <h3>
+                                @if (canManage) { <text>Control de Préstamos</text> }
+                                else            { <text>Mis Préstamos</text>        }
+                            </h3>
+                            <p>
+                                @if (canManage) { <text>Registra y controla el préstamo de dispositivos a los estudiantes.</text> }
+                                else            { <text>Consulta y gestiona tus solicitudes de préstamo activas.</text>           }
+                            </p>
+                            <span class="service-link">Ver Préstamos <i class="bi bi-arrow-right"></i></span>
                         </div>
-                        <h3>Control de Préstamos</h3>
-                        <p>Registra y controla el préstamo de dispositivos a los estudiantes.</p>
-                        <span class="service-link">Ver Préstamos <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
+            }
 
-            @* Gestión de Estudiantes: sólo para administradores *@
-            @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+            <!-- Solicitudes — solo autenticados -->
+            @if (isAuth)
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
+                    <a asp-controller="Request" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon"><i class="bi bi-send-check"></i></div>
+                            <h3>
+                                @if (canManage) { <text>Gestionar Solicitudes</text> }
+                                else            { <text>Mis Solicitudes</text>        }
+                            </h3>
+                            <p>
+                                @if (canManage) { <text>Aprueba o rechaza solicitudes de préstamo de los estudiantes.</text> }
+                                else            { <text>Crea y revisa el estado de tus solicitudes de dispositivos.</text>   }
+                            </p>
+                            <span class="service-link">Ver Solicitudes <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            <!-- SuperAdmin / Lender: gestión avanzada -->
+            @if (canManage)
             {
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
                     <a asp-controller="Student" asp-action="Index" class="text-decoration-none">
                         <div class="service-item">
-                            <div class="service-icon">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
+                            <div class="service-icon"><i class="bi bi-people-fill"></i></div>
                             <h3>Gestión de Estudiantes</h3>
                             <p>Administra la información de los estudiantes vinculados al sistema.</p>
                             <span class="service-link">Ver Estudiantes <i class="bi bi-arrow-right"></i></span>
@@ -114,220 +275,222 @@
                     </a>
                 </div>
 
-                @* Gestión de Administradores *@
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <a asp-controller="DeviceManager" asp-action="Index" class="text-decoration-none">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
+                    <a asp-controller="Lender" asp-action="Index" class="text-decoration-none">
                         <div class="service-item">
-                            <div class="service-icon">
-                                <i class="bi bi-person-gear"></i>
-                            </div>
-                            <h3>Gestión de Administradores</h3>
-                            <p>Controla los administradores y permisos de acceso al sistema.</p>
-                            <span class="service-link">Ver Administradores <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-
-                @* Estado de Estudiantes *@
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <a asp-controller="StudentStatus" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon">
-                                <i class="bi bi-person-check"></i>
-                            </div>
-                            <h3>Estado de Estudiantes</h3>
-                            <p>Verifica y actualiza el estado académico y de préstamo de los estudiantes.</p>
-                            <span class="service-link">Ver Estados <i class="bi bi-arrow-right"></i></span>
+                            <div class="service-icon"><i class="bi bi-person-badge"></i></div>
+                            <h3>Gestión de Prestamistas</h3>
+                            <p>Administra los prestamistas que gestionan los equipos del sistema.</p>
+                            <span class="service-link">Ver Prestamistas <i class="bi bi-arrow-right"></i></span>
                         </div>
                     </a>
                 </div>
             }
-            else
+
+            <!-- Solo SuperAdmin -->
+            @if (isSuperAdmin)
             {
-                @* Si no es administrador, evita mostrar las tarjetas de gestión sensibles (estudiantes, admins, estados) *@
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                    <a asp-controller="Account" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon"><i class="bi bi-people-gear"></i></div>
+                            <h3>Gestión de Usuarios</h3>
+                            <p>Administra todos los usuarios y asigna roles en el sistema.</p>
+                            <span class="service-link">Ver Usuarios <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="550">
+                    <a asp-controller="Account" asp-action="RolesIndex" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon"><i class="bi bi-shield-lock"></i></div>
+                            <h3>Gestión de Roles</h3>
+                            <p>Configura los roles y permisos del sistema de préstamos.</p>
+                            <span class="service-link">Ver Roles <i class="bi bi-arrow-right"></i></span>
+                        </div>
+                    </a>
+                </div>
             }
 
-            <!-- Eventos de Préstamo (visible a todos) -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <a asp-controller="LoanEvent" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon">
-                            <i class="bi bi-clock-history"></i>
+            <!-- Eventos — visible a todos autenticados -->
+            @if (isAuth)
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <a asp-controller="LoanEvent" asp-action="Index" class="text-decoration-none">
+                        <div class="service-item">
+                            <div class="service-icon"><i class="bi bi-clock-history"></i></div>
+                            <h3>Eventos de Préstamo</h3>
+                            <p>Consulta el historial de eventos relacionados con los préstamos.</p>
+                            <span class="service-link">Ver Eventos <i class="bi bi-arrow-right"></i></span>
                         </div>
-                        <h3>Eventos de Préstamo</h3>
-                        <p>Consulta el historial de eventos relacionados con los préstamos.</p>
-                        <span class="service-link">Ver Eventos <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
+            }
 
         </div>
     </div>
-</section><!-- /Services Section -->
+</section>
 
-<!-- Quick Stats Section -->
-<section id="stats" class="section light-background">
-    <div class="container" data-aos="fade-up">
-        <div class="row gy-4">
+<!-- ══════════════════════════════════════════════
+     ESTADÍSTICAS RÁPIDAS (solo autenticados)
+══════════════════════════════════════════════ -->
+@if (isAuth)
+{
+    <section id="stats" class="section light-background">
+        <div class="container" data-aos="fade-up">
+            <div class="row gy-4 justify-content-center">
 
-            <!-- Dispositivos -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-laptop" style="font-size: 2.5rem; color: #3b7ddd;"></i>
-                        <h5 class="mt-3 mb-1">Dispositivos</h5>
-                        <p class="text-muted">@(ViewBag.TotalDevices ?? "0")</p>
+                <div class="col-lg-2 col-md-4">
+                    <div class="card text-center border-0 shadow-sm h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-laptop" style="font-size:2.5rem;color:#3b7ddd;"></i>
+                            <h5 class="mt-3 mb-1">Dispositivos</h5>
+                            <p class="text-muted">@(ViewBag.TotalDevices ?? "0")</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Préstamos -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-arrow-left-right" style="font-size: 2.5rem; color: #ffc107;"></i>
-                        <h5 class="mt-3 mb-1">Préstamos</h5>
-                        <p class="text-muted">@(ViewBag.TotalLoans ?? "0")</p>
+                <div class="col-lg-2 col-md-4">
+                    <div class="card text-center border-0 shadow-sm h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-arrow-left-right" style="font-size:2.5rem;color:#ffc107;"></i>
+                            <h5 class="mt-3 mb-1">Préstamos</h5>
+                            <p class="text-muted">@(ViewBag.TotalLoans ?? "0")</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Estudiantes -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-people-fill" style="font-size: 2.5rem; color: #28a745;"></i>
-                        <h5 class="mt-3 mb-1">Estudiantes</h5>
-                        <p class="text-muted">@(ViewBag.TotalStudents ?? "0")</p>
+                <div class="col-lg-2 col-md-4">
+                    <div class="card text-center border-0 shadow-sm h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-people-fill" style="font-size:2.5rem;color:#28a745;"></i>
+                            <h5 class="mt-3 mb-1">Estudiantes</h5>
+                            <p class="text-muted">@(ViewBag.TotalStudents ?? "0")</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Administradores -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-person-gear" style="font-size: 2.5rem; color: #6610f2;"></i>
-                        <h5 class="mt-3 mb-1">Administradores</h5>
-                        <p class="text-muted">@(ViewBag.TotalManagers ?? "0")</p>
+                @if (canManage)
+                {
+                    <div class="col-lg-2 col-md-4">
+                        <div class="card text-center border-0 shadow-sm h-100">
+                            <div class="card-body py-4">
+                                <i class="bi bi-person-badge" style="font-size:2.5rem;color:#6610f2;"></i>
+                                <h5 class="mt-3 mb-1">Prestamistas</h5>
+                                <p class="text-muted">@(ViewBag.TotalLenders ?? "0")</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-lg-2 col-md-4">
+                    <div class="card text-center border-0 shadow-sm h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-clock-history" style="font-size:2.5rem;color:#17a2b8;"></i>
+                            <h5 class="mt-3 mb-1">Eventos</h5>
+                            <p class="text-muted">@(ViewBag.TotalEvents ?? "0")</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Eventos -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-clock-history" style="font-size: 2.5rem; color: #17a2b8;"></i>
-                        <h5 class="mt-3 mb-1">Eventos</h5>
-                        <p class="text-muted">@(ViewBag.TotalEvents ?? "0")</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estados -->
-            <div class="col-lg-2 col-md-4">
-                <div class="card text-center border-0 shadow-sm h-100">
-                    <div class="card-body py-4">
-                        <i class="bi bi-person-check" style="font-size: 2.5rem; color: #20c997;"></i>
-                        <h5 class="mt-3 mb-1">Estados</h5>
-                        <p class="text-muted">@(ViewBag.TotalStatuses ?? "0")</p>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
-</section><!-- /Stats Section -->
+    </section>
+}
 
-<!-- CTA Section -->
-<section id="cta" class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+<!-- ══════════════════════════════════════════════
+     CTA
+══════════════════════════════════════════════ -->
+<section id="cta" class="section"
+         style="background:linear-gradient(135deg,#0a2240 0%,#1a4080 100%);color:white;">
     <div class="container text-center" data-aos="fade-up">
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <h2 class="mb-4">¿Listo para gestionar tus dispositivos?</h2>
                 <p class="lead mb-4">
-                    Comienza ahora a administrar de manera eficiente todos los recursos de tu organización.
+                    @if (!isAuth)
+                    {
+                        <text>Crea tu cuenta con tu correo institucional y comienza a usar el sistema.</text>
+                    }
+                    else
+                    {
+                        <text>Comienza ahora a administrar de manera eficiente todos los recursos de tu organización.</text>
+                    }
                 </p>
                 <div class="d-flex gap-3 justify-content-center flex-wrap">
-                    <a asp-controller="Device" asp-action="Index" class="btn btn-light btn-lg px-5">
-                        <i class="bi bi-laptop me-2"></i>Ver Dispositivos
-                    </a>
 
-                    @* "Agregar Nuevo" sólo para administradores *@
-                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("DeviceManagerAdmin") || User.IsInRole("DeviceManAdmin")))
+                    @if (!isAuth)
                     {
-                        <a asp-controller="Device" asp-action="Create" class="btn btn-outline-light btn-lg px-5">
-                            <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo
+                        <a asp-controller="Account" asp-action="Register"
+                           class="btn btn-warning btn-lg px-5 fw-bold">
+                            <i class="bi bi-person-plus me-2"></i>Crear Cuenta
+                        </a>
+                        <a asp-controller="Account" asp-action="Login"
+                           class="btn btn-outline-light btn-lg px-5">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
                         </a>
                     }
+                    else
+                    {
+                        <a asp-controller="Device" asp-action="Index"
+                           class="btn btn-light btn-lg px-5">
+                            <i class="bi bi-laptop me-2"></i>Ver Dispositivos
+                        </a>
+                        @if (canManage)
+                        {
+                            <a asp-controller="Device" asp-action="Create"
+                               class="btn btn-outline-light btn-lg px-5">
+                                <i class="bi bi-plus-circle me-2"></i>Agregar Dispositivo
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Loan" asp-action="Create"
+                               class="btn btn-outline-light btn-lg px-5">
+                                <i class="bi bi-calendar-plus me-2"></i>Solicitar Préstamo
+                            </a>
+                        }
+                    }
+
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Estilos personalizados -->
 <style>
     .service-item {
         background: white;
         padding: 2rem;
         border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 15px rgba(0,0,0,.1);
+        transition: all .3s ease;
         height: 100%;
     }
-
-        .service-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-        }
-
+    .service-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 5px 25px rgba(0,0,0,.15);
+    }
     .service-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg,#0a2240 0%,#1a4080 100%);
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         margin-bottom: 1.5rem;
     }
-
-        .service-icon i {
-            font-size: 2rem;
-            color: white;
-        }
-
+    .service-icon i { font-size: 2rem; color: white; }
     .service-link {
-        color: #3b7ddd;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
+        color: #1a4080; font-weight: 600;
+        display: inline-flex; align-items: center; gap: .5rem;
     }
-
-    .card {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-    }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-
-    #cta {
-        padding: 5rem 0;
-    }
+    .card { border-radius: 15px; transition: all .3s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,.1) !important; }
+    #cta { padding: 5rem 0; }
 </style>
 
 @section Scripts {
     <script>
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true,
-            mirror: false
-        });
+        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false });
     </script>
 }

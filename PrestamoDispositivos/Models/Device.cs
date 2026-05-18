@@ -29,7 +29,7 @@ namespace PrestamoDispositivos.Models
         // apartado para Relaciones con otras clases (tablas)
         #region Relaciones
         //  Relación a uno con Prestamos
-        [InverseProperty("Dispositivo")]
+      
         public ICollection<Loan> Prestamos { get; set; } = new List<Loan>();
         #endregion
     }

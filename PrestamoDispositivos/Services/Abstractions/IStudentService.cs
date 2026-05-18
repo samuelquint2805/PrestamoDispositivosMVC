@@ -6,7 +6,6 @@ namespace PrestamoDispositivos.Services.Abstractions
 {
     public interface IStudentService
     {
-
         public Task<Response<StudentDTO>> CreateStudentAsync(StudentDTO student);
         public Task<Response<StudentDTO>> UpdateStudentAsync(Guid id, StudentDTO student);
 

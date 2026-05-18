@@ -1,0 +1,77 @@
+﻿@model PrestamoDispositivos.Models.ViewModels.ProfileViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<style>
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .65rem 0;
+        border-bottom: 1px solid var(--itm-border);
+        font-size: .95rem;
+    }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-row__label { color: var(--itm-muted); font-size: .8rem; font-weight: 600;
+                          letter-spacing: .04em; text-transform: uppercase; }
+    .profile-row__value { color: var(--itm-text); font-weight: 600; }
+    .profile-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: var(--itm-blue);
+        color: #fff;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.6rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.2rem;
+    }
+</style>
+
+<div class="itm-card">
+
+    <div class="profile-avatar">@(Model.UserName.Length > 0 ? Model.UserName[0].ToString().ToUpper() : "?")</div>
+
+    <h1 class="itm-card__title" style="text-align:center;">@Model.UserName</h1>
+
+    <div class="profile-row">
+        <span class="profile-row__label">Correo</span>
+        <span class="profile-row__value">@Model.Email</span>
+    </div>
+
+    <div class="profile-row">
+        <span class="profile-row__label">Rol</span>
+        <span class="profile-row__value">
+            @{
+                string rolCls = Model.NombreRol switch {
+                    "SuperAdmin" => "role-tag--admin",
+                    "Lender"     => "role-tag--lender",
+                    _            => "role-tag--student"
+                };
+            }
+            <span class="role-tag @rolCls">@Model.NombreRol</span>
+        </span>
+    </div>
+
+    <div class="profile-row">
+        <span class="profile-row__label">Estado</span>
+        <span class="profile-row__value">@Model.Estado</span>
+    </div>
+
+    <div class="profile-row">
+        <span class="profile-row__label">Registro</span>
+        <span class="profile-row__value">@Model.FechaRegistro.ToString("dd/MM/yyyy")</span>
+    </div>
+
+    <div style="margin-top:1.4rem; display:flex; gap:.7rem; flex-direction:column;">
+        <a asp-action="Settings" asp-controller="Account"
+           class="itm-btn itm-btn--outline" style="text-decoration:none; display:flex;">
+            Configuración
+        </a>
+        <form asp-action="Logout" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="itm-btn" style="background:#c0392b;">Cerrar Sesión</button>
+        </form>
+    </div>
+
+</div>

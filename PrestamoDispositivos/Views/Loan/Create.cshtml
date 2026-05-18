@@ -3,190 +3,51 @@
     ViewData["Title"] = "Nuevo Préstamo";
     var students = ViewBag.Students as List<PrestamoDispositivos.DTO.StudentDTO> ?? new List<PrestamoDispositivos.DTO.StudentDTO>();
     var devices = ViewBag.Devices as List<PrestamoDispositivos.DTO.deviceDTO> ?? new List<PrestamoDispositivos.DTO.deviceDTO>();
-    var administrators = ViewBag.Administrators as List<PrestamoDispositivos.DTO.deviceManagerDTO> ?? new List<PrestamoDispositivos.DTO.deviceManagerDTO>();
-    var loanEvents = ViewBag.LoanEvents as List<PrestamoDispositivos.DTO.LoanEventDTO> ?? new List<PrestamoDispositivos.DTO.LoanEventDTO>();
     var currentStudentId = ViewBag.CurrentStudentId as Guid?;
     var isStudentCreating = ViewBag.IsStudentCreating ?? false;
 }
 
-<section id="create-loan" class="contact py-5">
-    <div class="container">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold">Registrar Nuevo Préstamo</h2>
-            <p class="text-muted">Completa los campos para registrar un nuevo préstamo.</p>
-        </div>
+<div class="itm-card" style="max-width: 520px; margin: 60px auto; padding: 36px; border-radius: 12px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
 
-        <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 700px;">
-            <div class="card-body p-4">
-                <form asp-action="Create" method="post">
-
-                    <!-- Fecha del Evento -->
-                    <div class="mb-3">
-                        <label asp-for="FechaEvento" class="form-label fw-semibold">
-                            <i class="bi bi-calendar-event me-1"></i> Fecha del Evento
-                        </label>
-                        <input asp-for="FechaEvento" type="datetime-local" class="form-control" />
-                        <span asp-validation-for="FechaEvento" class="text-danger"></span>
-                    </div>
-
-                    <!-- Estado del Préstamo -->
-                    <div class="mb-3">
-                        <label asp-for="EstadoPrestamo" class="form-label fw-semibold">
-                            <i class="bi bi-info-circle me-1"></i> Estado del Préstamo
-                        </label>
-                        <select asp-for="EstadoPrestamo" class="form-select">
-                            <option value="">-- Selecciona un estado --</option>
-                            <option value="Nuevo">Nuevo</option>
-                            <option value="Activo">Activo</option>
-                            <option value="Renovar">Renovar</option>
-                            <option value="Cancelar">Cancelar</option>
-                            <option value="Finalizado">Finalizado</option>
-                        </select>
-                        <span asp-validation-for="EstadoPrestamo" class="text-danger"></span>
-                    </div>
-
-                    <!-- Estudiante -->
-                    <div class="mb-3">
-                        <label asp-for="IdEstudiante" class="form-label fw-semibold">
-                            <i class="bi bi-person-badge me-1"></i> Estudiante
-                        </label>
-
-                        @if (isStudentCreating)
-                        {
-                            <!-- Si es estudiante, mostrar solo su nombre (read-only) -->
-                            var currentStudent = students.FirstOrDefault(s => s.IdEst == currentStudentId);
-                            if (currentStudent != null)
-                            {
-                                <input type="text"
-                                       class="form-control"
-                                       value="@currentStudent.Nombre - Carnet: @currentStudent.Carnet"
-                                       readonly
-                                       disabled />
-                                <input type="hidden" asp-for="IdEstudiante" value="@currentStudentId" />
-                                <small class="text-muted d-block mt-1">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Este préstamo será registrado a tu nombre
-                                </small>
-                            }
-                            else
-                            {
-                                <div class="alert alert-danger">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                    Error: No se encontró tu perfil de estudiante
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <!-- Si es admin, mostrar dropdown completo -->
-                            <select asp-for="IdEstudiante" class="form-select">
-                                <option value="">-- Selecciona un estudiante --</option>
-                                @foreach (var student in students)
-                                {
-                                    <option value="@student.IdEst">@student.Nombre - Carnet: @student.Carnet</option>
-                                }
-                            </select>
-                            <span asp-validation-for="IdEstudiante" class="text-danger"></span>
-                            @if (!students.Any())
-                            {
-                                <small class="text-warning d-block mt-1">
-                                    <i class="bi bi-exclamation-triangle me-1"></i> No hay estudiantes disponibles
-                                </small>
-                            }
-                        }
-                    </div>
-
-                    <!-- Dispositivo -->
-                    <div class="mb-3">
-                        <label asp-for="IdDispo" class="form-label fw-semibold">
-                            <i class="bi bi-laptop me-1"></i> Dispositivo Disponible
-                        </label>
-                        <select asp-for="IdDispo" class="form-select">
-                            <option value="">-- Selecciona un dispositivo --</option>
-                            @foreach (var device in devices)
-                            {
-                                <option value="@device.IdDisp">
-                                    @device.Tipo - @device.Procesador
-                                    @if (device.Almacenamiento == 0 || device.Almacenamiento < 0)
-                                    {
-                                        <text>(@device.Almacenamiento)</text>
-                                    }
-                                </option>
-                            }
-                        </select>
-                        <span asp-validation-for="IdDispo" class="text-danger"></span>
-                        @if (!devices.Any())
-                        {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bi bi-exclamation-triangle me-1"></i> No hay dispositivos disponibles en este momento
-                            </small>
-                        }
-                    </div>
-
-                    <!-- Administrador -->
-                    <div class="mb-3">
-                        <label asp-for="IdAdminDev" class="form-label fw-semibold">
-                            <i class="bi bi-person-gear me-1"></i> Administrador Responsable
-                        </label>
-                        <select asp-for="IdAdminDev" class="form-select">
-                            <option value="">-- Selecciona un administrador --</option>
-                            @foreach (var admin in administrators)
-                            {
-                                <option value="@admin.IdAdmin">@admin.Nombre - Usuario: @admin.Usuario</option>
-                            }
-                        </select>
-                        <span asp-validation-for="IdAdminDev" class="text-danger"></span>
-                        @if (!administrators.Any())
-                        {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bi bi-exclamation-triangle me-1"></i> No hay administradores disponibles
-                            </small>
-                        }
-                    </div>
-
-                    <!-- Tipo de Evento -->
-                    <div class="mb-3">
-                        <label asp-for="IdEvento" class="form-label fw-semibold">
-                            <i class="bi bi-calendar-check me-1"></i> Tipo de Evento
-                        </label>
-                        <select asp-for="IdEvento" class="form-select">
-                            <option value="">-- Selecciona un tipo de evento --</option>
-                            @foreach (var evt in loanEvents)
-                            {
-                                <option value="@evt.IdEvento">@evt.TipoPrestamos</option>
-                            }
-                        </select>
-                        <span asp-validation-for="IdEvento" class="text-danger"></span>
-                        @if (!loanEvents.Any())
-                        {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bi bi-exclamation-triangle me-1"></i> No hay tipos de eventos configurados
-                            </small>
-                        }
-                    </div>
-
-                    <!-- Botones -->
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-success px-4">
-                            <i class="bi bi-check-circle me-1"></i>
-                            @if (isStudentCreating)
-                            {
-                                <text>Solicitar Préstamo</text>
-                            }
-                            else
-                            {
-                                <text>Guardar Préstamo</text>
-                            }
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary px-4 ms-2">
-                            <i class="bi bi-arrow-left-circle me-1"></i> Volver
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
+    @* Encabezado *@
+    <div style="margin-bottom: 28px; border-bottom: 2px solid #f0a500; padding-bottom: 16px;">
+        <h1 style="font-size: 22px; font-weight: 600; color: #1a3a6b; margin: 0;">Solicitar Préstamo</h1>
+        <p style="font-size: 13px; color: #6b7280; margin: 6px 0 0;">Instituto Tecnológico Metropolitano</p>
     </div>
-</section>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        @* Campo oculto con el ID del dispositivo *@
+        <input type="hidden" asp-for="IdDispo" />
+
+        @* Dispositivo (solo visual) *@
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 13px; color: #6b7280; display: block; margin-bottom: 6px;">Dispositivo</label>
+            <input type="text" value="@ViewBag.MarcaDispositivo" class="form-control" readonly
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #374151;" />
+        </div>
+
+        @* Fecha del evento *@
+        <div style="margin-bottom: 28px;">
+            <input type="date" asp-for="FechaEvento"
+                   min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                   style="width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #374151;" />
+            <span asp-validation-for="FechaEvento" style="color: #dc2626; font-size: 12px;"></span>
+        </div>
+
+        @* Botón *@
+        <button type="submit"
+                style="width: 100%; background: #1a3a6b; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 500; cursor: pointer;">
+            Confirmar préstamo
+        </button>
+
+        <a asp-controller="Device" asp-action="Index"
+           style="display: block; text-align: center; margin-top: 14px; font-size: 13px; color: #6b7280; text-decoration: none;">
+            Cancelar
+        </a>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

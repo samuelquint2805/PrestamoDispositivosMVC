@@ -1,22 +1,17 @@
 ﻿
-using System.ComponentModel.DataAnnotations;
+
 
 namespace PrestamoDispositivos.DTO
 {
     public class deviceDTO
     {
-        [Required]
+        
         public Guid IdDisp { get; set; }
-        
-        public required string Tipo { get; set; }
         public required string Serial { get; set; }
-        public required string Procesador { get; set; }
-        
-        public required int Almacenamiento { get; set; }
-        
-        public required string TarjetaGrafica { get; set; }
-        
-        public required string EstadoDisp { get; set; }
+        public required string Marca { get; set; }
+        public required string Especificaciones { get; set; }
+        public required string EstadoEquipo { get; set; }
+        public required string URLImagen { get; set; }
 
         //relacion hacia Loan
         public ICollection<LoanDTO> Prestamos { get; set; } = new List<LoanDTO>();

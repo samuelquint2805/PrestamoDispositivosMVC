@@ -7,7 +7,7 @@ using PrestamoDispositivos.Services.Abstractions;
 
 namespace PrestamoDispositivos.Controllers
 {
-   // [Authorize(Policy = "Estudiante")]
+    // [Authorize(Policy = "Estudiante")]
     public class StudentController : Controller
     {
         private readonly IStudentService _StudentService;
@@ -23,7 +23,7 @@ namespace PrestamoDispositivos.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            Response<List<StudentDTO>> response = await _StudentService.GetAllStudentsAsync(); 
+            Response<List<StudentDTO>> response = await _StudentService.GetAllStudentsAsync();
 
             if (!response.IsSuccess)
             {
@@ -41,7 +41,7 @@ namespace PrestamoDispositivos.Controllers
         }
 
 
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] StudentDTO dto)

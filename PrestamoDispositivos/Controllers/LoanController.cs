@@ -40,7 +40,7 @@ namespace PrestamoDispositivos.Controllers
                 Response<List<LoanDTO>> response;
 
                 // Verificar el rol del usuario actual
-                if (User.IsInRole("DeviceManAdmin"))
+                if (User.IsInRole(""))
                 {
                     // ADMIN: Mostrar TODOS los préstamos
                     response = await _loanService.GetAllLoansAsync();
@@ -120,11 +120,15 @@ namespace PrestamoDispositivos.Controllers
 
         // CREAR préstamo (formulario) - ESTUDIANTES Y ADMIN
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromRoute] Guid id)
         {
+            var dto = new LoanDTO { IdDispo = id };
+
+            var device = await _context.Dispositivos.FindAsync(id);
+            ViewBag.MarcaDispositivo = device?.Marca;
+
             await LoadDropdownData();
 
-            // Si es estudiante, pre-seleccionar su propio ID
             if (User.IsInRole("Estudiante"))
             {
                 var userId = GetCurrentUserId();
@@ -141,7 +145,7 @@ namespace PrestamoDispositivos.Controllers
                 }
             }
 
-            return View();
+            return View(dto);
         }
 
         // CREAR préstamo (POST) - ESTUDIANTES Y ADMIN
@@ -160,7 +164,7 @@ namespace PrestamoDispositivos.Controllers
                     if (student != null)
                     {
                         // Forzar que el préstamo sea para este estudiante
-                        dto.IdEstudiante = student.IdEst;
+                        dto.User.studentUsuario.IdEst = student.IdEst;
                     }
                     else
                     {
@@ -209,7 +213,7 @@ namespace PrestamoDispositivos.Controllers
                 var student = await _context.Estudiante
                     .FirstOrDefaultAsync(s => s.ApplicationUserId == userId);
 
-                if (student == null || response.Result.IdEstudiante != student.IdEst)
+                if (student == null || response.Result.User.studentUsuario.IdEst != student.IdEst)
                 {
                     _notyfService.Error("❌ No tienes permiso para editar este préstamo.");
                     return RedirectToAction(nameof(Index));
@@ -233,14 +237,14 @@ namespace PrestamoDispositivos.Controllers
                 var student = await _context.Estudiante
                     .FirstOrDefaultAsync(s => s.ApplicationUserId == userId);
 
-                if (student == null || dto.IdEstudiante != student.IdEst)
+                if (student == null || dto.User.studentUsuario.IdEst != student.IdEst)
                 {
                     _notyfService.Error("❌ No tienes permiso para editar este préstamo.");
                     return RedirectToAction(nameof(Index));
                 }
 
                 // Forzar que el estudiante no pueda cambiar a quién pertenece el préstamo
-                dto.IdEstudiante = student.IdEst;
+                dto.User.studentUsuario.IdEst = student.IdEst;
             }
 
             if (!ModelState.IsValid)
@@ -287,17 +291,13 @@ namespace PrestamoDispositivos.Controllers
             {
                 // Si es estudiante, verificar que sea dueño del préstamo
                 var loan = await _context.Prestamos
-                    .Include(l => l.Estudiante)
+                    .Include(l => l.User.studentUsuario)
                     .FirstOrDefaultAsync(l => l.IdPrestamos == id);
 
                 if (loan != null)
                 {
-                    var userId = GetCurrentUserId();
-                    if (loan.Estudiante?.ApplicationUserId != userId)
-                    {
                         _notyfService.Error("❌ No tienes permiso para devolver este dispositivo.");
                         return RedirectToAction(nameof(Index));
-                    }
                 }
             }
 
@@ -317,12 +317,10 @@ namespace PrestamoDispositivos.Controllers
             var studentsResponse = await _loanService.GetAllStudentsAsync();
             var devicesResponse = await _loanService.GetAvailableDevicesAsync();
             var adminsResponse = await _loanService.GetAllAdministratorsAsync();
-            var eventsResponse = await _loanService.GetAllLoanEventsAsync();
+           
 
             ViewBag.Students = studentsResponse.IsSuccess ? studentsResponse.Result : new List<StudentDTO>();
             ViewBag.Devices = devicesResponse.IsSuccess ? devicesResponse.Result : new List<deviceDTO>();
-            ViewBag.Administrators = adminsResponse.IsSuccess ? adminsResponse.Result : new List<deviceManagerDTO>();
-            ViewBag.LoanEvents = eventsResponse.IsSuccess ? eventsResponse.Result : new List<LoanEventDTO>();
         }
     }
 }

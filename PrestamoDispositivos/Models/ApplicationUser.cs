@@ -9,29 +9,58 @@ namespace PrestamoDispositivos.Models
     public class ApplicationUser 
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [Required]
+       public Guid idUsuario { get; set; } = Guid.NewGuid();
+        [Required(ErrorMessage = "El campo Usuario es requerido")]
+        public string? usuario { get; set; }
+        [Required(ErrorMessage = "El campo Correo es requerido")]
+        public string? CorreoElectrónico { get; set; }
+        [Required(ErrorMessage = "El campo Contraseña es requerido")]
+        public string? PasswordHash { get; set; }
+        [Required(ErrorMessage = "El campo Estado es requerido")]
+        public string? Estado { get; set; }
+        [Required(ErrorMessage = "La fecha del registro es requerido")]
+        public DateTime fechaRegistro { get; set; }
+         public string? codigo2FA { get; set; }
 
 
-        [ForeignKey("User")]
-        public Guid? ApplicationUserId { get; set; }
-        public ApplicationUser? User { get; set; }
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
 
-        // Password hash (guardado con BCrypt)
-        public string PasswordHash { get; set; } = string.Empty;
+        #region Relaciones
+        public Guid? idSuperior { get; set; }
 
-        // Rol (por simplicidad lo vamos a mantenr como propiedad)
-        public string Role { get; set; } = "Student";
-        
-        // 2FA
-        public bool TwoFactorEnabled { get; set; } = false;
-        public string? TwoFactorCode { get; set; }
-        public DateTime? TwoFactorCodeExpiry { get; set; }
+        // Propiedad de navegación hacia el superior
+        [ForeignKey("idSuperior")]
+        public virtual ApplicationUser? Superior { get; set; }
 
-        // Lockout / fallos
-        public bool LockoutEnabled { get; set; } = true;
-        public int AccessFailedCount { get; set; } = 0;
-        public DateTime? LockoutEnd { get; set; }
+        //Relacion hacia Estudiantes
+        //public Guid? StudentUser   { get; set; }
+        //[ForeignKey("StudentUser")]
+        public  virtual Student? studentUsuario { get; set; }
+
+        //Relacion hacia Prestamista (Lender)
+        //public Guid? LenderUser   { get; set; }
+        //[ForeignKey("LenderUser")]
+        public virtual lender? LenderUsuario  { get; set; }
+
+        //Relacion hacia Estudiantes
+        //public Guid? AdminUser   { get; set; }
+        //[ForeignKey("AdminUser")]
+        public virtual Administrator? AdminUsuario{ get; set; }
+
+        //Relacion hacia Estudiantes
+        public virtual Guid? RolUser{ get; set; }
+     
+        public setRol? Rol { get; set; }    
+
+       
+        public virtual ICollection<Request> Solicitudes { get; set; } = new List<Request>();
+
+       
+        public virtual ICollection<Loan> PrestamosUser { get; set; } = new List<Loan>();
+
+       
+        public virtual ICollection<AuditReportsClass> ReporAudit { get; set; } = new List<AuditReportsClass>();
+
+        #endregion
     }
 }

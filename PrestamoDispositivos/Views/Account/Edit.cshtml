@@ -1,4 +1,5 @@
-﻿@using PrestamoDispositivos.DTO;
+﻿@* 
+@using PrestamoDispositivos.DTO;
 @model ApplicationUserDTO
 @{
     ViewData["Title"] = "Editar Usuario";
@@ -15,7 +16,7 @@
                     <form asp-action="Edit" method="post">
                         @Html.AntiForgeryToken()
                         
-                        @* Es importante pasar el ID para que el POST sepa qué actualizar *@
+                        @* Es importante pasar el ID para que el POST sepa qué actualizar 
                         <input type="hidden" asp-for="Id" />
 
                         <div class="mb-3">
@@ -31,19 +32,19 @@
                         </div>
 
                         @* Asumo que el Rol (Role) está en el DTO y se puede editar, 
-                           ajusta las opciones según tus roles reales. *@
+                           ajusta las opciones según tus roles reales. 
                         <div class="mb-3">
                             <label asp-for="Role" class="form-label">Rol</label>
                             <select asp-for="Role" class="form-select">
                                 <option value="Estudiante">Estudiante</option>
                                 <option value="DeviceManAdmin">Administrador de Dispositivos</option>
-                                @* Agrega otros roles si existen (ej: DeviceManagerAdmin) *@
+                                @* Agrega otros roles si existen (ej: DeviceManagerAdmin) 
                             </select>
                             <span asp-validation-for="Role" class="text-danger"></span>
                         </div>
                         
                         @* Nota: No se recomienda editar la contraseña en esta vista.
-                           Debería usarse una vista separada (como ChangePassword). *@
+                           Debería usarse una vista separada (como ChangePassword). 
 
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-primary">
@@ -63,4 +64,4 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
-}
+} *@

@@ -1,0 +1,51 @@
+﻿@model PrestamoDispositivos.Models.ViewModels.completeLenderProfileViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Perfil de Prestamista";
+}
+
+<div class="itm-card">
+
+    <div class="itm-steps">
+        <div class="itm-step done">1 · Datos de Acceso ✓</div>
+        <div class="itm-step active">2 · Perfil Prestamista</div>
+    </div>
+
+    <h1 class="itm-card__title">
+        Completa tu Perfil
+        <span class="role-tag role-tag--lender">Prestamista</span>
+    </h1>
+
+    <p style="font-size:.88rem; color:#6b7f95; margin-bottom:1.3rem;">
+        Como <strong>Prestamista</strong> podrás gestionar solicitudes y aprobar préstamos de equipos.
+    </p>
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+    <form asp-action="CompleteLenderProfile" asp-controller="Account" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="itm-field">
+            <label class="itm-label" asp-for="Nombre">Nombre Completo</label>
+            <input class="itm-input" asp-for="Nombre"
+                   type="text"
+                   placeholder="Nombre" />
+            <span asp-validation-for="Nombre" class="field-validation-error"></span>
+        </div>
+
+        <div class="itm-field">
+            <label class="itm-label" asp-for="NumeroCelular">Celular</label>
+            <input class="itm-input" asp-for="NumeroCelular"
+                   type="number"
+                   placeholder="Número de celular" />
+            <span asp-validation-for="NumeroCelular" class="field-validation-error"></span>
+        </div>
+
+        <button type="submit" class="itm-btn">Crear Cuenta</button>
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

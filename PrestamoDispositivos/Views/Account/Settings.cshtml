@@ -1,0 +1,59 @@
+﻿@model PrestamoDispositivos.Models.ViewModels.SettingsViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Configuración";
+}
+
+<div class="itm-card itm-card--wide">
+
+    <h1 class="itm-card__title">Configuración de Cuenta</h1>
+
+    <!-- Info actual -->
+    <div style="background:#f0f4f8; border-radius:4px; padding:.85rem 1rem; margin-bottom:1.4rem;
+        font-size:.9rem; color:#4a5568;">
+        <strong>Correo actual:</strong> @Model.CurrentEmail
+    </div>
+
+    <div class="itm-divider">Cambiar Contraseña</div>
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+    <form asp-action="ChangePassword" asp-controller="Account" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="itm-field">
+            <label class="itm-label" for="CurrentPassword">Contraseña Actual</label>
+            <input class="itm-input" id="CurrentPassword" name="CurrentPassword"
+                   type="password" placeholder="Contraseña actual" />
+            <span class="field-validation-error" data-valmsg-for="CurrentPassword"></span>
+        </div>
+
+        <div class="itm-field">
+            <label class="itm-label" for="NewPassword">Nueva Contraseña</label>
+            <input class="itm-input" id="NewPassword" name="NewPassword"
+                   type="password" placeholder="Mínimo 6 caracteres" />
+            <span class="field-validation-error" data-valmsg-for="NewPassword"></span>
+        </div>
+
+        <div class="itm-field">
+            <label class="itm-label" for="ConfirmPassword">Confirmar Nueva Contraseña</label>
+            <input class="itm-input" id="ConfirmPassword" name="ConfirmPassword"
+                   type="password" placeholder="Repite la nueva contraseña" />
+            <span class="field-validation-error" data-valmsg-for="ConfirmPassword"></span>
+        </div>
+
+        <button type="submit" class="itm-btn">Actualizar Contraseña</button>
+    </form>
+
+    <div style="margin-top:1rem;">
+        <a asp-action="Profile" asp-controller="Account"
+               class="itm-btn itm-btn--outline" style="text-decoration:none; display:flex;">
+            ← Volver al Perfil
+        </a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
