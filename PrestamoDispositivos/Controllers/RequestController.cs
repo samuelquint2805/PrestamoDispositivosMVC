@@ -36,34 +36,49 @@ namespace PrestamoDispositivos.Controllers
         [Authorize(Roles = "SuperAdmin,Lender,Student")]
         public async Task<IActionResult> Index(string? estado = null)
         {
+            // 1. Normalizar el estado: si es nulo o "Todos", lo tratamos igual
+            string estadoFiltro = (string.IsNullOrEmpty(estado) || estado == "Todos") ? null : estado;
+
             Response<List<RequestoDTO>> response;
 
             if (User.IsInRole("SuperAdmin") || User.IsInRole("Lender"))
             {
-
-                response = string.IsNullOrEmpty(estado)
-                ? await _requestService.GetAllRequestsAsync()
-                    : await _requestService.GetRequestsByStatusAsync(estado);
-
                 ViewBag.IsManager = true;
+                // Si hay estado, filtramos; si no, traemos todo
+                response = string.IsNullOrEmpty(estadoFiltro)
+                    ? await _requestService.GetAllRequestsAsync()
+                    : await _requestService.GetRequestsByStatusAsync(estadoFiltro);
             }
             else
             {
+                ViewBag.IsManager = false;
                 var userId = GetCurrentUserId();
                 if (userId == null) return RedirectToAction("Login", "Account");
 
-                response = await _requestService.GetRequestsByUserAsync(userId.Value);
-                ViewBag.IsManager = false;
+                // IMPORTANTE: El estudiante también debería poder filtrar sus propias solicitudes
+                // Si no tienes un método "GetRequestsByUserAndStatusAsync", 
+                // puedes filtrar el resultado en memoria o pedirle al servicio uno nuevo.
+                response = string.IsNullOrEmpty(estadoFiltro)
+                    ? await _requestService.GetRequestsByUserAsync(userId.Value)
+                    : await _requestService.GetRequestsByUserAndStatusAsync(userId.Value, estadoFiltro);
+
+                // Si decides filtrar en memoria (rápido y efectivo):
+                if (response.IsSuccess && !string.IsNullOrEmpty(estadoFiltro))
+                {
+                    response.Result = response.Result
+                        .Where(r => r.EstadoSolicitud == estadoFiltro)
+                        .ToList();
+                }
             }
 
-            ViewBag.FiltroEstado = estado ?? "Todos";
-
+            // 2. Manejo unificado de errores
             if (!response.IsSuccess)
             {
-                _notyf.Error(response.Message ?? "Error al cargar solicitudes.");
+                _notyf.Error("Error: " + (response.Message ?? "No se pudieron cargar las solicitudes."));
                 return View(new List<RequestoDTO>());
             }
 
+            ViewBag.FiltroEstado = estado ?? "Todos";
             return View(response.Result ?? new List<RequestoDTO>());
         }
 
@@ -73,7 +88,7 @@ namespace PrestamoDispositivos.Controllers
         // ════════════════════════════════════════════
         [HttpGet]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> Reserve([FromForm]Guid idDevice)
+        public async Task<IActionResult> Reserve(Guid idDevice)
         {
             var deviceResponse = await _deviceService.GetDeviceByIdAsync(idDevice);
 
@@ -131,11 +146,17 @@ namespace PrestamoDispositivos.Controllers
         {
             var response = await _requestService.GetRequestByIdAsync(id);
 
-            if (!response.IsSuccess)
+            if (!response.IsSuccess || response.Result == null)
             {
                 _notyf.Error(response.Message ?? "Solicitud no encontrada.");
                 return RedirectToAction(nameof(Index));
             }
+
+            // Cargar dispositivos disponibles para el dropdown de aprobación
+            var devicesResponse = await _deviceService.GetAllDeviceAsync();
+            ViewBag.DisponiblesDevice = devicesResponse.IsSuccess
+                ? devicesResponse.Result?.Where(d => d.EstadoEquipo?.ToLower() == "disponible").ToList()
+                : new List<deviceDTO>();
 
             return View(response.Result);
         }
@@ -146,27 +167,44 @@ namespace PrestamoDispositivos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Lender")]
-        public async Task<IActionResult> Review(RequestoDTO dto)
+        public async Task<IActionResult> Review(
+           [FromForm] Guid IdSolicitud,
+           [FromForm] string NuevoEstado,
+           [FromForm] Guid? IdDispo,
+           [FromForm] string? Observacion)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrEmpty(NuevoEstado))
             {
-                _notyf.Error("Datos inválidos.");
-                return RedirectToAction(nameof(Index));
+                _notyf.Error("Debes elegir Aprobar o Rechazar.");
+                return RedirectToAction(nameof(Review), new { id = IdSolicitud });
             }
 
-            var response = await _requestService.ReviewRequestAsync(dto);
+            if (NuevoEstado == "Aprobada" && IdDispo == null)
+            {
+                _notyf.Error("Debes seleccionar el dispositivo a entregar.");
+                return RedirectToAction(nameof(Review), new { id = IdSolicitud });
+            }
+
+            var dto = new RequestoDTO
+            {
+                IdSolicitud = IdSolicitud,
+                NuevoEstado = NuevoEstado,
+                EstadoSolicitud = NuevoEstado,
+                Observacion = Observacion
+            };
+
+            // idDispo solo se pasa al servicio si se está aprobando
+            Guid? dispositivoId = NuevoEstado == "Aprobada" ? IdDispo : null;
+
+            var response = await _requestService.ReviewRequestAsync(dto, dispositivoId);
 
             if (!response.IsSuccess)
             {
                 _notyf.Error(response.Message ?? "Error al procesar la solicitud.");
-                return RedirectToAction(nameof(Review), new { id = dto.IdSolicitud });
+                return RedirectToAction(nameof(Review), new { id = IdSolicitud });
             }
 
-            string msg = dto.EstadoSolicitud == "Aprobada"
-                ? "Solicitud aprobada correctamente."
-                : "Solicitud rechazada.";
-
-            _notyf.Success(msg);
+            _notyf.Success(response.Message ?? $"Solicitud {NuevoEstado.ToLower()} correctamente.");
             return RedirectToAction(nameof(Index));
         }
 

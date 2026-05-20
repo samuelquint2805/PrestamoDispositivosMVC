@@ -2,212 +2,400 @@
 @{
     ViewData["Title"] = "Solicitudes";
     bool isManager = ViewBag.IsManager == true;
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
 }
 
 <style>
-    .page-header {
-        background: linear-gradient(135deg, #0a2240 0%, #1a4080 100%);
-        color: #fff; padding: 1.8rem 0 1.4rem;
-        margin-bottom: 2rem; border-bottom: 3px solid #c8a84b;
+    .itm-page {
+        display: block !important;
+        align-items: unset !important;
+        padding: 0 !important;
     }
-    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: .2rem; }
-    .page-header p  { color: #a8bcd0; font-size: .9rem; margin: 0; }
 
-    /* filter pills */
-    .filter-pills { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .pill {
-        padding: .3rem .9rem; border-radius: 20px; font-size: .8rem; font-weight: 600;
-        border: 1.5px solid #c8d4e0; background: #fff; color: #4a5568;
-        text-decoration: none; transition: all .18s;
+    :root {
+        --gold: #c8a84b;
+        --navy: #0a2240;
+        --blue: #1a4080;
+        --green: #2e7d32;
+        --orange: #e65100;
+        --red: #c0392b;
+        --bg: #f0f4f8;
+        --border: #dde4ec;
+        --muted: #6b7f95;
+        --text: #1e2d3d;
     }
-    .pill:hover, .pill.active { background: #1a4080; color: #fff; border-color: #1a4080; }
-    .pill.p-aprobada  { border-color: #2e7d32; color: #2e7d32; }
-    .pill.p-aprobada:hover, .pill.p-aprobada.active  { background: #2e7d32; color: #fff; }
-    .pill.p-rechazada { border-color: #c62828; color: #c62828; }
-    .pill.p-rechazada:hover, .pill.p-rechazada.active { background: #c62828; color: #fff; }
-    .pill.p-cancelada { border-color: #757575; color: #757575; }
-    .pill.p-cancelada:hover, .pill.p-cancelada.active { background: #757575; color: #fff; }
 
-    /* table */
-    .req-table { width: 100%; border-collapse: collapse; background: #fff;
-                 border-radius: 8px; overflow: hidden;
-                 box-shadow: 0 2px 10px rgba(10,34,64,.07); }
-    .req-table thead { background: #0a2240; color: #fff; }
-    .req-table thead th { padding: .75rem 1rem; font-size: .78rem; font-weight: 700;
-                          letter-spacing: .05em; text-transform: uppercase; }
-    .req-table tbody tr { border-bottom: 1px solid #e8eef5; transition: background .15s; }
-    .req-table tbody tr:last-child { border-bottom: none; }
-    .req-table tbody tr:hover { background: #f5f8fc; }
-    .req-table td { padding: .7rem 1rem; font-size: .88rem; color: #1e2d3d; vertical-align: middle; }
-
-    /* status badge */
-    .sbadge { display: inline-block; padding: .2rem .65rem; border-radius: 20px;
-              font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-    .sbadge-pendiente  { background: #fff3e0; color: #e65100; }
-    .sbadge-aprobada   { background: #e8f5e9; color: #2e7d32; }
-    .sbadge-rechazada  { background: #fce4ec; color: #c62828; }
-    .sbadge-cancelada  { background: #eeeeee; color: #616161; }
-
-    /* action btns */
-    .btn-sm-itm {
-        padding: .28rem .7rem; border-radius: 4px; font-size: .78rem; font-weight: 600;
-        border: 1.5px solid; display: inline-flex; align-items: center; gap: .25rem;
-        text-decoration: none; cursor: pointer; background: transparent; transition: all .15s;
+    .rq-header {
+        background: var(--navy);
+        border-bottom: 3px solid var(--gold);
+        padding: 1.1rem 0;
     }
-    .btn-approve { color: #2e7d32; border-color: #2e7d32; }
-    .btn-approve:hover { background: #e8f5e9; }
-    .btn-reject  { color: #c62828; border-color: #c62828; }
-    .btn-reject:hover  { background: #fce4ec; }
-    .btn-view    { color: #1a4080; border-color: #1a4080; }
-    .btn-view:hover    { background: #e8eef5; }
-    .btn-cancel-req { color: #757575; border-color: #bdbdbd; }
-    .btn-cancel-req:hover { background: #f5f5f5; }
-    .btn-del     { color: #c62828; border-color: #c62828; }
-    .btn-del:hover     { background: #fce4ec; }
 
-    .empty-state { text-align: center; padding: 4rem 2rem; color: #6b7f95; }
-    .empty-state i { font-size: 3rem; color: #c8d4e0; margin-bottom: 1rem; }
+        .rq-header h1 {
+            font-family: 'Barlow Condensed','Segoe UI',sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            letter-spacing: .02em;
+        }
+
+        .rq-header p {
+            color: #8da9c4;
+            font-size: .82rem;
+            margin: .2rem 0 0;
+        }
+
+    .rq-area {
+        background: var(--bg);
+        padding: 2rem 0 3rem;
+        min-height: 60vh;
+    }
+
+    /* Pills filtro */
+    .rq-pills {
+        display: flex;
+        gap: .45rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .rq-pill {
+        padding: .28rem .9rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        color: var(--muted);
+        text-decoration: none;
+        transition: all .16s;
+        white-space: nowrap;
+    }
+
+        .rq-pill:hover, .rq-pill.active {
+            background: var(--blue);
+            color: #fff;
+            border-color: var(--blue);
+        }
+
+    .rq-pill-aprobada {
+        border-color: var(--green);
+        color: var(--green);
+    }
+
+        .rq-pill-aprobada.active, .rq-pill-aprobada:hover {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+    .rq-pill-rechazada {
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+        .rq-pill-rechazada.active, .rq-pill-rechazada:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+
+    .rq-pill-cancelada {
+        border-color: #9e9e9e;
+        color: #757575;
+    }
+
+        .rq-pill-cancelada.active, .rq-pill-cancelada:hover {
+            background: #757575;
+            color: #fff;
+            border-color: #757575;
+        }
+
+    /* Tabla */
+    .rq-table-wrap {
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 1px 8px rgba(10,34,64,.08);
+    }
+
+    .rq-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+        .rq-table thead {
+            background: var(--navy);
+        }
+
+            .rq-table thead th {
+                padding: .7rem 1rem;
+                font-size: .73rem;
+                font-weight: 700;
+                letter-spacing: .05em;
+                text-transform: uppercase;
+                color: #fff;
+                white-space: nowrap;
+            }
+
+        .rq-table tbody tr {
+            border-bottom: 1px solid #eef1f5;
+            transition: background .13s;
+        }
+
+            .rq-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .rq-table tbody tr:hover {
+                background: #f5f8fc;
+            }
+
+        .rq-table td {
+            padding: .65rem 1rem;
+            font-size: .86rem;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+    /* Badges estado */
+    .rq-badge {
+        display: inline-block;
+        padding: .22rem .65em;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .rq-badge-pendiente {
+        background: #fff3e0;
+        color: var(--orange);
+        border: 1px solid #ffcc80;
+    }
+
+    .rq-badge-aprobada {
+        background: #e8f5e9;
+        color: var(--green);
+        border: 1px solid #a5d6a7;
+    }
+
+    .rq-badge-rechazada {
+        background: #fdecea;
+        color: var(--red);
+        border: 1px solid #ef9a9a;
+    }
+
+    .rq-badge-cancelada {
+        background: #f5f5f5;
+        color: #757575;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Botones acción */
+    .rq-act {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        border-radius: 5px;
+        padding: .28rem .65rem;
+        font-size: .76rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        border: 1.5px solid transparent;
+        transition: background .14s, color .14s;
+        white-space: nowrap;
+        line-height: 1;
+        background: transparent;
+    }
+
+    .rq-act-review {
+        color: var(--blue);
+        border-color: #90caf9;
+    }
+
+        .rq-act-review:hover {
+            background: #e3f2fd;
+            color: var(--blue);
+        }
+
+    .rq-act-cancel {
+        color: #757575;
+        border-color: #bdbdbd;
+    }
+
+        .rq-act-cancel:hover {
+            background: #f5f5f5;
+        }
+
+    .rq-act-del {
+        color: var(--red);
+        border-color: #ef9a9a;
+    }
+
+        .rq-act-del:hover {
+            background: #fdecea;
+        }
+
+    .rq-empty {
+        text-align: center;
+        padding: 4rem 1rem;
+        color: var(--muted);
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 8px rgba(10,34,64,.06);
+    }
+
+        .rq-empty i {
+            font-size: 3rem;
+            opacity: .2;
+            display: block;
+            margin-bottom: .8rem;
+        }
 </style>
 
-<div class="page-header">
+<!-- HEADER -->
+<div class="rq-header">
     <div class="container">
-        <h1><i class="bi bi-send-check me-2"></i>
-            @(isManager ? "Gestión de Solicitudes" : "Mis Solicitudes")
-        </h1>
-        <p>@(isManager
-            ? "Revisa y aprueba o rechaza las solicitudes de préstamo de los estudiantes."
-            : "Consulta el estado de tus solicitudes de dispositivos.")</p>
+        <h1><i class="bi bi-send-check me-2"></i>@(isManager ? "Gestión de Solicitudes" : "Mis Solicitudes")</h1>
+        <p>@(isManager ? "Revisa y aprueba o rechaza las solicitudes de préstamo." : "Consulta el estado de tus solicitudes.")</p>
     </div>
 </div>
 
-<div class="container mb-5">
+<!-- CONTENIDO -->
+<div class="rq-area">
+    <div class="container">
 
-    <!-- Filtros por estado -->
-    <div class="filter-pills">
-        <a asp-action="Index" class="pill @(ViewBag.FiltroEstado == "Todos" ? "active" : "")">
-            Todas (@Model.Count)
-        </a>
-        <a asp-action="Index" asp-route-estado="Pendiente"
-           class="pill @(ViewBag.FiltroEstado == "Pendiente" ? "active" : "")">
-            Pendientes
-        </a>
-        <a asp-action="Index" asp-route-estado="Aprobada"
-           class="pill p-aprobada @(ViewBag.FiltroEstado == "Aprobada" ? "active" : "")">
-            Aprobadas
-        </a>
-        <a asp-action="Index" asp-route-estado="Rechazada"
-           class="pill p-rechazada @(ViewBag.FiltroEstado == "Rechazada" ? "active" : "")">
-            Rechazadas
-        </a>
-        <a asp-action="Index" asp-route-estado="Cancelada"
-           class="pill p-cancelada @(ViewBag.FiltroEstado == "Cancelada" ? "active" : "")">
-            Canceladas
-        </a>
-    </div>
-
-    @if (!Model.Any())
-    {
-        <div class="empty-state">
-            <i class="bi bi-inbox d-block"></i>
-            <h4 style="color:#0a2240;">No hay solicitudes</h4>
-            <p>@(isManager ? "No hay solicitudes registradas con ese filtro." : "Aún no has hecho ninguna solicitud. Ve a dispositivos y reserva uno.")</p>
-            @if (!isManager)
-            {
-                <a asp-controller="Device" asp-action="Index"
-                   style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.5rem;
-                          background:#1a4080;color:#fff;padding:.5rem 1.2rem;border-radius:4px;
-                          text-decoration:none;font-weight:600;">
-                    <i class="bi bi-laptop"></i> Ver Dispositivos
-                </a>
-            }
+        <!-- Filtros -->
+        <div class="rq-pills">
+            <a asp-action="Index" class="rq-pill @(ViewBag.FiltroEstado == "Todos" ? "active" : "")">
+                Todas (@Model.Count)
+            </a>
+            <a asp-action="Index" asp-route-estado="Pendiente"
+               class="rq-pill @(ViewBag.FiltroEstado == "Pendiente" ? "active" : "")">
+                Pendientes
+            </a>
+            <a asp-action="Index" asp-route-estado="Aprobada"
+               class="rq-pill rq-pill-aprobada @(ViewBag.FiltroEstado == "Aprobada" ? "active" : "")">
+                Aprobadas
+            </a>
+            <a asp-action="Index" asp-route-estado="Rechazada"
+               class="rq-pill rq-pill-rechazada @(ViewBag.FiltroEstado == "Rechazada" ? "active" : "")">
+                Rechazadas
+            </a>
+            <a asp-action="Index" asp-route-estado="Cancelada"
+               class="rq-pill rq-pill-cancelada @(ViewBag.FiltroEstado == "Cancelada" ? "active" : "")">
+                Canceladas
+            </a>
         </div>
-    }
-    else
-    {
-        <div style="overflow-x:auto;">
-            <table class="req-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Fecha Solicitud</th>
-                        @if (isManager) { <th>Estudiante</th> }
-                        <th>Estado</th>
-                        <th>Fecha Aprobación</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{ int i = 1; }
-                    @foreach (var req in Model)
-                    {
-                        string badgeCls = req.EstadoSolicitud?.ToLower() switch {
-                            "pendiente" => "sbadge-pendiente",
-                            "aprobada"  => "sbadge-aprobada",
-                            "rechazada" => "sbadge-rechazada",
-                            "cancelada" => "sbadge-cancelada",
-                            _           => ""
-                        };
 
+        @if (!Model.Any())
+        {
+            <div class="rq-empty">
+                <i class="bi bi-inbox"></i>
+                <p style="font-size:.95rem;font-weight:600;color:var(--navy);margin:.5rem 0 .25rem;">
+                    No hay solicitudes
+                </p>
+                <p style="font-size:.84rem;">
+                    @(isManager ? "No hay solicitudes con ese filtro." : "Aún no has hecho ninguna solicitud.")
+                </p>
+                @if (!isManager)
+                {
+                    <a asp-controller="Device" asp-action="Index"
+                       style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;background:var(--blue);color:#fff;padding:.5rem 1.2rem;border-radius:6px;text-decoration:none;font-weight:600;font-size:.85rem;">
+                        <i class="bi bi-laptop"></i> Ver Dispositivos
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="rq-table-wrap">
+                <table class="rq-table">
+                    <thead>
                         <tr>
-                            <td style="color:#6b7f95; font-size:.8rem;">@(i++)</td>
-                            <td>@req.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                            <th>#</th>
+                            <th>Fecha Solicitud</th>
                             @if (isManager)
                             {
-                                <td>
-                                    <strong>@(req.User?.usuario ?? "—")</strong><br>
-                                    <span style="font-size:.76rem;color:#6b7f95;">@(req.User?.CorreoElectrónico ?? "")</span>
-                                </td>
+                                <th>Estudiante</th>
                             }
-                            <td><span class="sbadge @badgeCls">@req.EstadoSolicitud</span></td>
-                            <td>
-                                @(req.FechaAprobacion == DateTime.MinValue
-                                    ? "—"
-                                    : req.FechaAprobacion.ToString("dd/MM/yyyy HH:mm"))
-                            </td>
-                            <td>
-                                <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
-
-                                    @* Lender / SuperAdmin: revisar *@
-                                    @if (isManager && req.EstadoSolicitud == "Pendiente")
-                                    {
-                                        <a asp-action="Review" asp-route-id="@req.IdSolicitud"
-                                           class="btn-sm-itm btn-view">
-                                            <i class="bi bi-eye"></i> Revisar
-                                        </a>
-                                    }
-
-                                    @* Student: cancelar si está pendiente *@
-                                    @if (!isManager && req.EstadoSolicitud == "Pendiente")
-                                    {
-                                        <form asp-action="Cancel" method="post" style="display:inline;">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@req.IdSolicitud" />
-                                            <button type="submit" class="btn-sm-itm btn-cancel-req"
-                                                    onclick="return confirm('¿Cancelar esta solicitud?')">
-                                                <i class="bi bi-x-circle"></i> Cancelar
-                                            </button>
-                                        </form>
-                                    }
-
-                                    @* SuperAdmin: eliminar *@
-                                    @if (User.IsInRole("SuperAdmin"))
-                                    {
-                                        <form asp-action="Delete" method="post" style="display:inline;">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@req.IdSolicitud" />
-                                            <button type="submit" class="btn-sm-itm btn-del"
-                                                    onclick="return confirm('¿Eliminar permanentemente esta solicitud?')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    }
-
-                                </div>
-                            </td>
+                            <th>Estado</th>
+                            <th>Fecha Resolución</th>
+                            <th>Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 1;
+                        }
+                        @foreach (var req in Model)
+                        {
+                            string bc = req.EstadoSolicitud?.ToLower() switch
+                            {
+                                "pendiente" => "rq-badge-pendiente",
+                                "aprobada" => "rq-badge-aprobada",
+                                "rechazada" => "rq-badge-rechazada",
+                                "cancelada" => "rq-badge-cancelada",
+                                _ => ""
+                            };
+                            <tr>
+                                <td style="color:var(--muted);font-size:.78rem;">@(i++)</td>
+                                <td>@req.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                                @if (isManager)
+                                {
+                                    <td>
+                                        <strong style="font-size:.86rem;">@(req.User?.usuario ?? "—")</strong><br>
+                                        <span style="font-size:.75rem;color:var(--muted);">@(req.User?.CorreoElectrónico ?? "")</span>
+                                    </td>
+                                }
+                                <td><span class="rq-badge @bc">@req.EstadoSolicitud</span></td>
+                                <td style="font-size:.83rem;">
+                                    @(req.FechaAprobacion == DateTime.MinValue ? "—" : req.FechaAprobacion.ToString("dd/MM/yyyy HH:mm"))
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+                                        @if (isManager && req.EstadoSolicitud == "Pendiente")
+                                        {
+                                            <a asp-action="Review" asp-route-id="@req.IdSolicitud"
+                                               class="rq-act rq-act-review">
+                                                <i class="bi bi-eye-fill"></i> Revisar
+                                            </a>
+                                        }
+                                        @if (!isManager && req.EstadoSolicitud == "Pendiente")
+                                        {
+                                            <form asp-action="Cancel" method="post" style="display:inline;margin:0;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@req.IdSolicitud" />
+                                                <button type="submit" class="rq-act rq-act-cancel"
+                                                        onclick="return confirm('¿Cancelar esta solicitud?')">
+                                                    <i class="bi bi-x-circle"></i> Cancelar
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (User.IsInRole("SuperAdmin"))
+                                        {
+                                            <form asp-action="Delete" method="post" style="display:inline;margin:0;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@req.IdSolicitud" />
+                                                <button type="submit" class="rq-act rq-act-del"
+                                                        onclick="return confirm('¿Eliminar esta solicitud?')">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
 </div>

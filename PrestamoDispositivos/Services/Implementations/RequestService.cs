@@ -28,26 +28,32 @@ namespace PrestamoDispositivos.Services.Implementations
 
         public async Task<Response<List<RequestoDTO>>> GetAllRequestsAsync()
         {
-            try
-            {
-                var list = await _context.solicitud
-                    .AsNoTracking()
-                    .Include(r => r.User)
-                    .OrderByDescending(r => r.FechaSolicitud)
-                    .ToListAsync();
+           
+                try
+                {
+                    var list = await _context.solicitud
+                        .AsNoTracking()
+                        .Include(r => r.User)
+                        .OrderByDescending(r => r.FechaSolicitud)
+                        .ToListAsync();
 
-                return Response<List<RequestoDTO>>.Success("Lista de solicitudes obtenida ");
+                    // Mapeo manual usando tu helper
+                    var dtoList = list.Select(MapToDto).ToList();
+
+                    // PASA EL DTO AL RESULTADO
+                    return Response<List<RequestoDTO>>.Success(dtoList, "Lista de solicitudes obtenida");
+                }
+                catch (Exception ex)
+                {
+                    return Response<List<RequestoDTO>>.Failure($"Error: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                return Response<List<RequestoDTO>>.Failure($"Error al obtener solicitudes: {ex.Message}");
-            }
-        }
 
         public async Task<Response<List<RequestoDTO>>> GetRequestsByUserAsync(Guid idUsuario)
         {
             try
             {
+                // 1. Obtener datos de la base de datos
                 var list = await _context.solicitud
                     .AsNoTracking()
                     .Include(r => r.User)
@@ -55,11 +61,34 @@ namespace PrestamoDispositivos.Services.Implementations
                     .OrderByDescending(r => r.FechaSolicitud)
                     .ToListAsync();
 
-                return Response<List<RequestoDTO>>.Success("Solicitud obtenida correctamente");
+                // 2. Mapear a DTO usando tu helper privado MapToDto
+                var dtoList = list.Select(MapToDto).ToList();
+
+                // 3. RETORNO CORREGIDO: Pasamos la lista mapeada como primer argumento
+                return Response<List<RequestoDTO>>.Success(dtoList, "Solicitudes obtenidas correctamente");
             }
             catch (Exception ex)
             {
                 return Response<List<RequestoDTO>>.Failure($"Error al obtener solicitudes del usuario: {ex.Message}");
+            }
+        }
+
+        public async Task<Response<List<RequestoDTO>>> GetRequestsByUserAndStatusAsync(Guid idUsuario, string estado)
+        {
+            try
+            {
+                var list = await _context.solicitud
+                    .AsNoTracking()
+                    .Include(r => r.User)
+                    .Where(r => r.idUser == idUsuario && r.EstadoSolicitud == estado)
+                    .OrderByDescending(r => r.FechaSolicitud)
+                    .ToListAsync();
+
+                return Response<List<RequestoDTO>>.Success(list.Select(MapToDto).ToList(), "Solicitudes filtradas");
+            }
+            catch (Exception ex)
+            {
+                return Response<List<RequestoDTO>>.Failure($"Error: {ex.Message}");
             }
         }
 
@@ -75,7 +104,7 @@ namespace PrestamoDispositivos.Services.Implementations
                 if (req == null)
                     return Response<RequestoDTO>.Failure("Solicitud no encontrada.");
 
-                return Response<RequestoDTO>.Success("Solicitud obtenida correctamente");
+                return Response<RequestoDTO>.Success(MapToDto(req),"Solicitud obtenida correctamente");
             }
             catch (Exception ex)
             {
@@ -156,15 +185,17 @@ namespace PrestamoDispositivos.Services.Implementations
             }
         }
 
-        public async Task<Response<RequestoDTO>> ReviewRequestAsync(RequestoDTO dto)
+        public async Task<Response<RequestoDTO>> ReviewRequestAsync(RequestoDTO dto, Guid? idDispo = null)
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Validar estado nuevo
-                if (dto.EstadoSolicitud != ESTADO_APROBADA && dto.EstadoSolicitud != ESTADO_RECHAZADA)
-                    return Response<RequestoDTO>.Failure(
-                        "Estado no válido. Use 'Aprobada' o 'Rechazada'.");
+                string nuevoEstado = dto.NuevoEstado ?? dto.EstadoSolicitud ?? "";
 
+                if (nuevoEstado != ESTADO_APROBADA && nuevoEstado != ESTADO_RECHAZADA)
+                    return Response<RequestoDTO>.Failure("Estado no válido. Use 'Aprobada' o 'Rechazada'.");
+
+                // ── Cargar la solicitud con su usuario ──
                 var solicitud = await _context.solicitud
                     .Include(r => r.User)
                     .FirstOrDefaultAsync(r => r.IdSolicitud == dto.IdSolicitud);
@@ -176,23 +207,61 @@ namespace PrestamoDispositivos.Services.Implementations
                     return Response<RequestoDTO>.Failure(
                         $"Solo se pueden revisar solicitudes Pendientes. Estado actual: {solicitud.EstadoSolicitud}.");
 
-                solicitud.EstadoSolicitud = dto.EstadoSolicitud;
+                // ── 1. Actualizar estado de la solicitud ──
+                solicitud.EstadoSolicitud = nuevoEstado;
                 solicitud.FechaAprobacion = DateTime.UtcNow;
-
                 _context.solicitud.Update(solicitud);
+
+                // ── 2. Si se APRUEBA: crear Loan y marcar dispositivo ──
+                if (nuevoEstado == ESTADO_APROBADA)
+                {
+                    if (idDispo == null)
+                        return Response<RequestoDTO>.Failure(
+                            "Debes seleccionar el dispositivo a prestar al aprobar la solicitud.");
+
+                    var device = await _context.Dispositivos
+                        .FirstOrDefaultAsync(d => d.IdDisp == idDispo);
+
+                    if (device == null)
+                        return Response<RequestoDTO>.Failure("Dispositivo no encontrado.");
+
+                    if (device.EstadoEquipo?.ToLower() != "disponible")
+                        return Response<RequestoDTO>.Failure(
+                            $"El dispositivo ya no está disponible (Estado: {device.EstadoEquipo}).");
+
+                    // Crear el préstamo — relacionado con el User de la solicitud
+                    var nuevoPrestamo = new Loan
+                    {
+                        IdPrestamos = Guid.NewGuid(),
+                        FechaEvento = DateTime.UtcNow,
+                        EstadoPrestamo = "Prestado",
+                        IdDispo = device.IdDisp,
+                        IdUser = solicitud.idUser   // mismo user de la solicitud
+                    };
+
+                    _context.Prestamos.Add(nuevoPrestamo);
+
+                    // Marcar el dispositivo como prestado
+                    device.EstadoEquipo = "Prestado";
+                    _context.Dispositivos.Update(device);
+                }
+
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                // ── PATRÓN OBSERVER: notificar revisión ──────────────
-                string obs = string.IsNullOrWhiteSpace(dto.EstadoSolicitud)
-                    ? $"Solicitud {dto.EstadoSolicitud.ToLower()} por el prestamista."
-                    : dto.EstadoSolicitud;
+                await _observable.NotifyAll(
+                    solicitud.IdSolicitud, nuevoEstado,
+                    $"Solicitud {nuevoEstado.ToLower()} por el prestamista.");
 
-                await _observable.NotifyAll(solicitud.IdSolicitud, dto.EstadoSolicitud, obs);
+                string mensaje = nuevoEstado == ESTADO_APROBADA
+                    ? "Solicitud aprobada y préstamo creado correctamente."
+                    : "Solicitud rechazada correctamente.";
 
-                return Response<RequestoDTO>.Success(MapToDto(solicitud));
+                return Response<RequestoDTO>.Success(MapToDto(solicitud), mensaje);
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return Response<RequestoDTO>.Failure($"Error al revisar solicitud: {ex.Message}");
             }
         }

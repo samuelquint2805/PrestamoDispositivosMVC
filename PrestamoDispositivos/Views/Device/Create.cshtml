@@ -1,9 +1,6 @@
-﻿@model List<PrestamoDispositivos.DTO.deviceDTO>
+﻿@model PrestamoDispositivos.DTO.deviceDTO
 @{
-    ViewData["Title"] = "Dispositivos";
-    bool canManage = User.IsInRole("SuperAdmin") || User.IsInRole("Lender");
-    bool isStudent = User.IsInRole("Student");
-    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    ViewData["Title"] = "Agregar Dispositivo";
 }
 
 <style>
@@ -12,626 +9,281 @@
         align-items: unset !important;
         padding: 0 !important;
     }
-
-    :root {
-        --gold: #c8a84b;
-        --navy: #0a2240;
-        --blue: #1a4080;
-        --green: #2e7d32;
-        --orange: #e65100;
-        --red: #c0392b;
-        --bg: #f0f4f8;
-        --card: #ffffff;
-        --border: #dde4ec;
-        --text: #1e2d3d;
-        --muted: #6b7f95;
-        --r: 8px;
-    }
-
-    /* TOPBAR */
-    .dv-topbar {
-        background: var(--navy);
-        border-bottom: 3px solid var(--gold);
-        padding: 1.1rem 0;
-    }
-
-    .dv-topbar__title {
-        font-family: 'Barlow Condensed','Segoe UI',sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
+    .page-header {
+        background: linear-gradient(135deg, #0a2240 0%, #1a4080 100%);
         color: #fff;
-        margin: 0;
-        letter-spacing: .03em;
+        padding: 1.8rem 0 1.4rem;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #c8a84b;
     }
 
-        .dv-topbar__title span {
-            color: var(--gold);
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: .2rem;
         }
 
-    .dv-search {
-        position: relative;
-        width: 280px;
+        .page-header p {
+            color: #a8bcd0;
+            font-size: .9rem;
+            margin: 0;
+        }
+
+    .form-card {
+        background: #fff;
+        border: 1px solid #c8d4e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(10,34,64,.08);
+        padding: 2rem 2.2rem;
+        max-width: 680px;
     }
 
-        .dv-search i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8da9c4;
-            font-size: .8rem;
-            pointer-events: none;
-        }
-
-        .dv-search input {
-            width: 100%;
-            background: rgba(255,255,255,.1);
-            border: 1px solid rgba(255,255,255,.2);
-            border-radius: 20px;
-            color: #fff;
-            padding: .42rem 1rem .42rem 2.2rem;
-            font-size: .85rem;
-            outline: none;
-            transition: border-color .2s;
-        }
-
-            .dv-search input::placeholder {
-                color: #8da9c4;
-            }
-
-            .dv-search input:focus {
-                border-color: var(--gold);
-            }
-
-    .dv-btn-new {
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        background: var(--gold);
-        color: var(--navy);
-        font-family: 'Barlow Condensed',sans-serif;
+    .f-label {
+        display: block;
+        font-size: .78rem;
         font-weight: 700;
-        font-size: .88rem;
-        letter-spacing: .04em;
+        letter-spacing: .05em;
         text-transform: uppercase;
-        padding: .42rem 1.1rem;
-        border-radius: 20px;
-        text-decoration: none;
-        border: none;
-        white-space: nowrap;
-        transition: background .15s, transform .1s;
+        color: #6b7f95;
+        margin-bottom: .3rem;
     }
 
-        .dv-btn-new:hover {
-            background: #b8943b;
-            color: var(--navy);
-            transform: translateY(-1px);
+    .f-input, .f-select, .f-textarea {
+        width: 100%;
+        border: 1px solid #c8d4e0;
+        border-radius: 4px;
+        padding: .6rem .9rem;
+        font-size: .95rem;
+        color: #1e2d3d;
+        background: #fafbfc;
+        outline: none;
+        transition: border-color .18s, box-shadow .18s;
+    }
+
+    .f-textarea {
+        resize: vertical;
+        min-height: 90px;
+    }
+
+        .f-input:focus, .f-select:focus, .f-textarea:focus {
+            border-color: #1a4080;
+            box-shadow: 0 0 0 3px rgba(26,64,128,.1);
+            background: #fff;
         }
 
-    /* GRID */
-    .dv-grid-area {
-        background: var(--bg);
-        padding: 2rem 0 3rem;
-        min-height: 60vh;
-    }
-
-    /* CARD */
-    .dv-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        box-shadow: 0 1px 6px rgba(10,34,64,.07);
-        transition: transform .2s, box-shadow .2s, border-color .2s;
-    }
-
-        .dv-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(10,34,64,.12);
-            border-color: var(--gold);
+        .f-input.input-validation-error,
+        .f-select.input-validation-error,
+        .f-textarea.input-validation-error {
+            border-color: #c0392b;
         }
 
-    .dv-card__thumb {
+    .field-validation-error {
+        color: #c0392b;
+        font-size: .78rem;
+        margin-top: .2rem;
+        display: block;
+    }
+
+    .f-group {
+        margin-bottom: 1.15rem;
+    }
+
+    .img-preview-wrap {
         width: 100%;
         height: 180px;
-        background: #eef1f5;
+        border: 2px dashed #c8d4e0;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
+        background: #f0f4f8;
+        margin-top: .4rem;
+        transition: border-color .2s;
     }
 
-        .dv-card__thumb img {
+        .img-preview-wrap.has-img {
+            border-style: solid;
+            border-color: #1a4080;
+        }
+
+        .img-preview-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            padding: .75rem;
-            transition: transform .25s;
+            object-fit: cover;
         }
 
-    .dv-card:hover .dv-card__thumb img {
-        transform: scale(1.05);
-    }
+        .img-preview-wrap i {
+            font-size: 2.5rem;
+            color: #c8d4e0;
+        }
 
-    .dv-card__thumb-icon {
-        font-size: 3.2rem;
-        color: #b8c8d8;
-    }
-
-    .dv-card__body {
-        padding: .8rem 1rem .6rem;
-        flex: 1;
-    }
-
-    .dv-card__serial {
-        font-size: .65rem;
+    .btn-submit {
+        background: #1a4080;
+        color: #fff;
+        border: none;
+        padding: .65rem 2rem;
+        border-radius: 4px;
+        font-size: .98rem;
         font-weight: 700;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: var(--blue);
-        display: block;
-        margin-bottom: .18rem;
-    }
-
-    .dv-card__brand {
-        font-size: .97rem;
-        font-weight: 700;
-        color: var(--navy);
-        margin-bottom: .2rem;
-    }
-
-    .dv-card__specs {
-        font-size: .76rem;
-        color: var(--muted);
-        line-height: 1.45;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .dv-card__foot {
-        padding: .65rem 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: .4rem;
-        border-top: 1px solid var(--border);
-        background: #f8fafc;
-        flex-shrink: 0;
-    }
-
-    /* BADGES */
-    .dv-badge {
-        font-size: .62rem;
-        font-weight: 700;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        padding: .25em .7em;
-        border-radius: 20px;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
-
-    .dv-badge-disponible {
-        background: #e8f5e9;
-        color: var(--green);
-        border: 1px solid #a5d6a7;
-    }
-
-    .dv-badge-prestado {
-        background: #fff3e0;
-        color: var(--orange);
-        border: 1px solid #ffcc80;
-    }
-
-    .dv-badge-mantenimiento {
-        background: #fdecea;
-        color: var(--red);
-        border: 1px solid #ef9a9a;
-    }
-
-    .dv-badge-default {
-        background: #f0f4f8;
-        color: var(--muted);
-        border: 1px solid var(--border);
-    }
-
-    /* BOTONES */
-    .dv-acts {
-        display: flex;
-        gap: .35rem;
-        align-items: center;
-        flex-shrink: 0;
-    }
-
-    .dv-act {
+        letter-spacing: .04em;
+        cursor: pointer;
+        transition: background .18s;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: .25rem;
-        border-radius: 6px;
-        padding: .32rem .6rem;
-        font-size: .75rem;
+        gap: .4rem;
+    }
+
+        .btn-submit:hover {
+            background: #0a2240;
+        }
+
+    .btn-cancel {
+        background: transparent;
+        color: #1a4080;
+        border: 1.5px solid #1a4080;
+        padding: .63rem 1.4rem;
+        border-radius: 4px;
+        font-size: .95rem;
         font-weight: 600;
-        cursor: pointer;
         text-decoration: none;
-        border: 1.5px solid transparent;
-        transition: background .14s, color .14s;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    .dv-act-edit {
-        background: #e3f2fd;
-        color: #1565c0;
-        border-color: #90caf9;
-    }
-
-        .dv-act-edit:hover {
-            background: #1565c0;
-            color: #fff;
-            border-color: #1565c0;
-        }
-
-    .dv-act-del {
-        background: #fdecea;
-        color: var(--red);
-        border-color: #ef9a9a;
-    }
-
-        .dv-act-del:hover {
-            background: var(--red);
-            color: #fff;
-            border-color: var(--red);
-        }
-
-    .dv-act-req {
-        background: var(--blue);
-        color: #fff;
-        border-color: var(--blue);
-    }
-
-        .dv-act-req:hover {
-            background: var(--navy);
-            color: #fff;
-            border-color: var(--navy);
-        }
-
-    .dv-act-off {
-        background: #f0f4f8;
-        color: #b0bec8;
-        border-color: var(--border);
-        cursor: not-allowed;
-        opacity: .7;
-        pointer-events: none;
-    }
-
-    /* EMPTY */
-    .dv-empty {
-        text-align: center;
-        padding: 5rem 1rem;
-        color: var(--muted);
-    }
-
-        .dv-empty i {
-            font-size: 3.5rem;
-            opacity: .2;
-            display: block;
-            margin-bottom: .8rem;
-        }
-
-    #noResults {
-        display: none;
-        text-align: center;
-        padding: 2.5rem 1rem;
-        color: var(--muted);
-    }
-
-    /* ── MODAL VANILLA (sin Bootstrap) ── */
-    #customModal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        background: rgba(10,34,64,.55);
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
+        gap: .4rem;
+        transition: all .18s;
     }
 
-        #customModal.is-open {
-            display: flex;
+        .btn-cancel:hover {
+            background: #e8eef5;
+            color: #0a2240;
         }
 
-    .cm-box {
-        background: #fff;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.25);
-        overflow: hidden;
-        animation: cmIn .18s ease;
+    .validation-summary-errors {
+        background: #fdf0ef;
+        border: 1px solid #e8b4b0;
+        border-radius: 4px;
+        padding: .7rem .9rem;
+        margin-bottom: 1rem;
+        font-size: .85rem;
+        color: #9b2a1f;
     }
 
-    @@keyframes cmIn {
-        from {
-            transform: scale(.94);
-            opacity: 0;
+        .validation-summary-errors ul {
+            padding-left: 1.1rem;
         }
-
-        to {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    .cm-head {
-        background: #fdecea;
-        padding: .9rem 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #f5c6c6;
-    }
-
-        .cm-head h5 {
-            margin: 0;
-            font-size: .95rem;
-            font-weight: 700;
-            color: var(--red);
-        }
-
-    .cm-close {
-        background: none;
-        border: none;
-        font-size: 1.1rem;
-        cursor: pointer;
-        color: var(--muted);
-        line-height: 1;
-        padding: 0;
-    }
-
-        .cm-close:hover {
-            color: var(--red);
-        }
-
-    .cm-body {
-        padding: 1.2rem;
-        font-size: .88rem;
-        color: var(--text);
-    }
-
-        .cm-body small {
-            color: var(--muted);
-            font-size: .78rem;
-        }
-
-    .cm-foot {
-        padding: .8rem 1.2rem;
-        display: flex;
-        justify-content: flex-end;
-        gap: .5rem;
-        border-top: 1px solid var(--border);
-        background: #f8fafc;
-    }
-
-    .cm-btn-cancel {
-        background: #f0f4f8;
-        color: var(--muted);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: .38rem .9rem;
-        font-size: .82rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-        .cm-btn-cancel:hover {
-            background: #e2e8f0;
-        }
-
-    .cm-btn-confirm {
-        background: var(--red);
-        color: #fff;
-        border: 1px solid var(--red);
-        border-radius: 6px;
-        padding: .38rem .9rem;
-        font-size: .82rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-        .cm-btn-confirm:hover {
-            background: #a93226;
-        }
-
-    @@media (max-width:768px) {
-        .dv-topbar .d-flex {
-            flex-direction: column;
-            align-items: flex-start !important;
-            gap: .6rem;
-        }
-
-        .dv-search {
-            width: 100%;
-        }
-
-        .cm-box {
-            margin: 1rem;
-        }
-    }
 </style>
 
-<!-- TOPBAR -->
-<div class="dv-topbar">
+<div class="page-header">
     <div class="container">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <h1 class="dv-topbar__title"><i class="bi bi-laptop me-2"></i>Dispositivos <span>ITM</span></h1>
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <div class="dv-search">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Serial o marca…" autocomplete="off" />
-                </div>
-                @if (canManage)
-                {
-                    <a asp-controller="Device" asp-action="Create" class="dv-btn-new">
-                        <i class="bi bi-plus-lg"></i> Nuevo dispositivo
-                    </a>
-                }
-            </div>
-        </div>
+        <nav aria-label="breadcrumb" style="margin-bottom:.4rem;">
+            <a asp-controller="Device" asp-action="Index"
+               style="color:#a8bcd0; font-size:.82rem; text-decoration:none;">
+                <i class="bi bi-laptop"></i> Dispositivos
+            </a>
+            <span style="color:#4a6080; margin:0 .4rem;">/</span>
+            <span style="color:#fff; font-size:.82rem;">Nuevo</span>
+        </nav>
+        <h1><i class="bi bi-plus-circle me-2"></i>Agregar Dispositivo</h1>
+        <p>Registra un nuevo equipo en el inventario</p>
     </div>
 </div>
 
-<!-- GRID -->
-<div class="dv-grid-area">
-    <div class="container">
-        @if (!Model.Any())
-        {
-            <div class="dv-empty">
-                <i class="bi bi-laptop"></i>
-                <p>No hay dispositivos registrados todavía.</p>
-                @if (canManage)
-                {
-                    <a asp-controller="Device" asp-action="Create" class="dv-btn-new mt-3 d-inline-flex">
-                        <i class="bi bi-plus-lg"></i> Agregar el primero
-                    </a>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="row g-4" id="deviceGrid">
-                @foreach (var device in Model)
-                {
-                    string sl = device.EstadoEquipo?.ToLower() ?? "";
-                    string bc = sl switch
-                    {
-                        "disponible" => "dv-badge-disponible",
-                        "prestado" => "dv-badge-prestado",
-                        "mantenimiento" => "dv-badge-mantenimiento",
-                        _ => "dv-badge-default"
-                    };
-                    <div class="col-lg-4 col-md-6 device-item"
-                         data-search="@((device.Serial + " " + device.Marca + " " + device.EstadoEquipo).ToLower())">
-                        <div class="dv-card">
-                            <div class="dv-card__thumb">
-                                @if (!string.IsNullOrWhiteSpace(device.URLImagen))
-                                {
-                                    <img src="@device.URLImagen" alt="@device.Marca" loading="lazy" />
-                                }
-                                else
-                                {
-                                    <i class="bi bi-laptop dv-card__thumb-icon"></i>
-                                }
-                            </div>
-                            <div class="dv-card__body">
-                                <span class="dv-card__serial">Serial: @device.Serial</span>
-                                <div class="dv-card__brand">@device.Marca</div>
-                                <div class="dv-card__specs">@device.Especificaciones</div>
-                            </div>
-                            <div class="dv-card__foot">
-                                <span class="dv-badge @bc">@device.EstadoEquipo</span>
-                                <div class="dv-acts">
-                                    @if (canManage)
-                                    {
-                                        <a asp-controller="Device" asp-action="Edit"
-                                           asp-route-id="@device.IdDisp"
-                                           class="dv-act dv-act-edit" title="Editar">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-                                        <button type="button"
-                                                class="dv-act dv-act-del"
-                                                onclick="openDel('@device.IdDisp', '@device.Marca (@device.Serial)')"
-                                                title="Eliminar">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
-                                    }
-                                    @if (isStudent && sl == "disponible")
-                                    {
-                                        <a asp-controller="Loan" asp-action="Create"
-                                           asp-route-id="@device.IdDisp"
-                                           class="dv-act dv-act-req">
-                                            <i class="bi bi-calendar-check-fill"></i> Solicitar
-                                        </a>
-                                    }
-                                    else if (isStudent)
-                                    {
-                                        <span class="dv-act dv-act-off">No disponible</span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
+<div class="container mb-5">
+    <div class="form-card">
+
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <form asp-action="Create" asp-controller="Device" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label" asp-for="Serial">Serial</label>
+                        @Html.TextBoxFor(m => m.Serial, new { @class = "f-input", placeholder = "Ej: SN-2024-001" })
+                        <span asp-validation-for="Serial" class="field-validation-error"></span>
                     </div>
-                }
+                </div>
+                <div class="col-md-6">
+                    <div class="f-group">
+                        <label class="f-label" asp-for="Marca">Marca</label>
+                        @Html.TextBoxFor(m => m.Marca, new { @class = "f-input", placeholder = "Ej: Dell, HP, Lenovo" })
+                        <span asp-validation-for="Marca" class="field-validation-error"></span>
+                    </div>
+                </div>
             </div>
-            <div id="noResults">
-                <i class="bi bi-search" style="font-size:1.8rem;opacity:.2;"></i>
-                <p class="mt-2 small">Sin resultados.</p>
-            </div>
-        }
-    </div>
-</div>
 
-<!-- MODAL VANILLA — completamente independiente de Bootstrap -->
-<div id="customModal">
-    <div class="cm-box">
-        <div class="cm-head">
-            <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar eliminación</h5>
-            <button class="cm-close" onclick="closeDel()">&#x2715;</button>
-        </div>
-        <div class="cm-body">
-            ¿Eliminar <strong id="delName"></strong>?<br>
-            <small>Esta acción no se puede deshacer.</small>
-        </div>
-        <div class="cm-foot">
-            <button class="cm-btn-cancel" onclick="closeDel()">Cancelar</button>
-            <form id="delForm" method="post" style="margin:0; display:inline;">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" id="delId" />
-                <button type="submit" class="cm-btn-confirm">
-                    <i class="bi bi-trash-fill me-1"></i>Eliminar
+            <div class="f-group">
+                <label class="f-label" asp-for="Especificaciones">Especificaciones</label>
+                @Html.TextAreaFor(m => m.Especificaciones, new { @class = "f-textarea", placeholder = "RAM, procesador, almacenamiento, pantalla…" })
+                <span asp-validation-for="Especificaciones" class="field-validation-error"></span>
+            </div>
+
+            <div class="f-group">
+                <label class="f-label" asp-for="EstadoEquipo">Estado del Dispositivo</label>
+                @Html.DropDownListFor(m => m.EstadoEquipo,
+                    new SelectList(new[] { "Disponible", "Prestado", "Mantenimiento", "Dañado", "Baja" }),
+                    "— Selecciona un estado —",
+                    new { @class = "f-select" })
+                <span asp-validation-for="EstadoEquipo" class="field-validation-error"></span>
+            </div>
+
+            <div class="f-group">
+                <label class="f-label" asp-for="URLImagen">URL de Imagen</label>
+                @Html.TextBoxFor(m => m.URLImagen, new
+                {
+                    @class = "f-input",
+                    placeholder = "https://…",
+                    id = "urlImagenInput"
+                })
+                <span asp-validation-for="URLImagen" class="field-validation-error"></span>
+
+                <!-- Preview de imagen -->
+                <div class="img-preview-wrap mt-2" id="imgPreview">
+                    <i class="bi bi-image"></i>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-3 flex-wrap">
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-check-circle"></i> Guardar Dispositivo
                 </button>
-            </form>
-        </div>
+                <a asp-controller="Device" asp-action="Index" class="btn-cancel">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
-        // Búsqueda
-        document.getElementById('searchInput')?.addEventListener('input', function () {
-            const q = this.value.toLowerCase().trim();
-            let n = 0;
-            document.querySelectorAll('.device-item').forEach(el => {
-                const show = el.dataset.search.includes(q);
-                el.style.display = show ? '' : 'none';
-                if (show) n++;
-            });
-            const nr = document.getElementById('noResults');
-            if (nr) nr.style.display = (!n && q) ? 'block' : 'none';
-        });
+        var urlInput = document.getElementById('urlImagenInput');
+        var preview = document.getElementById('imgPreview');
 
-        // Modal vanilla
-        function openDel(id, name) {
-            document.getElementById('delId').value = id;
-            document.getElementById('delName').textContent = name;
-            document.getElementById('delForm').action = '/Device/Delete';
-            document.getElementById('customModal').classList.add('is-open');
+        function updatePreview(url) {
+            if (!url || url.trim() === '') {
+                preview.innerHTML = '<i class="bi bi-image"></i>';
+                preview.classList.remove('has-img');
+                return;
+            }
+            var img = document.createElement('img');
+            img.src = url.trim();
+            img.alt = 'Preview';
+            img.onerror = function () {
+                preview.innerHTML = '<i class="bi bi-image-fill" style="color:#c0392b;" title="URL no válida"></i>';
+                preview.classList.remove('has-img');
+            };
+            img.onload = function () {
+                preview.innerHTML = '';
+                preview.appendChild(img);
+                preview.classList.add('has-img');
+            };
         }
 
-        function closeDel() {
-            document.getElementById('customModal').classList.remove('is-open');
-        }
-
-        // Cerrar al hacer clic en el fondo
-        document.getElementById('customModal').addEventListener('click', function (e) {
-            if (e.target === this) closeDel();
-        });
+        urlInput.addEventListener('input', function () { updatePreview(this.value); });
+        // Si hay valor precargado (error de validación)
+        if (urlInput.value) updatePreview(urlInput.value);
     </script>
 }

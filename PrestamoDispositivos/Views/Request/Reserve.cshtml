@@ -1,128 +1,280 @@
 ﻿@{
-    ViewData["Title"] = "Confirmar Reserva";
+    ViewData["Title"] = "Confirmar Solicitud";
     var device = ViewBag.Device as PrestamoDispositivos.DTO.deviceDTO;
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
 }
 
 <style>
-    /* ... (Mantenemos tus estilos exactamente igual) ... */
-    .page-header {
-        background: linear-gradient(135deg, #0a2240 0%, #1a4080 100%);
-        color: #fff; padding: 1.8rem 0 1.4rem;
-        margin-bottom: 2rem; border-bottom: 3px solid #c8a84b;
+    .itm-page {
+        display: block !important;
+        align-items: unset !important;
+        padding: 0 !important;
     }
-    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
-    .page-header p  { color: #a8bcd0; font-size: .9rem; margin: 0; }
-    .confirm-card {
-        background: #fff; border: 1px solid #c8d4e0;
-        border-radius: 10px; box-shadow: 0 2px 12px rgba(10,34,64,.08);
-        max-width: 520px; overflow: hidden; margin: 0 auto; /* Centramos la tarjeta */
+
+    :root {
+        --gold: #c8a84b;
+        --navy: #0a2240;
+        --blue: #1a4080;
+        --green: #2e7d32;
+        --border: #dde4ec;
+        --muted: #6b7f95;
     }
-    .confirm-card__img {
-        height: 200px; overflow: hidden; background: #f0f4f8;
-        display: flex; align-items: center; justify-content: center;
+
+    .rv-header {
+        background: var(--navy);
+        border-bottom: 3px solid var(--gold);
+        padding: 1.1rem 0;
     }
-    .confirm-card__img img { width: 100%; height: 100%; object-fit: cover; }
-    .confirm-card__img i   { font-size: 4rem; color: #c8d4e0; }
-    .confirm-card__body    { padding: 1.5rem 1.8rem; }
-    .spec-row { display: flex; justify-content: space-between; align-items: flex-start;
-                padding: .55rem 0; border-bottom: 1px solid #e8eef5; font-size: .9rem; }
-    .spec-row:last-child { border-bottom: none; }
-    .spec-label { color: #6b7f95; font-size: .78rem; font-weight: 700;
-                  text-transform: uppercase; letter-spacing: .04em; }
-    .spec-value { color: #1e2d3d; font-weight: 600; text-align: right; max-width: 60%; }
-    .info-box {
-        background: #e8f4fd; border: 1px solid #bee3f8; border-radius: 6px;
-        padding: .85rem 1rem; margin: 1.2rem 0; font-size: .87rem; color: #1565c0;
-        display: flex; gap: .6rem; align-items: flex-start;
+
+    .rv-breadcrumb {
+        font-size: .8rem;
+        margin-bottom: .35rem;
     }
-    .info-box i { font-size: 1.1rem; margin-top: .05rem; flex-shrink: 0; }
-    .btn-reserve {
-        background: #1a4080; color: #fff; border: none;
-        padding: .65rem 1.8rem; border-radius: 4px;
-        font-size: .98rem; font-weight: 700; cursor: pointer;
-        display: inline-flex; align-items: center; gap: .4rem;
+
+        .rv-breadcrumb a {
+            color: #8da9c4;
+            text-decoration: none;
+        }
+
+            .rv-breadcrumb a:hover {
+                color: var(--gold);
+            }
+
+        .rv-breadcrumb span {
+            color: #4a6080;
+            margin: 0 .35rem;
+        }
+
+    .rv-header h1 {
+        font-family: 'Barlow Condensed','Segoe UI',sans-serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        letter-spacing: .02em;
+    }
+
+    .rv-header p {
+        color: #8da9c4;
+        font-size: .82rem;
+        margin: .25rem 0 0;
+    }
+
+    .rv-area {
+        background: #f0f4f8;
+        padding: 2.5rem 0 3rem;
+        min-height: 60vh;
+    }
+
+    .rv-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(10,34,64,.09);
+        max-width: 500px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    .rv-card__thumb {
+        height: 200px;
+        background: #eef1f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+
+        .rv-card__thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 1rem;
+        }
+
+        .rv-card__thumb i {
+            font-size: 4rem;
+            color: #c8d4e0;
+        }
+
+    .rv-card__body {
+        padding: 1.5rem 1.8rem;
+    }
+
+    .rv-card__name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 1rem;
+    }
+
+    .rv-spec {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: .5rem 0;
+        border-bottom: 1px solid #eef1f5;
+        font-size: .87rem;
+    }
+
+        .rv-spec:last-of-type {
+            border-bottom: none;
+        }
+
+    .rv-spec__label {
+        color: var(--muted);
+        font-size: .73rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .rv-spec__value {
+        color: #1e2d3d;
+        font-weight: 600;
+        text-align: right;
+        max-width: 60%;
+    }
+
+    .rv-info {
+        background: #e8f4fd;
+        border: 1px solid #bee3f8;
+        border-radius: 6px;
+        padding: .85rem 1rem;
+        margin: 1.2rem 0;
+        font-size: .84rem;
+        color: #1565c0;
+        display: flex;
+        gap: .6rem;
+        align-items: flex-start;
+    }
+
+        .rv-info i {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: .1rem;
+        }
+
+    .rv-actions {
+        display: flex;
+        gap: .75rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+    }
+
+    .rv-btn-confirm {
+        flex: 1;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: .65rem 1rem;
+        font-size: .9rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .4rem;
         transition: background .18s;
     }
-    .btn-reserve:hover { background: #0a2240; }
-    .btn-back {
-        background: transparent; color: #1a4080; border: 1.5px solid #1a4080;
-        padding: .62rem 1.4rem; border-radius: 4px; font-size: .95rem; font-weight: 600;
-        text-decoration: none; display: inline-flex; align-items: center; gap: .4rem;
+
+        .rv-btn-confirm:hover {
+            background: var(--navy);
+        }
+
+    .rv-btn-back {
+        flex: 1;
+        background: transparent;
+        color: var(--muted);
+        border: 1.5px solid var(--border);
+        border-radius: 7px;
+        padding: .62rem 1rem;
+        font-size: .88rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .4rem;
         transition: all .18s;
     }
-    .btn-back:hover { background: #e8eef5; color: #0a2240; }
+
+        .rv-btn-back:hover {
+            background: #e8eef5;
+            color: #1e2d3d;
+        }
 </style>
 
-<div class="page-header">
+<!-- HEADER -->
+<div class="rv-header">
     <div class="container">
-        <nav style="margin-bottom:.4rem;">
-            <a asp-controller="Device" asp-action="Index"
-               style="color:#a8bcd0;font-size:.82rem;text-decoration:none;">
-                <i class="bi bi-laptop"></i> Dispositivos
-            </a>
-            <span style="color:#4a6080;margin:0 .4rem;">/</span>
-            <span style="color:#fff;font-size:.82rem;">Confirmar Reserva</span>
-        </nav>
-        <h1><i class="bi bi-bookmark-check me-2"></i>Confirmar Reserva</h1>
-        <p>Revisa los detalles del dispositivo antes de enviar tu solicitud</p>
+        <div class="rv-breadcrumb">
+            <a asp-controller="Device" asp-action="Index"><i class="bi bi-laptop me-1"></i>Dispositivos</a>
+            <span>/</span>
+            <span style="color:#fff;">Confirmar Solicitud</span>
+        </div>
+        <h1><i class="bi bi-bookmark-check me-2"></i>Confirmar Solicitud</h1>
+        <p>Revisa los detalles antes de enviar tu solicitud al prestamista</p>
     </div>
 </div>
 
-<div class="container mb-5">
-    <div class="confirm-card">
-        <!-- Imagen del dispositivo -->
-        <div class="confirm-card__img">
-            @if (device != null && !string.IsNullOrWhiteSpace(device.URLImagen))
-            {
-                <img src="@device.URLImagen" alt="@device?.Marca" />
-            }
-            else
-            {
-                <i class="bi bi-laptop"></i>
-            }
-        </div>
+<!-- CONTENIDO -->
+<div class="rv-area">
+    <div class="container">
+        <div class="rv-card">
 
-        <div class="confirm-card__body">
-            <h3 style="color:#0a2240;font-weight:700;margin-bottom:1rem;">@device?.Marca</h3>
-
-            <div class="spec-row">
-                <span class="spec-label">Serial</span>
-                <span class="spec-value">@device?.Serial</span>
-            </div>
-            <div class="spec-row">
-                <span class="spec-label">Especificaciones</span>
-                <span class="spec-value">@device?.Especificaciones</span>
-            </div>
-            <div class="spec-row">
-                <span class="spec-label">Estado</span>
-                <span class="spec-value" style="color:#2e7d32;">@device?.EstadoEquipo</span>
+            <div class="rv-card__thumb">
+                @if (device != null && !string.IsNullOrWhiteSpace(device.URLImagen))
+                {
+                    <img src="@device.URLImagen" alt="@device.Marca" />
+                }
+                else
+                {
+                    <i class="bi bi-laptop"></i>
+                }
             </div>
 
-            <div class="info-box">
-                <i class="bi bi-info-circle-fill"></i>
-                <div>
-                    Al confirmar, se enviará una <strong>solicitud de reserva</strong> al prestamista.
-                    Recibirás una notificación cuando sea aprobada o rechazada.
+            <div class="rv-card__body">
+                <div class="rv-card__name">@device?.Marca</div>
+
+                <div class="rv-spec">
+                    <span class="rv-spec__label">Serial</span>
+                    <span class="rv-spec__value">@device?.Serial</span>
                 </div>
+                <div class="rv-spec">
+                    <span class="rv-spec__label">Especificaciones</span>
+                    <span class="rv-spec__value">@device?.Especificaciones</span>
+                </div>
+                <div class="rv-spec">
+                    <span class="rv-spec__label">Estado</span>
+                    <span class="rv-spec__value" style="color:var(--green);">@device?.EstadoEquipo</span>
+                </div>
+
+                <div class="rv-info">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <div>
+                        Al confirmar se enviará una <strong>solicitud de reserva</strong> al prestamista.
+                        Te notificarán cuando sea aprobada o rechazada.
+                    </div>
+                </div>
+
+                <form asp-action="Reserve" asp-controller="Request" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="idDevice" value="@device?.IdDisp" />
+                    <input type="hidden" name="confirm" value="yes" />
+                    <div class="rv-actions">
+                        <button type="submit" class="rv-btn-confirm">
+                            <i class="bi bi-send-fill"></i> Enviar Solicitud
+                        </button>
+                        <a asp-controller="Device" asp-action="Index" class="rv-btn-back">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
 
-            @* 🛠 CAMBIO CRÍTICO AQUÍ: Usamos un campo oculto para idDevice *@
-            <form asp-action="Reserve" asp-controller="Request" method="post">
-                @Html.AntiForgeryToken()
-                
-                <!-- Este campo oculto asegura que el ID llegue al POST -->
-                <input type="hidden" name="idDevice" value="@device?.IdDisp" />
-                <input type="hidden" name="confirm" value="yes" />
-
-                <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.5rem;">
-                    <button type="submit" class="btn-reserve">
-                        <i class="bi bi-send"></i> Enviar Solicitud
-                    </button>
-                    <a asp-controller="Device" asp-action="Index" class="btn-back">
-                        <i class="bi bi-arrow-left"></i> Cancelar
-                    </a>
-                </div>
-            </form>
         </div>
     </div>
 </div>

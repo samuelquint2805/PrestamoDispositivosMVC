@@ -24,20 +24,21 @@ namespace PrestamoDispositivos.Services.Abstractions
             /// <summary>Obtiene solicitudes filtradas por estado (Pendiente, Aprobada, Rechazada).</summary>
             Task<Response<List<RequestoDTO>>> GetRequestsByStatusAsync(string estado);
 
-            // ── CICLO DE VIDA ────────────────────────────────────────────
+        // ── CICLO DE VIDA ────────────────────────────────────────────
 
-            /// <summary>
-            /// El estudiante crea una solicitud de reserva para un dispositivo.
-            /// Estado inicial: "Pendiente".
-            /// Dispara Observer → notifica cambio.
-            /// </summary>
-            Task<Response<RequestoDTO>> CreateRequestAsync(RequestoDTO dto, Guid idDispo);
+        /// <summary>
+        /// El estudiante crea una solicitud de reserva para un dispositivo.
+        /// Estado inicial: "Pendiente".
+        /// Dispara Observer → notifica cambio.
+        /// </summary>
+        Task<Response<List<RequestoDTO>>> GetRequestsByUserAndStatusAsync(Guid idUsuario, string estado);
+        Task<Response<RequestoDTO>> CreateRequestAsync(RequestoDTO dto, Guid idDispo);
 
             /// <summary>
             /// El Prestamista / SuperAdmin aprueba o rechaza una solicitud.
             /// Dispara Observer → notifica cambio a todos los observadores.
             /// </summary>
-            Task<Response<RequestoDTO>> ReviewRequestAsync(RequestoDTO dto);
+            Task<Response<RequestoDTO>> ReviewRequestAsync(RequestoDTO dto, Guid? idDispo);
 
             /// <summary>
             /// El estudiante cancela su propia solicitud (solo si está Pendiente).

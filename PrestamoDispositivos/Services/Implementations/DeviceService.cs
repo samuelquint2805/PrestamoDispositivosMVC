@@ -98,11 +98,11 @@ namespace PrestamoDispositivos.Services.Implementations
                     "Dispositivo creado correctamente"
                 );
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return  Response<deviceDTO>.Failure(
-                    "Error al crear el Dispositivo"
-                );
+                // Cambia esto temporalmente para ver el error real
+                var inner = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Response<deviceDTO>.Failure($"Error detallado: {inner}");
             }
         }
 

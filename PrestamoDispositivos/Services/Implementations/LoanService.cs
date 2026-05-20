@@ -21,36 +21,130 @@ namespace PrestamoDispositivos.Services.Implementations
 
 
 
-        // Crear préstamo
+        // ── OBTENER TODOS ────────────────────────────────────────────
+
+        public async Task<Response<List<LoanDTO>>> GetAllLoansAsync()
+        {
+            try
+            {
+                var loans = await _context.Prestamos
+                    .Include(l => l.User)
+                    .Include(l => l.Dispositivo)
+                    .OrderByDescending(l => l.FechaEvento)
+                    .ToListAsync();
+
+                return Response<List<LoanDTO>>.Success(
+                    _mapper.Map<List<LoanDTO>>(loans), "Lista obtenida correctamente");
+            }
+            catch (Exception ex)
+            {
+                return Response<List<LoanDTO>>.Failure($"Error al obtener préstamos: {ex.Message}");
+            }
+        }
+
+        // ── OBTENER POR USUARIO (Student ve los suyos) ───────────────
+        // Busca por ApplicationUser.idUsuario directamente en Loan.IdUser
+        public async Task<Response<List<LoanDTO>>> GetLoansByUserAsync(Guid idUser)
+        {
+            try
+            {
+                var loans = await _context.Prestamos
+                    .Include(l => l.User)
+                    .Include(l => l.Dispositivo)
+                    .Where(l => l.IdUser == idUser)
+                    .OrderByDescending(l => l.FechaEvento)
+                    .ToListAsync();
+
+                return Response<List<LoanDTO>>.Success(
+                    _mapper.Map<List<LoanDTO>>(loans), "Préstamos del usuario obtenidos");
+            }
+            catch (Exception ex)
+            {
+                return Response<List<LoanDTO>>.Failure($"Error al obtener préstamos del usuario: {ex.Message}");
+            }
+        }
+
+        // ── OBTENER POR ESTUDIANTE (legacy, por si lo usas en otro lado) ──
+        public async Task<Response<List<LoanDTO>>> GetAllLoansPerStudentAsync(Guid idEst)
+        {
+            try
+            {
+                var loans = await _context.Prestamos
+                    .Include(l => l.User.studentUsuario)
+                    .Include(l => l.Dispositivo)
+                    .Where(l => l.User.studentUsuario.IdEst == idEst)
+                    .OrderByDescending(l => l.FechaEvento)
+                    .ToListAsync();
+
+                return Response<List<LoanDTO>>.Success(
+                    _mapper.Map<List<LoanDTO>>(loans), "Préstamos del estudiante obtenidos");
+            }
+            catch (Exception ex)
+            {
+                return Response<List<LoanDTO>>.Failure($"Error: {ex.Message}");
+            }
+        }
+
+        // ── OBTENER POR ID ───────────────────────────────────────────
+
+        public async Task<Response<LoanDTO>> GetLoanByIdAsync(Guid id)
+        {
+            try
+            {
+                var loan = await _context.Prestamos
+                    .Include(l => l.User)
+                    .Include(l => l.Dispositivo)
+                    .FirstOrDefaultAsync(l => l.IdPrestamos == id);
+
+                if (loan == null)
+                    return Response<LoanDTO>.Failure("Préstamo no encontrado.");
+
+                return Response<LoanDTO>.Success(_mapper.Map<LoanDTO>(loan), "Préstamo encontrado");
+            }
+            catch (Exception ex)
+            {
+                return Response<LoanDTO>.Failure($"Error: {ex.Message}");
+            }
+        }
+
+        // ── CREAR ─────────────────────────────────────────────────────
+        // Se llama desde RequestService al aprobar una solicitud.
+        // Regla: el usuario no puede tener más de 1 préstamo activo.
+
         public async Task<Response<LoanDTO>> CreateLoanAsync(LoanDTO dto)
         {
             try
             {
+                // ── Regla de negocio: máximo 1 préstamo activo por usuario ──
+                var tieneActivo = await _context.Prestamos
+                    .AnyAsync(l => l.IdUser == dto.IdUser
+                               && l.EstadoPrestamo != "Devuelto"
+                               && l.EstadoPrestamo != "Finalizado"
+                               && l.EstadoPrestamo != "Cancelar");
 
+                if (tieneActivo)
+                    return Response<LoanDTO>.Failure(
+                        "El estudiante ya tiene un préstamo activo. Debe devolverlo antes de solicitar otro.");
 
-                // Validar que el dispositivo exista y esté disponible
                 var device = await _context.Dispositivos.FindAsync(dto.IdDispo);
+                if (device == null)
+                    return Response<LoanDTO>.Failure("Dispositivo no encontrado.");
 
-                if(device.EstadoEquipo == "Disponible")
-                {
-                    // Crear el préstamo
-                    dto.IdPrestamos = Guid.NewGuid();
-                    Loan loan = _mapper.Map<Loan>(dto);
-                    await _context.Prestamos.AddAsync(loan);
+                if (device.EstadoEquipo?.ToLower() != "disponible")
+                    return Response<LoanDTO>.Failure(
+                        $"El dispositivo no está disponible. Estado: {device.EstadoEquipo}.");
 
-                    // Actualizar el estado del dispositivo a "Prestado"
-                    device.EstadoEquipo = "Prestado";
-                    _context.Dispositivos.Update(device);
-                }else
-                {
-                    return Response<LoanDTO>.Failure("El dispositivo no está disponible para préstamo");
-                }
+                dto.IdPrestamos = Guid.NewGuid();
+                var loan = _mapper.Map<Loan>(dto);
 
+                await _context.Prestamos.AddAsync(loan);
 
-                // Guardar cambios
+                device.EstadoEquipo = "Prestado";
+                _context.Dispositivos.Update(device);
+
                 await _context.SaveChangesAsync();
 
-                return Response<LoanDTO>.Success(dto, "Préstamo creado correctamente");
+                return Response<LoanDTO>.Success(dto, "Préstamo creado correctamente.");
             }
             catch (Exception ex)
             {
@@ -58,113 +152,50 @@ namespace PrestamoDispositivos.Services.Implementations
             }
         }
 
-        // Actualizar préstamo
+        // ── ACTUALIZAR ───────────────────────────────────────────────
+
         public async Task<Response<LoanDTO>> UpdateLoanAsync(Guid id, LoanDTO dto)
         {
             try
             {
-                var loan = await _context.Prestamos.FirstOrDefaultAsync(x => x.IdPrestamos == id);
+                var loan = await _context.Prestamos.FirstOrDefaultAsync(l => l.IdPrestamos == id);
                 if (loan == null)
-                    return Response<LoanDTO>.Failure(" Préstamo no encontrado");
+                    return Response<LoanDTO>.Failure("Préstamo no encontrado.");
 
                 _mapper.Map(dto, loan);
-
                 _context.Prestamos.Update(loan);
                 await _context.SaveChangesAsync();
 
-                return Response<LoanDTO>.Success(dto, " Préstamo actualizado correctamente");
+                return Response<LoanDTO>.Success(dto, "Préstamo actualizado correctamente.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Response<LoanDTO>.Failure(" Error al actualizar el préstamo");
+                return Response<LoanDTO>.Failure($"Error al actualizar: {ex.Message}");
             }
         }
 
-        // Eliminar préstamo
+        // ── ELIMINAR ─────────────────────────────────────────────────
+
         public async Task<Response<bool>> DeleteLoanAsync(Guid id)
         {
             try
             {
                 var loan = await _context.Prestamos.FindAsync(id);
                 if (loan == null)
-                    return Response<bool>.Failure(" Préstamo no encontrado");
+                    return Response<bool>.Failure("Préstamo no encontrado.");
 
                 _context.Prestamos.Remove(loan);
                 await _context.SaveChangesAsync();
 
-                return Response<bool>.Success(true, " Préstamo eliminado correctamente");
+                return Response<bool>.Success(true, "Préstamo eliminado correctamente.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Response<bool>.Failure(" Error al eliminar el préstamo");
+                return Response<bool>.Failure($"Error al eliminar: {ex.Message}");
             }
         }
 
-        // Obtener préstamo por Id
-        public async Task<Response<LoanDTO>> GetLoanByIdAsync(Guid id)
-        {
-            try
-            {
-
-                //metodo de busqueda por ID incluyendo las relaciones usando DTO
-                var loan = await _context.Prestamos
-                    .Include(x => x.User.studentUsuario)
-                    .Include(x => x.Dispositivo)
-                    .FirstOrDefaultAsync(x => x.IdPrestamos == id);
-
-                if (loan == null)
-                    return Response<LoanDTO>.Failure(" Préstamo no encontrado");
-
-
-                var loanDto = _mapper.Map<LoanDTO>(loan);
-
-                return Response<LoanDTO>.Success(loanDto, "Préstamo encontrado correctamente");
-            }
-            catch (Exception)
-            {
-                return Response<LoanDTO>.Failure(" Error al obtener el préstamo");
-            }
-        }
-
-        // Obtener todos los préstamos
-        public async Task<Response<List<LoanDTO>>> GetAllLoansPerStudentAsync(Guid idEst)
-        {
-
-            try
-            {
-                List<Loan> loans = await _context.Prestamos
-                    .Include(l => l.User.studentUsuario)
-                    .Include(l => l.Dispositivo)
-                    .Where(l => l.User.studentUsuario.IdEst == idEst) // ✅ Filtrar por estudiante
-                    .OrderByDescending(l => l.FechaEvento) // Más recientes primero
-                         .ToListAsync();
-
-                List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
-
-                return Response<List<LoanDTO>>.Success(dtoList, "Lista de préstamos obtenida correctamente");
-            }
-            catch (Exception)
-            {
-                return Response<List<LoanDTO>>.Failure("Error al obtener los préstamos");
-            }
-        }
-        public async Task<Response<List<LoanDTO>>> GetAllLoansAsync()
-        {
-            try
-            {
-                List<Loan> loans = await _context.Prestamos
-                    .Include(l => l.User.studentUsuario)
-                    .Include(l => l.Dispositivo)
-            .ToListAsync();
-                List<LoanDTO> dtoList = _mapper.Map<List<LoanDTO>>(loans);
-
-                return Response<List<LoanDTO>>.Success(dtoList, " Lista de préstamos obtenida correctamente");
-            }
-            catch (Exception)
-            {
-                return Response<List<LoanDTO>>.Failure("Error al obtener los préstamos");
-            }
-        }
+        // ── DEVOLVER DISPOSITIVO ─────────────────────────────────────
 
         public async Task<Response<bool>> ReturnDeviceAsync(Guid loanId)
         {
@@ -175,194 +206,66 @@ namespace PrestamoDispositivos.Services.Implementations
                     .FirstOrDefaultAsync(l => l.IdPrestamos == loanId);
 
                 if (loan == null)
-                    return Response<bool>.Failure("Préstamo no encontrado");
+                    return Response<bool>.Failure("Préstamo no encontrado.");
 
-                // Actualizar estado del préstamo
-                loan.EstadoPrestamo = "Devuelto";
+                if (loan.EstadoPrestamo == "Finalizado" || loan.EstadoPrestamo == "Devuelto")
+                    return Response<bool>.Failure("Este préstamo ya fue finalizado.");
 
-                // Actualizar estado del dispositivo
-                loan.Dispositivo.EstadoEquipo = "Disponible";
+                loan.EstadoPrestamo = "Finalizado";
 
+                if (loan.Dispositivo != null)
+                {
+                    loan.Dispositivo.EstadoEquipo = "Disponible";
+                    _context.Dispositivos.Update(loan.Dispositivo);
+                }
+
+                _context.Prestamos.Update(loan);
                 await _context.SaveChangesAsync();
 
-                return Response<bool>.Success(true, "Dispositivo devuelto correctamente");
+                return Response<bool>.Success(true, "Dispositivo devuelto correctamente.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Response<bool>.Failure("Error al devolver el dispositivo");
+                return Response<bool>.Failure($"Error al devolver: {ex.Message}");
             }
         }
+
+        // ── AUXILIARES ───────────────────────────────────────────────
 
         public async Task<Response<List<StudentDTO>>> GetAllStudentsAsync()
         {
             try
             {
-                List<Student> students = await _context.Estudiante.ToListAsync();
-                List<StudentDTO> dtoList = _mapper.Map<List<StudentDTO>>(students);
-                return Response<List<StudentDTO>>.Success(dtoList, "Lista de estudiantes obtenida correctamente");
+                var list = await _context.Estudiante.ToListAsync();
+                return Response<List<StudentDTO>>.Success(
+                    _mapper.Map<List<StudentDTO>>(list), "Estudiantes obtenidos");
             }
-            catch (Exception)
-            {
-                return Response<List<StudentDTO>>.Failure("Error al obtener los estudiantes");
-            }
+            catch (Exception ex) { return Response<List<StudentDTO>>.Failure($"Error: {ex.Message}"); }
         }
 
         public async Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync()
         {
             try
             {
-                List<Device> devices = await _context.Dispositivos
+                var list = await _context.Dispositivos
                     .Where(d => d.EstadoEquipo == "Disponible")
                     .ToListAsync();
 
-                List<deviceDTO> dtoList = _mapper.Map<List<deviceDTO>>(devices);
-                return Response<List<deviceDTO>>.Success(dtoList, "Dispositivos disponibles obtenidos correctamente");
+                return Response<List<deviceDTO>>.Success(
+                    _mapper.Map<List<deviceDTO>>(list), "Dispositivos disponibles obtenidos");
             }
-            catch (Exception)
-            {
-                return Response<List<deviceDTO>>.Failure("Error al obtener los dispositivos disponibles");
-            }
+            catch (Exception ex) { return Response<List<deviceDTO>>.Failure($"Error: {ex.Message}"); }
         }
 
         public async Task<Response<List<AdministratorDTO>>> GetAllAdministratorsAsync()
         {
             try
             {
-                List<Administrator> admins = await _context.Administradores.ToListAsync();
-                List<AdministratorDTO> dtoList = _mapper.Map<List<AdministratorDTO>>(admins);
-                return Response<List<AdministratorDTO>>.Success(dtoList, "Lista de administradores obtenida correctamente");
+                var list = await _context.Administradores.ToListAsync();
+                return Response<List<AdministratorDTO>>.Success(
+                    _mapper.Map<List<AdministratorDTO>>(list), "Administradores obtenidos");
             }
-            catch (Exception)
-            {
-                return Response<List<AdministratorDTO>>.Failure("Error al obtener los administradores");
-            }
+            catch (Exception ex) { return Response<List<AdministratorDTO>>.Failure($"Error: {ex.Message}"); }
         }
-
-
-
-        // Cambiar estado del préstamo
-        //public async Task<Response<object>> ToggleLoanStatusAsync(ToggleLoanStatusDTO dto)
-        //{
-        //    try
-        //    {
-        //        var loan = await _context.Prestamos.FindAsync(dto.LoanId);
-        //        if (loan == null)
-        //            return Response<object>.Failure(" Préstamo no encontrado");
-
-        //        loan.IdEvento = dto.NewStatus;
-        //        await _context.SaveChangesAsync();
-
-        //        return Response<object>.Success(true, " Estado del préstamo actualizado correctamente");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Response<object>.Failure("Error al cambiar el estado del préstamo");
-        //    }
-        //}
-        // Obtener todos los estudiantes
-        //public async Task<Response<List<StudentDTO>>> GetAllStudentsAsync()
-        //{
-        //    try
-        //    {
-        //        var targetStatusId = Guid.Parse("1EAA1209-075C-4E29-91C9-33824518AD93");
-        //        var students = await _context.Estudiante
-        //            .Where(s => s.EstadoEstId == targetStatusId) // Solo estudiantes activos
-        //            .OrderBy(s => s.Nombre)
-        //            .ToListAsync();
-
-        //        var dtoList = _mapper.Map<List<StudentDTO>>(students);
-        //        return Response<List<StudentDTO>>.Success(dtoList, "Estudiantes obtenidos correctamente");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Response<List<StudentDTO>>.Failure("Error al obtener estudiantes");
-        //    }
-        //}
-
-        // Obtener dispositivos disponibles
-        //public async Task<Response<List<deviceDTO>>> GetAvailableDevicesAsync()
-        //{
-        //    try
-        //    {
-        //        var devices = await _context.Dispositivos
-        //            .Where(d => d.EstadoDisp == "Nuevo")
-        //            .OrderBy(d => d.Tipo)
-        //            .ToListAsync();
-
-        //        var dtoList = _mapper.Map<List<deviceDTO>>(devices);
-        //        return Response<List<deviceDTO>>.Success(dtoList, "Dispositivos obtenidos correctamente");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Response<List<deviceDTO>>.Failure("Error al obtener dispositivos");
-        //    }
-        //}
-
-        //// Obtener todos los administradores
-        //public async Task<Response<List<deviceManagerDTO>>> GetAllAdministratorsAsync()
-        //{
-        //    try
-        //    {
-        //        var admins = await _context.AdminDisp
-        //            .OrderBy(a => a.Nombre)
-        //            .ToListAsync();
-
-        //        var dtoList = _mapper.Map<List<deviceManagerDTO>>(admins);
-        //        return Response<List<deviceManagerDTO>>.Success(dtoList, "Administradores obtenidos correctamente");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Response<List<deviceManagerDTO>>.Failure("Error al obtener administradores");
-        //    }
-        //}
-
-        // Obtener todos los eventos de préstamo
-
-        //public async Task<Response<bool>> ReturnDeviceAsync(Guid loanId)
-        //{
-        //    try
-        //    {
-        //        // Buscar el préstamo con sus relaciones
-        //        var loan = await _context.Prestamos
-        //            .Include(l => l.Dispositivo)
-        //            .FirstOrDefaultAsync(l => l.IdPrestamos == loanId);
-
-        //        if (loan == null)
-        //            return Response<bool>.Failure("❌ Préstamo no encontrado");
-
-        //        // Verificar que el préstamo esté activo
-        //        if (loan.EstadoPrestamo == "Finalizado")
-        //            return Response<bool>.Failure("⚠️ Este préstamo ya fue finalizado");
-
-        //        // Buscar el evento "Devuelto" en la tabla EventoPrestamos
-        //        var eventoDevuelto = await _context.EventoPrestamos
-        //            .FirstOrDefaultAsync(e => e.TipoPrestamos.ToLower() == "devuelto");
-
-        //        if (eventoDevuelto == null)
-        //            return Response<bool>.Failure("⚠️ No se encontró el evento 'Devuelto' en el sistema");
-
-        //        // Actualizar el estado del préstamo
-        //        loan.EstadoPrestamo = "Finalizado";
-        //        loan.IdEvento = eventoDevuelto.IdEvento;
-        //        loan.FechaEvento = DateTime.Now; // Actualizar a la fecha de devolución
-
-        //        // Actualizar el estado del dispositivo a disponible
-        //        if (loan.Dispositivo != null)
-        //        {
-        //            loan.Dispositivo.EstadoDisp = "Nuevo";
-        //            _context.Dispositivos.Update(loan.Dispositivo);
-        //        }
-
-        //        // Guardar cambios
-        //        _context.Prestamos.Update(loan);
-        //        await _context.SaveChangesAsync();
-
-        //        return Response<bool>.Success(true, "✅ Dispositivo devuelto correctamente. El préstamo ha sido finalizado.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Response<bool>.Failure($"❌ Error al devolver el dispositivo: {ex.Message}");
-        //    }
-        //}
     }
 }

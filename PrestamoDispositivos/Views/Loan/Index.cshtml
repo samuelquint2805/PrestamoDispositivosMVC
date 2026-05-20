@@ -1,94 +1,633 @@
-﻿@* @using PrestamoDispositivos.DTO;
-@model IEnumerable<LoanDTO>
+﻿@using PrestamoDispositivos.DTO
+@model List<LoanDTO>
 @{
-    ViewData["Title"] = "Listado de Préstamos";
+    ViewData["Title"] = "Préstamos";
+    Layout = "~/Views/Shared/_LayoutITM.cshtml";
+    bool isAdmin = ViewBag.IsAdmin == true;
+
+    // Para el estudiante: separar activo del historial
+    var loanActivo = !isAdmin
+        ? Model.FirstOrDefault(l =>
+            l.EstadoPrestamo != "Finalizado" &&
+            l.EstadoPrestamo != "Devuelto" &&
+            l.EstadoPrestamo != "Cancelar")
+        : null;
+
+    var historial = !isAdmin
+        ? Model.Where(l =>
+            l.EstadoPrestamo == "Finalizado" ||
+            l.EstadoPrestamo == "Devuelto" ||
+            l.EstadoPrestamo == "Cancelar").ToList()
+        : new List<LoanDTO>();
 }
-<section id="loans" class="services section-bg py-5">
+
+<style>
+    .itm-page {
+        display: block !important;
+        align-items: unset !important;
+        padding: 0 !important;
+    }
+
+    :root {
+        --gold: #c8a84b;
+        --navy: #0a2240;
+        --blue: #1a4080;
+        --green: #2e7d32;
+        --orange: #e65100;
+        --red: #c0392b;
+        --bg: #f0f4f8;
+        --card: #ffffff;
+        --border: #dde4ec;
+        --text: #1e2d3d;
+        --muted: #6b7f95;
+        --r: 8px;
+    }
+
+    /* HEADER */
+    .ln-header {
+        background: var(--navy);
+        border-bottom: 3px solid var(--gold);
+        padding: 1.1rem 0;
+    }
+
+        .ln-header h1 {
+            font-family: 'Barlow Condensed','Segoe UI',sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+        .ln-header p {
+            color: #8da9c4;
+            font-size: .82rem;
+            margin: .2rem 0 0;
+        }
+
+    .ln-area {
+        background: var(--bg);
+        padding: 2rem 0 3rem;
+        min-height: 60vh;
+    }
+
+    /* ── TARJETA PRÉSTAMO ACTIVO (vista estudiante) ── */
+    .active-loan-card {
+        background: var(--card);
+        border: 2px solid var(--gold);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(200,168,75,.18);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .active-loan-card__header {
+        background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+        padding: .85rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+    }
+
+        .active-loan-card__header span {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+    .active-loan-card__pulse {
+        width: 10px;
+        height: 10px;
+        background: #4caf50;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(76,175,80,.6);
+        animation: pulse 1.6s infinite;
+        flex-shrink: 0;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(76,175,80,.6);
+        }
+
+        70% {
+            box-shadow: 0 0 0 8px rgba(76,175,80,0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(76,175,80,0);
+        }
+    }
+
+    .active-loan-card__body {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 0;
+    }
+
+    .active-loan-card__img {
+        background: #eef1f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid var(--border);
+        padding: 1rem;
+        min-height: 160px;
+    }
+
+        .active-loan-card__img img {
+            width: 100%;
+            max-height: 140px;
+            object-fit: contain;
+        }
+
+        .active-loan-card__img i {
+            font-size: 3.5rem;
+            color: #c8d4e0;
+        }
+
+    .active-loan-card__info {
+        padding: 1.2rem 1.4rem;
+    }
+
+    .active-loan-card__device {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: .2rem;
+    }
+
+    .active-loan-card__serial {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: .6rem;
+    }
+
+    .active-loan-card__specs {
+        font-size: .8rem;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-bottom: .9rem;
+    }
+
+    .active-loan-card__meta {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: .9rem;
+    }
+
+    .meta-item {
+        font-size: .78rem;
+        color: var(--muted);
+    }
+
+        .meta-item strong {
+            display: block;
+            color: var(--text);
+            font-size: .86rem;
+        }
+
+    /* ── BADGE ESTADO ── */
+    .ln-badge {
+        display: inline-block;
+        padding: .22rem .65em;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ln-badge-prestado {
+        background: #fff3e0;
+        color: var(--orange);
+        border: 1px solid #ffcc80;
+    }
+
+    .ln-badge-activo {
+        background: #e8f5e9;
+        color: var(--green);
+        border: 1px solid #a5d6a7;
+    }
+
+    .ln-badge-finalizado {
+        background: #f5f5f5;
+        color: #757575;
+        border: 1px solid #e0e0e0;
+    }
+
+    .ln-badge-devuelto {
+        background: #f5f5f5;
+        color: #757575;
+        border: 1px solid #e0e0e0;
+    }
+
+    .ln-badge-renovar {
+        background: #e3f2fd;
+        color: var(--blue);
+        border: 1px solid #90caf9;
+    }
+
+    .ln-badge-cancelar {
+        background: #fdecea;
+        color: var(--red);
+        border: 1px solid #ef9a9a;
+    }
+
+    /* ── BOTONES ACCIÓN ── */
+    .ln-act {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        border-radius: 5px;
+        padding: .28rem .65rem;
+        font-size: .76rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        border: 1.5px solid transparent;
+        transition: background .14s, color .14s;
+        white-space: nowrap;
+        line-height: 1;
+        background: transparent;
+    }
+
+    .ln-act-edit {
+        color: var(--blue);
+        border-color: #90caf9;
+    }
+
+        .ln-act-edit:hover {
+            background: #e3f2fd;
+        }
+
+    .ln-act-return {
+        color: var(--green);
+        border-color: #a5d6a7;
+    }
+
+        .ln-act-return:hover {
+            background: #e8f5e9;
+        }
+
+    .ln-act-del {
+        color: var(--red);
+        border-color: #ef9a9a;
+    }
+
+        .ln-act-del:hover {
+            background: #fdecea;
+        }
+
+    /* ── TABLA (admin) ── */
+    .ln-table-wrap {
+        overflow-x: auto;
+        border-radius: var(--r);
+        box-shadow: 0 1px 8px rgba(10,34,64,.08);
+    }
+
+    .ln-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+    }
+
+        .ln-table thead {
+            background: var(--navy);
+        }
+
+            .ln-table thead th {
+                padding: .7rem 1rem;
+                font-size: .73rem;
+                font-weight: 700;
+                letter-spacing: .05em;
+                text-transform: uppercase;
+                color: #fff;
+                white-space: nowrap;
+            }
+
+        .ln-table tbody tr {
+            border-bottom: 1px solid #eef1f5;
+            transition: background .13s;
+        }
+
+            .ln-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .ln-table tbody tr:hover {
+                background: #f5f8fc;
+            }
+
+        .ln-table td {
+            padding: .65rem 1rem;
+            font-size: .86rem;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+    /* Historial del estudiante */
+    .ln-section-title {
+        font-family: 'Barlow Condensed','Segoe UI',sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--navy);
+        border-bottom: 2px solid var(--gold);
+        padding-bottom: .4rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Banner info */
+    .ln-info-banner {
+        background: #e8f4fd;
+        border: 1px solid #bee3f8;
+        border-radius: var(--r);
+        padding: .85rem 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        font-size: .84rem;
+        color: #1565c0;
+    }
+
+        .ln-info-banner i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+    .ln-empty {
+        text-align: center;
+        padding: 4rem 1rem;
+        color: var(--muted);
+        background: var(--card);
+        border-radius: var(--r);
+        box-shadow: 0 1px 8px rgba(10,34,64,.06);
+    }
+
+        .ln-empty i {
+            font-size: 3rem;
+            opacity: .2;
+            display: block;
+            margin-bottom: .8rem;
+        }
+
+    @@media(max-width:600px) {
+        .active-loan-card__body {
+            grid-template-columns: 1fr;
+        }
+
+        .active-loan-card__img {
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+            min-height: 120px;
+        }
+    }
+</style>
+
+<!-- HEADER -->
+<div class="ln-header">
     <div class="container">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold">Gestión de Préstamos</h2>
-            <p class="text-muted">Consulta, edita o gestiona los préstamos registrados en el sistema.</p>
-        </div>
-        <div class="text-end mb-3">
-            <a asp-action="Create" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-circle me-1"></i> Nuevo Préstamo
-            </a>
-        </div>
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Fecha del Evento</th>
-                            <th>Estado</th>
-                            <th>Estudiante</th>
-                            <th>Dispositivo</th>
-                            <th>Administrador</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var loan in Model)
-                            {
+        <h1><i class="bi bi-journal-check me-2"></i>@(isAdmin ? "Gestión de Préstamos" : "Mis Préstamos")</h1>
+        <p>@(isAdmin ? "Todos los préstamos activos e historial del sistema." : "Tu préstamo activo y tu historial.")</p>
+    </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="ln-area">
+    <div class="container">
+
+        @* ═══════════════════════════════════════════════════════
+           VISTA ESTUDIANTE
+        ═══════════════════════════════════════════════════════ *@
+        @if (!isAdmin)
+        {
+            @if (loanActivo == null && !historial.Any())
+            {
+                <!-- Sin préstamos -->
+                <div class="ln-empty">
+                    <i class="bi bi-journal-x"></i>
+                    <p style="font-size:.95rem;font-weight:600;color:var(--navy);margin:.5rem 0 .25rem;">Sin préstamos activos</p>
+                    <p style="font-size:.84rem;">Solicita un dispositivo para comenzar.</p>
+                    <a asp-controller="Device" asp-action="Index"
+                       style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;
+                        background:var(--blue);color:#fff;padding:.5rem 1.2rem;
+                        border-radius:6px;text-decoration:none;font-weight:600;font-size:.85rem;">
+                        <i class="bi bi-laptop"></i> Ver Dispositivos
+                    </a>
+                </div>
+            }
+            else
+            {
+                <!-- Préstamo activo -->
+                @if (loanActivo != null)
+                {
+                    <div class="ln-info-banner">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Solo puedes tener <strong style="margin:0 .25rem;">1 préstamo activo</strong> a la vez. Devuelve el dispositivo actual para solicitar otro.
+                    </div>
+
+                    <div class="active-loan-card">
+                        <div class="active-loan-card__header">
+                            <span><i class="bi bi-laptop me-2"></i>Préstamo Activo</span>
+                            <div class="d-flex align-items-center gap-2">
+                                @{
+                                    string activeBC = loanActivo.EstadoPrestamo?.ToLower() switch
+                                    {
+                                        "prestado" => "ln-badge-prestado",
+                                        "activo" => "ln-badge-activo",
+                                        "renovar" => "ln-badge-renovar",
+                                        _ => "ln-badge-prestado"
+                                    };
+                                }
+                                <span class="ln-badge @activeBC">@loanActivo.EstadoPrestamo</span>
+                                <div class="active-loan-card__pulse"></div>
+                            </div>
+                        </div>
+                        <div class="active-loan-card__body">
+                            <div class="active-loan-card__img">
+                                @if (!string.IsNullOrWhiteSpace(loanActivo.Dispositivo?.URLImagen))
+                                {
+                                    <img src="@loanActivo.Dispositivo.URLImagen" alt="@loanActivo.Dispositivo.Marca" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-laptop"></i>
+                                }
+                            </div>
+                            <div class="active-loan-card__info">
+                                <div class="active-loan-card__device">@(loanActivo.Dispositivo?.Marca ?? "—")</div>
+                                <div class="active-loan-card__serial">Serial: @(loanActivo.Dispositivo?.Serial ?? "—")</div>
+                                <div class="active-loan-card__specs">@(loanActivo.Dispositivo?.Especificaciones ?? "")</div>
+                                <div class="active-loan-card__meta">
+                                    <div class="meta-item">
+                                        <strong>@loanActivo.FechaEvento.ToString("dd/MM/yyyy")</strong>
+                                        Fecha de préstamo
+                                    </div>
+                                </div>
+                                <p style="font-size:.78rem;color:var(--muted);margin:0;">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Para devolver el dispositivo contacta al prestamista.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="ln-info-banner">
+                        <i class="bi bi-check-circle-fill" style="color:var(--green);"></i>
+                        No tienes ningún préstamo activo. Puedes solicitar un dispositivo.
+                        <a asp-controller="Device" asp-action="Index" style="margin-left:.5rem;font-weight:700;color:var(--blue);">Ver Dispositivos</a>
+                    </div>
+                }
+
+                <!-- Historial -->
+                @if (historial.Any())
+                {
+                    <p class="ln-section-title"><i class="bi bi-clock-history me-2"></i>Historial de Préstamos</p>
+                    <div class="ln-table-wrap">
+                        <table class="ln-table">
+                            <thead>
                                 <tr>
+                                    <th>#</th>
+                                    <th>Fecha</th>
+                                    <th>Dispositivo</th>
+                                    <th>Serial</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int hi = 1;
+                                }
+                                @foreach (var loan in historial)
+                                {
+                                    string hbc = loan.EstadoPrestamo?.ToLower() switch
+                                    {
+                                        "finalizado" => "ln-badge-finalizado",
+                                        "devuelto" => "ln-badge-devuelto",
+                                        "cancelar" => "ln-badge-cancelar",
+                                        _ => "ln-badge-finalizado"
+                                    };
+                                    <tr>
+                                        <td style="color:var(--muted);font-size:.77rem;">@(hi++)</td>
+                                        <td>@loan.FechaEvento.ToString("dd/MM/yyyy")</td>
+                                        <td><strong>@(loan.Dispositivo?.Marca ?? "—")</strong></td>
+                                        <td style="font-size:.8rem;color:var(--muted);">@(loan.Dispositivo?.Serial ?? "—")</td>
+                                        <td><span class="ln-badge @hbc">@loan.EstadoPrestamo</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        }
+
+        @* ═══════════════════════════════════════════════════════
+           VISTA ADMIN / LENDER — tabla completa
+        ═══════════════════════════════════════════════════════ *@
+        @if (isAdmin)
+        {
+            @if (!Model.Any())
+            {
+                <div class="ln-empty">
+                    <i class="bi bi-journal-x"></i>
+                    <p style="font-size:.95rem;font-weight:600;color:var(--navy);margin:.5rem 0 .25rem;">No hay préstamos</p>
+                    <p style="font-size:.84rem;">Aún no se han generado préstamos en el sistema.</p>
+                </div>
+            }
+            else
+            {
+                <div class="ln-table-wrap">
+                    <table class="ln-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Dispositivo</th>
+                                <th>Serial</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+                            @foreach (var loan in Model)
+                            {
+                                string bc = loan.EstadoPrestamo?.ToLower() switch
+                                {
+                                    "prestado" => "ln-badge-prestado",
+                                    "activo" => "ln-badge-activo",
+                                    "finalizado" => "ln-badge-finalizado",
+                                    "devuelto" => "ln-badge-devuelto",
+                                    "renovar" => "ln-badge-renovar",
+                                    "cancelar" => "ln-badge-cancelar",
+                                    _ => "ln-badge-prestado"
+                                };
+                                bool esActivo = loan.EstadoPrestamo != "Finalizado"
+                                             && loan.EstadoPrestamo != "Devuelto"
+                                             && loan.EstadoPrestamo != "Cancelar";
+
+                                <tr>
+                                    <td style="color:var(--muted);font-size:.77rem;">@(i++)</td>
                                     <td>@loan.FechaEvento.ToString("dd/MM/yyyy")</td>
+                                    <td style="font-size:.83rem;">@(loan.User?.CorreoElectrónico ?? "—")</td>
+                                    <td><strong>@(loan.Dispositivo?.Marca ?? "—")</strong></td>
+                                    <td style="font-size:.8rem;color:var(--muted);">@(loan.Dispositivo?.Serial ?? "—")</td>
+                                    <td><span class="ln-badge @bc">@loan.EstadoPrestamo</span></td>
                                     <td>
-                                        <span class="badge @(loan.EstadoPrestamo == "Activo" ? "bg-success" :
-                                                                                                          loan.EstadoPrestamo == "Finalizado" ? "bg-secondary" :
-                                                                                                          loan.EstadoPrestamo == "Renovar" ? "bg-warning" :
-                                                                                                          loan.EstadoPrestamo == "Cancelar" ? "bg-danger" : "bg-info")">
-                                    @loan.EstadoPrestamo
-                                </span>
-                            </td>
-                            <td>@(loan.Estudiante?.Nombre ?? "—")</td>
-                            <td>@(loan.Dispositivo?.Tipo ?? "—")</td>
-                            <td>@(loan.DeviceManager?.Nombre ?? "—")</td>
-                            <td class="text-center">
-                                @if (loan.EstadoPrestamo != "Finalizado")
+                                        @if (esActivo)
                                         {
-                                            <a asp-action="Edit" asp-route-id="@loan.IdPrestamos" class="btn btn-sm btn-warning" title="Editar">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </a>
-
-                                            <form asp-action="ReturnDevice" asp-route-id="@loan.IdPrestamos" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-success"
-                                                        onclick="return confirm('¿Confirmar devolución del dispositivo?');"
-                                                        title="Devolver Dispositivo">
-                                                    <i class="bi bi-box-arrow-in-down-left"></i> Devolver
-                                                </button>
-                                            </form>
-
-                                            <form asp-action="Delete" asp-route-id="@loan.IdPrestamos" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('¿Seguro que deseas eliminar este préstamo?');"
-                                                        title="Eliminar">
-                                                    <i class="bi bi-trash3"></i>
-                                                </button>
-                                            </form>
+                                            <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+                                                <a asp-action="Edit" asp-route-id="@loan.IdPrestamos"
+                                                   class="ln-act ln-act-edit" title="Editar">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <form asp-action="ReturnDevice" asp-route-id="@loan.IdPrestamos"
+                                                      method="post" style="display:inline;margin:0;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="ln-act ln-act-return"
+                                                            onclick="return confirm('¿Confirmar devolución del dispositivo?')">
+                                                        <i class="bi bi-box-arrow-in-down-left"></i> Devolver
+                                                    </button>
+                                                </form>
+                                                <form asp-action="Delete" asp-route-id="@loan.IdPrestamos"
+                                                      method="post" style="display:inline;margin:0;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="ln-act ln-act-del"
+                                                            onclick="return confirm('¿Eliminar este préstamo?')">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
-                                                <i class="bi bi-check-circle"></i> Finalizado
+                                            <span class="ln-badge ln-badge-finalizado">
+                                                <i class="bi bi-check-circle me-1"></i>Finalizado
                                             </span>
                                         }
                                     </td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-3">
-                                    <i class="bi bi-exclamation-circle"></i> No hay préstamos registrados.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+
     </div>
-</section> *@
+</div>

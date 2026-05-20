@@ -47,7 +47,7 @@ namespace PrestamoDispositivos.Controllers
         [HttpPost]
         [Authorize(Roles = "SuperAdmin,Lender")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( [FromForm] deviceDTO dto)
+        public async Task<IActionResult> Create( deviceDTO dto)
         {
             if(!ModelState.IsValid)
             {
