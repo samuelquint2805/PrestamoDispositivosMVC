@@ -1,496 +1,821 @@
 ﻿@{
     ViewData["Title"] = "Inicio - Sistema de Préstamos";
 
-    bool isAuth      = User.Identity?.IsAuthenticated == true;
+    bool isAuth = User.Identity?.IsAuthenticated == true;
     bool isSuperAdmin = isAuth && User.IsInRole("SuperAdmin");
-    bool isLender    = isAuth && User.IsInRole("Lender");
-    bool isStudent   = isAuth && User.IsInRole("Student");
-    bool canManage   = isSuperAdmin || isLender;   // gestión de préstamos y equipos
-    string userName  = User.Identity?.Name ?? "";
+    bool isLender = isAuth && User.IsInRole("Lender");
+    bool isStudent = isAuth && User.IsInRole("Student");
+    bool canManage = isSuperAdmin || isLender;
+    string userName = User.Identity?.Name ?? "";
 }
 
-<!-- ══════════════════════════════════════════════
-     BARRA DE SESIÓN (solo visible cuando NO hay sesión)
-══════════════════════════════════════════════ -->
+<style>
+    /* al inicio del bloque <style> del Index */
+    main.itm-page {
+    display: block !important;
+    padding: 0 !important;
+    min-height: unset !important;
+    }
+
+    :root {
+    --navy: #0a2240;
+    --navy2: #1a4080;
+    --gold: #c8a84b;
+    --gold-lt: #f0dfa0;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+    background: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    padding: .5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    }
+
+    .topbar-welcome {
+    font-size: .85rem;
+    color: #a8bcd0;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    }
+
+    .role-badge {
+    font-size: .68rem;
+    font-weight: 700;
+    padding: .15rem .55rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    }
+
+    .topbar-actions {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    }
+
+    .topbar-actions a, .topbar-actions button {
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: .25rem .7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+
+    .link-plain {
+    color: #cbd8e8;
+    background: none;
+    border: none;
+    }
+
+    .link-plain:hover {
+    color: #fff;
+    }
+
+    .btn-login {
+    color: #fff;
+    border: 1px solid var(--gold);
+    background: none;
+    }
+
+    .btn-login:hover {
+    background: var(--gold);
+    color: var(--navy);
+    }
+
+    .btn-register {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    font-weight: 700;
+    }
+
+    .btn-danger {
+    background: none;
+    border: 1px solid #c0392b;
+    color: #c0392b;
+    }
+
+    .btn-danger:hover {
+    background: #c0392b;
+    color: #fff;
+    }
+
+    /* ── HERO ── */
+    .hero-wrap {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    padding: 4rem 2rem 3.5rem;
+    color: #fff;
+    }
+
+    .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2.5rem;
+    align-items: center;
+    }
+
+    .hero-tag {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .75rem;
+    }
+
+    .hero-wrap h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+    }
+
+    .hero-wrap p {
+    font-size: .95rem;
+    color: #a8bcd0;
+    line-height: 1.65;
+    margin: 0 0 1.75rem;
+    max-width: 520px;
+    }
+
+    .hero-cta {
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    }
+
+    .hero-cta a {
+    text-decoration: none;
+    font-size: .88rem;
+    font-weight: 600;
+    padding: .6rem 1.4rem;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    transition: opacity .15s;
+    }
+
+    .hero-cta a:hover {
+    opacity: .85;
+    }
+
+    .cta-primary {
+    background: var(--gold);
+    color: var(--navy);
+    }
+
+    .cta-outline {
+    border: 1px solid #fff4;
+    color: #fff;
+    }
+
+    /* hero stats */
+    .hero-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2.25rem;
+    flex-wrap: wrap;
+    }
+
+    .stat-pill {
+    border-left: 3px solid var(--gold);
+    padding-left: .75rem;
+    }
+
+    .stat-pill .num {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+    }
+
+    .stat-pill .lbl {
+    font-size: .72rem;
+    color: #8aa0b8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: .2rem;
+    }
+
+    /* hero badge cluster */
+    .hero-badges {
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    padding: 1.4rem 1.2rem;
+    min-width: 170px;
+    }
+
+    .hb-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: .82rem;
+    color: #cbd8e8;
+    }
+
+    .hb-icon {
+    width: 30px;
+    height: 30px;
+    background: rgba(200,168,75,.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 1rem;
+    flex-shrink: 0;
+    }
+
+    /* ── SECTION WRAPPER ── */
+    .section-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    }
+
+    .section-header {
+    margin-bottom: 2rem;
+    }
+
+    .section-header .eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--navy2);
+    margin-bottom: .4rem;
+    }
+
+    .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 .5rem;
+    }
+
+    .section-header p {
+    font-size: .9rem;
+    color: #5a6a7e;
+    margin: 0;
+    }
+
+    /* ── STATS GRID ── */
+    .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    }
+
+    .stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    transition: box-shadow .2s, transform .2s;
+    }
+
+    .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+
+    .stat-card .sc-icon {
+    font-size: 1.75rem;
+    margin-bottom: .5rem;
+    display: block;
+    }
+
+    .stat-card .sc-label {
+    font-size: .78rem;
+    color: #6b7a8d;
+    margin-bottom: .25rem;
+    }
+
+    .stat-card .sc-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    }
+
+    /* ── FEATURE CARDS ── */
+    .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.1rem;
+    }
+
+    .feature-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    transition: box-shadow .2s, transform .2s, border-color .2s;
+    }
+
+    .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(10,34,64,.1);
+    border-color: var(--navy2);
+    }
+
+    .fc-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: .5rem;
+    }
+
+    .feature-card h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0;
+    }
+
+    .feature-card p {
+    font-size: .82rem;
+    color: #5a6a7e;
+    margin: 0;
+    line-height: 1.55;
+    flex: 1;
+    }
+
+    .fc-link {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--navy2);
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    margin-top: .25rem;
+    }
+
+    /* ── AUTH CARDS ── */
+    .auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+    }
+
+    .auth-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    }
+
+    .auth-card .ac-icon {
+    font-size: 2.2rem;
+    color: var(--navy2);
+    }
+
+    .auth-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0;
+    }
+
+    .auth-card p {
+    font-size: .85rem;
+    color: #5a6a7e;
+    margin: 0;
+    }
+
+    .auth-card a {
+    margin-top: .5rem;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: .5rem 1.2rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    }
+
+    .ac-btn-primary {
+    background: var(--navy);
+    color: #fff;
+    }
+
+    .ac-btn-primary:hover {
+    background: var(--navy2);
+    }
+
+    .ac-btn-secondary {
+    border: 1.5px solid var(--gold);
+    color: var(--navy);
+    }
+
+    .ac-btn-secondary:hover {
+    background: var(--gold-lt);
+    }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    color: #fff;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    }
+
+    .cta-banner h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 .75rem;
+    }
+
+    .cta-banner p {
+    font-size: .95rem;
+    color: #a8bcd0;
+    margin: 0 0 2rem;
+    }
+
+    .cta-banner .cta-actions {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    }
+
+    .cta-banner a {
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 600;
+    padding: .65rem 1.6rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    transition: opacity .15s;
+    }
+
+    .cta-banner a:hover {
+    opacity: .85;
+    }
+
+    .cta-gold {
+    background: var(--gold);
+    color: var(--navy);
+    }
+
+    .cta-ghost {
+    border: 1px solid rgba(255,255,255,.4);
+    color: #fff;
+    }
+
+    /* light section bg */
+    .bg-light-section {
+    background: #f5f7fa;
+    }
+
+    @@media (max-width: 640px) {
+    .hero-inner {
+    grid-template-columns: 1fr;
+    }
+
+    .hero-badges {
+    display: none;
+    }
+
+    .auth-grid {
+    grid-template-columns: 1fr;
+    }
+
+    .hero-wrap h1 {
+    font-size: 1.5rem;
+    }
+    }
+</style>
+
+<!-- ══ TOPBAR ══ -->
 @if (!isAuth)
 {
-    <div style="background:#0a2240; padding:.55rem 1.5rem; display:flex; align-items:center;
-                justify-content:flex-end; gap:1rem; border-bottom:2px solid #c8a84b;">
-        <span style="color:#a8bcd0; font-size:.85rem;">¿Ya tienes cuenta?</span>
-        <a asp-controller="Account" asp-action="Login"
-           style="color:#fff; font-weight:600; font-size:.85rem; text-decoration:none;
-                  border:1px solid #c8a84b; padding:.25rem .75rem; border-radius:3px;">
-            Iniciar Sesión
-        </a>
-        <a asp-controller="Account" asp-action="Register"
-           style="background:#c8a84b; color:#0a2240; font-weight:700; font-size:.85rem;
-                  text-decoration:none; padding:.25rem .8rem; border-radius:3px;">
-            Crear Cuenta
-        </a>
+    <div class="topbar">
+        <span style="color:#a8bcd0; font-size:.82rem;">
+            <i class="bi bi-shield-lock-fill" style="color:var(--gold);"></i>
+            &nbsp;Sistema de Préstamos de Equipos
+        </span>
+        <div class="topbar-actions">
+            <a asp-controller="Account" asp-action="Login" class="btn-login">Iniciar sesión</a>
+            <a asp-controller="Account" asp-action="Register" class="btn-register">Crear cuenta</a>
+        </div>
     </div>
 }
-
-<!-- ══════════════════════════════════════════════
-     BANNER DE BIENVENIDA (cuando hay sesión activa)
-══════════════════════════════════════════════ -->
 @if (isAuth)
 {
-    <div style="background:#e8f4fd; border-bottom:1px solid #bee3f8;
-                padding:.6rem 1.5rem; display:flex; align-items:center;
-                justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
-        <div style="font-size:.9rem; color:#1a4080;">
-            Bienvenido, <strong>@userName</strong> &mdash;
+    <div class="topbar">
+        <div class="topbar-welcome">
+            <i class="bi bi-person-circle" style="color:var(--gold); font-size:1.1rem;"></i>
+            <span style="color:#fff;">Bienvenido, <strong>@userName</strong></span>
             @if (isSuperAdmin)
             {
-                <span style="background:#fff3e0; color:#e65100; font-size:.72rem; font-weight:700;
-                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
-                    SuperAdmin
-                </span>
+                <span class="role-badge" style="background:#fff3e0; color:#e65100;">SuperAdmin</span>
             }
             else if (isLender)
             {
-                <span style="background:#e8f5e9; color:#2e7d32; font-size:.72rem; font-weight:700;
-                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
-                    Prestamista
-                </span>
+
+                <span class="role-badge" style="background:#e8f5e9; color:#2e7d32;">Prestamista</span>
             }
             else
             {
-                <span style="background:#e3f2fd; color:#1565c0; font-size:.72rem; font-weight:700;
-                             padding:.15rem .5rem; border-radius:2px; text-transform:uppercase; letter-spacing:.04em;">
-                    Estudiante
-                </span>
+
+                <span class="role-badge" style="background:#e3f2fd; color:#1565c0;">Estudiante</span>
             }
         </div>
-        <div style="display:flex; gap:.75rem; align-items:center; font-size:.85rem;">
-            <a asp-controller="Account" asp-action="Profile"
-               style="color:#1a4080; text-decoration:none; font-weight:600;">
-                Mi Perfil
-            </a>
-            <a asp-controller="Account" asp-action="Settings"
-               style="color:#1a4080; text-decoration:none; font-weight:600;">
-                Configuración
-            </a>
+        <div class="topbar-actions">
+            <a asp-controller="Account" asp-action="Profile" class="link-plain">Mi Perfil</a>
+            <a asp-controller="Account" asp-action="Settings" class="link-plain">Configuración</a>
             <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
                 @Html.AntiForgeryToken()
-                <button type="submit"
-                        style="background:none; border:1px solid #c0392b; color:#c0392b; font-size:.8rem;
-                               font-weight:600; padding:.2rem .65rem; border-radius:3px; cursor:pointer;">
-                    Cerrar Sesión
-                </button>
+                <button type="submit" class="btn-danger">Cerrar sesión</button>
             </form>
         </div>
     </div>
 }
 
-<!-- ══════════════════════════════════════════════
-     HERO
-══════════════════════════════════════════════ -->
-<section id="hero" class="hero section light-background">
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="hero-content">
-                    <h1 data-aos="fade-up" data-aos-delay="200">
-                        Sistema de Gestión de Préstamos de Dispositivos
-                    </h1>
-                    <p data-aos="fade-up" data-aos-delay="300">
-                        Administra de manera eficiente todos los dispositivos tecnológicos de tu organización.
-                        Control total sobre préstamos, disponibilidad y mantenimiento.
-                    </p>
-                    <div class="hero-cta" data-aos="fade-up" data-aos-delay="400">
-                        <a asp-controller="Device" asp-action="Index" class="btn-primary">
-                            Ver Dispositivos
-                        </a>
+<!-- ══ HERO ══ -->
+<div class="hero-wrap">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-tag"><i class="bi bi-building"></i> &nbsp;Institución Universitaria</div>
+            <h1>Sistema de Gestión de<br>Préstamos de Dispositivos</h1>
+            <p>Administra de manera eficiente todos los dispositivos tecnológicos. Control total sobre préstamos, disponibilidad y mantenimiento.</p>
 
-                        @* Agregar dispositivo: solo SuperAdmin o Lender *@
-                        @if (canManage)
-                        {
-                            <a asp-controller="Device" asp-action="Create" class="btn-secondary">
-                                <i class="bi bi-plus-circle"></i> Agregar Dispositivo
-                            </a>
-                        }
-
-                        @* Si no está autenticado, invitar a registrarse *@
-                        @if (!isAuth)
-                        {
-                            <a asp-controller="Account" asp-action="Register" class="btn-secondary">
-                                <i class="bi bi-person-plus"></i> Registrarse
-                            </a>
-                        }
-                    </div>
-
-                    <div class="hero-stats" data-aos="fade-up" data-aos-delay="500">
-                        <div class="stat-item">
-                            <div class="stat-number">24/7</div>
-                            <div class="stat-label">Disponibilidad</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">100%</div>
-                            <div class="stat-label">Control</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">Fast</div>
-                            <div class="stat-label">Gestión Rápida</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="hero-cta">
+                <a asp-controller="Device" asp-action="Index" class="cta-primary">
+                    <i class="bi bi-laptop"></i> Ver dispositivos
+                </a>
+                @if (canManage)
+                {
+                    <a asp-controller="Device" asp-action="Create" class="cta-outline">
+                        <i class="bi bi-plus-circle"></i> Agregar dispositivo
+                    </a>
+                }
+                @if (!isAuth)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="cta-outline">
+                        <i class="bi bi-person-plus"></i> Registrarse
+                    </a>
+                }
             </div>
 
-            <div class="col-lg-6">
-                <div class="hero-image" data-aos="fade-left" data-aos-delay="300">
-                    <img src="~/assets/img/about/about-square-10.webp"
-                         alt="Sistema de Préstamos" class="img-fluid">
-                    <div class="floating-card" data-aos="zoom-in" data-aos-delay="600">
-                        <div class="card-icon"><i class="bi bi-laptop"></i></div>
-                        <div class="card-content">
-                            <h5>Gestión Inteligente</h5>
-                            <div class="growth-percentage">+100%</div>
-                        </div>
+            <div class="hero-stats">
+                <div class="stat-pill">
+                    <div class="num">24/7</div>
+                    <div class="lbl">Disponibilidad</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="num">100%</div>
+                    <div class="lbl">Control</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="num">Fast</div>
+                    <div class="lbl">Gestión rápida</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-badges">
+            <div class="hb-item"><div class="hb-icon"><i class="bi bi-laptop"></i></div> Dispositivos</div>
+            <div class="hb-item"><div class="hb-icon"><i class="bi bi-calendar-check"></i></div> Préstamos</div>
+            <div class="hb-item"><div class="hb-icon"><i class="bi bi-people-fill"></i></div> Estudiantes</div>
+            <div class="hb-item"><div class="hb-icon"><i class="bi bi-send-check"></i></div> Solicitudes</div>
+            <div class="hb-item"><div class="hb-icon"><i class="bi bi-clock-history"></i></div> Historial</div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ ESTADÍSTICAS (solo autenticados) ══ -->
+@if (isAuth)
+{
+    <div class="bg-light-section">
+        <div class="section-wrap" style="padding-top:2.25rem; padding-bottom:2.25rem;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="sc-icon" style="color:#3b7ddd;"><i class="bi bi-laptop"></i></span>
+                    <div class="sc-label">Dispositivos</div>
+                    <div class="sc-value">@(ViewBag.TotalDevices ?? "0")</div>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-icon" style="color:#f59e0b;"><i class="bi bi-arrow-left-right"></i></span>
+                    <div class="sc-label">Préstamos</div>
+                    <div class="sc-value">@(ViewBag.TotalLoans ?? "0")</div>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-icon" style="color:#28a745;"><i class="bi bi-people-fill"></i></span>
+                    <div class="sc-label">Estudiantes</div>
+                    <div class="sc-value">@(ViewBag.TotalStudents ?? "0")</div>
+                </div>
+                @if (canManage)
+                {
+                    <div class="stat-card">
+                        <span class="sc-icon" style="color:#7c3aed;"><i class="bi bi-person-badge"></i></span>
+                        <div class="sc-label">Prestamistas</div>
+                        <div class="sc-value">@(ViewBag.TotalLenders ?? "0")</div>
                     </div>
+                }
+                <div class="stat-card">
+                    <span class="sc-icon" style="color:#0891b2;"><i class="bi bi-clock-history"></i></span>
+                    <div class="sc-label">Eventos</div>
+                    <div class="sc-value">@(ViewBag.TotalEvents ?? "0")</div>
                 </div>
             </div>
         </div>
     </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     TARJETAS DE ACCESO RÁPIDO (no autenticado)
-══════════════════════════════════════════════ -->
-@if (!isAuth)
-{
-    <section class="section light-background">
-        <div class="container" data-aos="fade-up">
-            <div class="row justify-content-center gy-4">
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-item text-center">
-                        <div class="service-icon mx-auto">
-                            <i class="bi bi-box-arrow-in-right"></i>
-                        </div>
-                        <h3>¿Ya tienes cuenta?</h3>
-                        <p>Accede con tu correo institucional y gestiona tus préstamos.</p>
-                        <a asp-controller="Account" asp-action="Login" class="service-link">
-                            Iniciar Sesión <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-item text-center">
-                        <div class="service-icon mx-auto">
-                            <i class="bi bi-person-plus-fill"></i>
-                        </div>
-                        <h3>¿Primera vez?</h3>
-                        <p>Regístrate con tu correo. El rol se asigna automáticamente.</p>
-                        <a asp-controller="Account" asp-action="Register" class="service-link">
-                            Crear Cuenta <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
 }
 
-<!-- ══════════════════════════════════════════════
-     SERVICIOS / FUNCIONALIDADES
-══════════════════════════════════════════════ -->
-<section id="services" class="services section">
-    <div class="container section-title" data-aos="fade-up">
-        <span class="subtitle">Funcionalidades</span>
-        <h2>¿Qué Puedes Hacer?</h2>
+<!-- ══ ACCESO RÁPIDO (no autenticado) ══ -->
+@if (!isAuth)
+{
+    <div class="bg-light-section">
+        <div class="section-wrap" style="padding-top:2.5rem; padding-bottom:2.5rem;">
+            <div class="auth-grid">
+                <div class="auth-card">
+                    <i class="bi bi-box-arrow-in-right ac-icon"></i>
+                    <h3>¿Ya tienes cuenta?</h3>
+                    <p>Accede con tu correo institucional y gestiona tus préstamos desde aquí.</p>
+                    <a asp-controller="Account" asp-action="Login" class="ac-btn-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                    </a>
+                </div>
+                <div class="auth-card">
+                    <i class="bi bi-person-plus-fill ac-icon"></i>
+                    <h3>¿Primera vez?</h3>
+                    <p>Regístrate con tu correo. El rol se asigna automáticamente según tu perfil.</p>
+                    <a asp-controller="Account" asp-action="Register" class="ac-btn-secondary">
+                        <i class="bi bi-person-plus"></i> Crear cuenta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ══ FUNCIONALIDADES ══ -->
+<div class="section-wrap">
+    <div class="section-header">
+        <div class="eyebrow">Funcionalidades</div>
+        <h2>¿Qué puedes hacer?</h2>
         <p>Explora las herramientas disponibles según tu rol en el sistema.</p>
     </div>
 
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row gy-5">
+    <div class="feature-grid">
 
-            <!-- Dispositivos — visible a todos -->
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <a asp-controller="Device" asp-action="Index" class="text-decoration-none">
-                    <div class="service-item">
-                        <div class="service-icon"><i class="bi bi-laptop"></i></div>
-                        <h3>Gestionar Dispositivos</h3>
-                        <p>Administra el inventario completo de dispositivos tecnológicos.</p>
-                        <span class="service-link">Ver Dispositivos <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
+        <!-- Dispositivos — todos -->
+        <a asp-controller="Device" asp-action="Index" class="feature-card">
+            <div class="fc-icon"><i class="bi bi-laptop"></i></div>
+            <h3>Gestionar dispositivos</h3>
+            <p>Administra el inventario completo de dispositivos tecnológicos disponibles.</p>
+            <span class="fc-link">Ver dispositivos <i class="bi bi-arrow-right"></i></span>
+        </a>
 
-            <!-- Préstamos — solo autenticados -->
-            @if (isAuth)
-            {
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <a asp-controller="Loan" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-calendar-check"></i></div>
-                            <h3>
-                                @if (canManage) { <text>Control de Préstamos</text> }
-                                else            { <text>Mis Préstamos</text>        }
-                            </h3>
-                            <p>
-                                @if (canManage) { <text>Registra y controla el préstamo de dispositivos a los estudiantes.</text> }
-                                else            { <text>Consulta y gestiona tus solicitudes de préstamo activas.</text>           }
-                            </p>
-                            <span class="service-link">Ver Préstamos <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-            }
+        <!-- Préstamos — autenticados -->
+        @if (isAuth)
+        {
+            <a asp-controller="Loan" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-calendar-check"></i></div>
+                <h3>@(canManage ? "Control de préstamos" : "Mis préstamos")</h3>
+                <p>@(canManage ? "Registra y controla el préstamo de dispositivos a los estudiantes." : "Consulta y gestiona tus solicitudes de préstamo activas.")</p>
+                <span class="fc-link">Ver préstamos <i class="bi bi-arrow-right"></i></span>
+            </a>
 
-            <!-- Solicitudes — solo autenticados -->
-            @if (isAuth)
-            {
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
-                    <a asp-controller="Request" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-send-check"></i></div>
-                            <h3>
-                                @if (canManage) { <text>Gestionar Solicitudes</text> }
-                                else            { <text>Mis Solicitudes</text>        }
-                            </h3>
-                            <p>
-                                @if (canManage) { <text>Aprueba o rechaza solicitudes de préstamo de los estudiantes.</text> }
-                                else            { <text>Crea y revisa el estado de tus solicitudes de dispositivos.</text>   }
-                            </p>
-                            <span class="service-link">Ver Solicitudes <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-            }
+            <a asp-controller="Request" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-send-check"></i></div>
+                <h3>@(canManage ? "Gestionar solicitudes" : "Mis solicitudes")</h3>
+                <p>@(canManage ? "Aprueba o rechaza solicitudes de préstamo de los estudiantes." : "Crea y revisa el estado de tus solicitudes de dispositivos.")</p>
+                <span class="fc-link">Ver solicitudes <i class="bi bi-arrow-right"></i></span>
+            </a>
 
-            <!-- SuperAdmin / Lender: gestión avanzada -->
+            <a asp-controller="LoanEvent" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-clock-history"></i></div>
+                <h3>Eventos de préstamo</h3>
+                <p>Consulta el historial de eventos relacionados con los préstamos del sistema.</p>
+                <span class="fc-link">Ver eventos <i class="bi bi-arrow-right"></i></span>
+            </a>
+        }
+
+        <!-- Gestión avanzada — Lender + SuperAdmin -->
+        @if (canManage)
+        {
+            <a asp-controller="Student" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-people-fill"></i></div>
+                <h3>Gestión de estudiantes</h3>
+                <p>Administra la información de los estudiantes vinculados al sistema.</p>
+                <span class="fc-link">Ver estudiantes <i class="bi bi-arrow-right"></i></span>
+            </a>
+
+            <a asp-controller="Lender" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-person-badge"></i></div>
+                <h3>Gestión de prestamistas</h3>
+                <p>Administra los prestamistas que gestionan los equipos del sistema.</p>
+                <span class="fc-link">Ver prestamistas <i class="bi bi-arrow-right"></i></span>
+            </a>
+        }
+
+        <!-- Solo SuperAdmin -->
+        @if (isSuperAdmin)
+        {
+            <a asp-controller="Account" asp-action="Index" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-people-gear"></i></div>
+                <h3>Gestión de usuarios</h3>
+                <p>Administra todos los usuarios y asigna roles en el sistema.</p>
+                <span class="fc-link">Ver usuarios <i class="bi bi-arrow-right"></i></span>
+            </a>
+
+            <a asp-controller="Account" asp-action="RolesIndex" class="feature-card">
+                <div class="fc-icon"><i class="bi bi-shield-lock"></i></div>
+                <h3>Gestión de roles</h3>
+                <p>Configura los roles y permisos del sistema de préstamos.</p>
+                <span class="fc-link">Ver roles <i class="bi bi-arrow-right"></i></span>
+            </a>
+        }
+
+    </div>
+</div>
+
+<!-- ══ CTA BANNER ══ -->
+<div class="cta-banner">
+    <h2>¿Listo para gestionar tus dispositivos?</h2>
+    <p>
+        @if (!isAuth)
+        {
+            <text>Crea tu cuenta con tu correo institucional y comienza a usar el sistema.</text>
+        }
+        else
+        {
+
+            <text>Administra de manera eficiente todos los recursos de tu organización.</text>
+        }
+    </p>
+    <div class="cta-actions">
+        @if (!isAuth)
+        {
+            <a asp-controller="Account" asp-action="Register" class="cta-gold">
+                <i class="bi bi-person-plus"></i> Crear cuenta
+            </a>
+            <a asp-controller="Account" asp-action="Login" class="cta-ghost">
+                <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Device" asp-action="Index" class="cta-gold">
+                <i class="bi bi-laptop"></i> Ver dispositivos
+            </a>
             @if (canManage)
             {
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <a asp-controller="Student" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-people-fill"></i></div>
-                            <h3>Gestión de Estudiantes</h3>
-                            <p>Administra la información de los estudiantes vinculados al sistema.</p>
-                            <span class="service-link">Ver Estudiantes <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
-                    <a asp-controller="Lender" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-person-badge"></i></div>
-                            <h3>Gestión de Prestamistas</h3>
-                            <p>Administra los prestamistas que gestionan los equipos del sistema.</p>
-                            <span class="service-link">Ver Prestamistas <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
+                <a asp-controller="Device" asp-action="Create" class="cta-ghost">
+                    <i class="bi bi-plus-circle"></i> Agregar dispositivo
+                </a>
             }
-
-            <!-- Solo SuperAdmin -->
-            @if (isSuperAdmin)
+            else
             {
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                    <a asp-controller="Account" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-people-gear"></i></div>
-                            <h3>Gestión de Usuarios</h3>
-                            <p>Administra todos los usuarios y asigna roles en el sistema.</p>
-                            <span class="service-link">Ver Usuarios <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="550">
-                    <a asp-controller="Account" asp-action="RolesIndex" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-shield-lock"></i></div>
-                            <h3>Gestión de Roles</h3>
-                            <p>Configura los roles y permisos del sistema de préstamos.</p>
-                            <span class="service-link">Ver Roles <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
+                <a asp-controller="Loan" asp-action="Create" class="cta-ghost">
+                    <i class="bi bi-calendar-plus"></i> Solicitar préstamo
+                </a>
             }
-
-            <!-- Eventos — visible a todos autenticados -->
-            @if (isAuth)
-            {
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <a asp-controller="LoanEvent" asp-action="Index" class="text-decoration-none">
-                        <div class="service-item">
-                            <div class="service-icon"><i class="bi bi-clock-history"></i></div>
-                            <h3>Eventos de Préstamo</h3>
-                            <p>Consulta el historial de eventos relacionados con los préstamos.</p>
-                            <span class="service-link">Ver Eventos <i class="bi bi-arrow-right"></i></span>
-                        </div>
-                    </a>
-                </div>
-            }
-
-        </div>
+        }
     </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     ESTADÍSTICAS RÁPIDAS (solo autenticados)
-══════════════════════════════════════════════ -->
-@if (isAuth)
-{
-    <section id="stats" class="section light-background">
-        <div class="container" data-aos="fade-up">
-            <div class="row gy-4 justify-content-center">
-
-                <div class="col-lg-2 col-md-4">
-                    <div class="card text-center border-0 shadow-sm h-100">
-                        <div class="card-body py-4">
-                            <i class="bi bi-laptop" style="font-size:2.5rem;color:#3b7ddd;"></i>
-                            <h5 class="mt-3 mb-1">Dispositivos</h5>
-                            <p class="text-muted">@(ViewBag.TotalDevices ?? "0")</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-2 col-md-4">
-                    <div class="card text-center border-0 shadow-sm h-100">
-                        <div class="card-body py-4">
-                            <i class="bi bi-arrow-left-right" style="font-size:2.5rem;color:#ffc107;"></i>
-                            <h5 class="mt-3 mb-1">Préstamos</h5>
-                            <p class="text-muted">@(ViewBag.TotalLoans ?? "0")</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-2 col-md-4">
-                    <div class="card text-center border-0 shadow-sm h-100">
-                        <div class="card-body py-4">
-                            <i class="bi bi-people-fill" style="font-size:2.5rem;color:#28a745;"></i>
-                            <h5 class="mt-3 mb-1">Estudiantes</h5>
-                            <p class="text-muted">@(ViewBag.TotalStudents ?? "0")</p>
-                        </div>
-                    </div>
-                </div>
-
-                @if (canManage)
-                {
-                    <div class="col-lg-2 col-md-4">
-                        <div class="card text-center border-0 shadow-sm h-100">
-                            <div class="card-body py-4">
-                                <i class="bi bi-person-badge" style="font-size:2.5rem;color:#6610f2;"></i>
-                                <h5 class="mt-3 mb-1">Prestamistas</h5>
-                                <p class="text-muted">@(ViewBag.TotalLenders ?? "0")</p>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                <div class="col-lg-2 col-md-4">
-                    <div class="card text-center border-0 shadow-sm h-100">
-                        <div class="card-body py-4">
-                            <i class="bi bi-clock-history" style="font-size:2.5rem;color:#17a2b8;"></i>
-                            <h5 class="mt-3 mb-1">Eventos</h5>
-                            <p class="text-muted">@(ViewBag.TotalEvents ?? "0")</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-}
-
-<!-- ══════════════════════════════════════════════
-     CTA
-══════════════════════════════════════════════ -->
-<section id="cta" class="section"
-         style="background:linear-gradient(135deg,#0a2240 0%,#1a4080 100%);color:white;">
-    <div class="container text-center" data-aos="fade-up">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h2 class="mb-4">¿Listo para gestionar tus dispositivos?</h2>
-                <p class="lead mb-4">
-                    @if (!isAuth)
-                    {
-                        <text>Crea tu cuenta con tu correo institucional y comienza a usar el sistema.</text>
-                    }
-                    else
-                    {
-                        <text>Comienza ahora a administrar de manera eficiente todos los recursos de tu organización.</text>
-                    }
-                </p>
-                <div class="d-flex gap-3 justify-content-center flex-wrap">
-
-                    @if (!isAuth)
-                    {
-                        <a asp-controller="Account" asp-action="Register"
-                           class="btn btn-warning btn-lg px-5 fw-bold">
-                            <i class="bi bi-person-plus me-2"></i>Crear Cuenta
-                        </a>
-                        <a asp-controller="Account" asp-action="Login"
-                           class="btn btn-outline-light btn-lg px-5">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
-                        </a>
-                    }
-                    else
-                    {
-                        <a asp-controller="Device" asp-action="Index"
-                           class="btn btn-light btn-lg px-5">
-                            <i class="bi bi-laptop me-2"></i>Ver Dispositivos
-                        </a>
-                        @if (canManage)
-                        {
-                            <a asp-controller="Device" asp-action="Create"
-                               class="btn btn-outline-light btn-lg px-5">
-                                <i class="bi bi-plus-circle me-2"></i>Agregar Dispositivo
-                            </a>
-                        }
-                        else
-                        {
-                            <a asp-controller="Loan" asp-action="Create"
-                               class="btn btn-outline-light btn-lg px-5">
-                                <i class="bi bi-calendar-plus me-2"></i>Solicitar Préstamo
-                            </a>
-                        }
-                    }
-
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<style>
-    .service-item {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0,0,0,.1);
-        transition: all .3s ease;
-        height: 100%;
-    }
-    .service-item:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 5px 25px rgba(0,0,0,.15);
-    }
-    .service-icon {
-        width: 80px; height: 80px;
-        background: linear-gradient(135deg,#0a2240 0%,#1a4080 100%);
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        margin-bottom: 1.5rem;
-    }
-    .service-icon i { font-size: 2rem; color: white; }
-    .service-link {
-        color: #1a4080; font-weight: 600;
-        display: inline-flex; align-items: center; gap: .5rem;
-    }
-    .card { border-radius: 15px; transition: all .3s ease; }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,.1) !important; }
-    #cta { padding: 5rem 0; }
-</style>
+</div>
 
 @section Scripts {
     <script>
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false });
+        if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 700, easing: 'ease-in-out', once: true });
+        }
     </script>
 }

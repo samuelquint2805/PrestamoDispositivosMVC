@@ -457,7 +457,7 @@ namespace PrestamoDispositivos.Controllers
 
             return rolNombre switch
             {
-                RolService.ROL_SUPERADMIN => RedirectToAction("Index", "Administrator"),
+                RolService.ROL_SUPERADMIN => RedirectToAction("Index", "Home"),
                 RolService.ROL_LENDER => RedirectToAction("Index", "Loan"),
                 _ => RedirectToAction("Index", "Home")
             };
