@@ -40,8 +40,3 @@ El proyecto está desarrollado utilizando el patrón **MVC (Modelo-Vista-Control
    ```bash
     Abrir consola de paquetes nuget
    update-database
-
- 
-
-
-   
