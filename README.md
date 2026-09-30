@@ -36,4 +36,12 @@ El proyecto está desarrollado utilizando el patrón **MVC (Modelo-Vista-Control
    ```bash
    git clone [https://github.com/tu-usuario/PrestamosDispositivosMVC.git]
 
+2. **Desplegar base de datos**
+   ```bash
+    Abrir consola de paquetes nuget
+   update-database
+
+ 
+
+
    
